@@ -312,34 +312,34 @@ void CDisassembler::disassembleBlock(CAddr addr) {
       return;
     }
     switch (m_DisassemblerCore->getLastCmdJumpType(chunk, jump_addr)) {
-    case IDisassemblerCore::JT_CALL:
+    case IDisassemblerCore::Type::JT_CALL:
       //call
       qDebug()<<"call: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
       qDebug()<<"st_addr="<<st_addr.toString();
       makeJump(addr, jump_addr, CReference::CALL);
       addr+=res;
       break;
-    case IDisassemblerCore::JT_COND_JUMP:
+    case IDisassemblerCore::Type::JT_COND_JUMP:
       //conditional jump
       qDebug()<<"cond jump: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
       makeJump(addr, jump_addr, CReference::JUMP);
       addr+=res;
       break;
-    case IDisassemblerCore::JT_JUMP:
+    case IDisassemblerCore::Type::JT_JUMP:
       qDebug()<<"jump: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
       makeJump(addr, jump_addr, CReference::JUMP);
       res=0;
       break;
-    case IDisassemblerCore::JT_COND_RET:
+    case IDisassemblerCore::Type::JT_COND_RET:
       //conditional ret
       qDebug()<<"cond_ret: addr=" <<addr.toString();
       addr+=res;
       break;
-    case IDisassemblerCore::JT_RET:
+    case IDisassemblerCore::Type::JT_RET:
       qDebug()<<"ret: addr=" <<addr.toString();
       res=0;
       break;
-    case IDisassemblerCore::JT_NONE:
+    case IDisassemblerCore::Type::JT_NONE:
       addr+=res;
       break;
     }
