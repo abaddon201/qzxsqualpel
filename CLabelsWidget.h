@@ -16,10 +16,10 @@
 #include <QTableWidget>
 
 class CLabelsWidget : public QTableWidget {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    CLabelsWidget(QWidget* par);
-    void refresh();
+  CLabelsWidget(QWidget* par);
+  void refresh();
 };
 
 #endif

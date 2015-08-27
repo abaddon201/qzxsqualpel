@@ -48,3 +48,6 @@ SOURCES += CAddr.cpp \
 
 #INCLUDEPATH += $$PWD/../../Qt5_0_1/5.0.1/msvc2010/include
 #DEPENDPATH += $$PWD/../../Qt5_0_1/5.0.1/msvc2010/include
+
+DISTFILES += \
+    .astylerc

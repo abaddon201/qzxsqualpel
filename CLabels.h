@@ -1,7 +1,7 @@
 //
 // C++ Interface: CLabels
 //
-// Description: 
+// Description:
 //
 //
 // Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
@@ -18,9 +18,9 @@
 #include "CChunk.h"
 
 class CLabels : public QList<CLabel> {
-    public:
-        QString offsetInLabel(CAddr& addr) const;
-        void changeLabel(CChunk* chunk, QString new_label);
+public:
+  QString offsetInLabel(CAddr &addr) const;
+  void changeLabel(CChunk* chunk, QString new_label);
 };
 
 #endif

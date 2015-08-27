@@ -17,8 +17,8 @@
 
 class CDisassemblerCoreZX : public IDisassemblerCore {
 public:
-    virtual JumpType getLastCmdJumpType(CChunk* chunk, CAddr& jump_addr);
-    virtual int disassembleInstruction(QString* res_str, CAddr addr);
+  virtual JumpType getLastCmdJumpType(CChunk* chunk, CAddr &jump_addr);
+  virtual int disassembleInstruction(QString* res_str, CAddr addr);
 };
 
 #endif

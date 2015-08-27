@@ -17,20 +17,20 @@
 
 class CReference {
 public:
-    typedef enum {
-        JUMP=1,
-        CALL,
-        READ_BYTE,
-        WRITE_BYTE,
-        READ_WORD,
-        WRITE_WORD
-    } ReferenceType;
+  typedef enum {
+    JUMP=1,
+    CALL,
+    READ_BYTE,
+    WRITE_BYTE,
+    READ_WORD,
+    WRITE_WORD
+  } ReferenceType;
 public:
-    CReference(CAddr addr, ReferenceType type);
-    QString toString();
+  CReference(CAddr addr, ReferenceType type);
+  QString toString();
 private:
-    CAddr m_From;
-    ReferenceType m_Type;
+  CAddr m_From;
+  ReferenceType m_Type;
 };
 
 #endif

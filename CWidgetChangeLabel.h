@@ -1,7 +1,7 @@
 //
 // C++ Interface: CWidgetChangeLabel
 //
-// Description: 
+// Description:
 //
 //
 // Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
@@ -17,12 +17,14 @@
 #include <QLineEdit>
 
 class CWidgetChangeLabel : public QDialog {
-    Q_OBJECT
-    public:
-        CWidgetChangeLabel(QWidget* par, QString old_link);
-        QString label() {return m_LinkName->text();}
-    private:
-        QLineEdit* m_LinkName;
+  Q_OBJECT
+public:
+  CWidgetChangeLabel(QWidget* par, QString old_link);
+  QString label() {
+    return m_LinkName->text();
+  }
+private:
+  QLineEdit* m_LinkName;
 };
 
 #endif

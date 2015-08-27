@@ -18,18 +18,18 @@
 
 class IDisassemblerCore {
 public:
-    typedef enum {
-        JT_NONE=0,
-        JT_CALL,
-        JT_COND_JUMP,
-        JT_JUMP,
-        JT_COND_RET,
-        JT_RET,
-    } JumpType;
+  typedef enum {
+    JT_NONE=0,
+    JT_CALL,
+    JT_COND_JUMP,
+    JT_JUMP,
+    JT_COND_RET,
+    JT_RET,
+  } JumpType;
 
-    virtual ~IDisassemblerCore() {}
-    virtual JumpType getLastCmdJumpType(CChunk* chunk, CAddr& jump_addr)=0;
-    virtual int disassembleInstruction(QString* res_str, CAddr addr)=0;
+  virtual ~IDisassemblerCore() {}
+  virtual JumpType getLastCmdJumpType(CChunk* chunk, CAddr &jump_addr)=0;
+  virtual int disassembleInstruction(QString* res_str, CAddr addr)=0;
 
 };
 

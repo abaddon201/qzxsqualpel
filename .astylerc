@@ -1,0 +1,12 @@
+--style=attach
+--indent=spaces=2 # 2 space for intent
+-xn #attach to namesp
+-xc #attach to classes
+-xl #attach to inlines
+-xk #attach to extern "C"
+-H #space after if, for...
+-k1 #attach pointer, ref and so on to the type
+-W3 # attach ref oper to the name
+-c #convert tabs to the spaces
+-xC200 #break line on 200 symbols
+-z2 #linux line endings

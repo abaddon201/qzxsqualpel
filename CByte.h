@@ -17,13 +17,13 @@
 
 class CByte {
 public:
-    CByte(unsigned char b=0) : m_Byte(b) {}
-    unsigned char toUChar() const {
-        return m_Byte;
-    }
-    QString toString() const;
+  CByte(unsigned char b=0) : m_Byte(b) {}
+  unsigned char toUChar() const {
+    return m_Byte;
+  }
+  QString toString() const;
 private:
-    unsigned char m_Byte;
+  unsigned char m_Byte;
 };
 
 #endif
