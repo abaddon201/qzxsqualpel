@@ -8,6 +8,7 @@
 #if QT_VERSION>=0x040500
 #include <QTextDocumentWriter>
 #endif
+#include <QPainter>
 #include "CMainWindow.h"
 #include "CWidgetChangeLabel.h"
 
@@ -72,13 +73,21 @@ bool CDisassembler::labelPresent(CAddr addr) {
 
 void CDisassembler::navigateToLabel(int num) {
   if (m_Labels.count()>num) {
-    const CLabel& label=m_Labels.at(num);
+    const CLabel &label=m_Labels.at(num);
     qDebug()<< label;
     const CChunk* chunk = m_Chunks.getChunkContains(label.addr());
     QTextCursor cursor(textCursor());
     cursor.setPosition(chunk->cursorStartPosition());
     setTextCursor(cursor);
   }
+}
+
+void CDisassembler::paintEvent(QPaintEvent* event) {
+  QPlainTextEdit::paintEvent(event);
+  QPainter p(viewport());
+  QRect cr = cursorRect();
+  cr.setRight(cr.right()+5);
+  p.fillRect(cr, QBrush(QColor(0, 100, 255, 120)));
 }
 
 void CDisassembler::keyPressEvent(QKeyEvent* event) {
@@ -494,7 +503,7 @@ void CDisassembler::refreshView() {
   CChunkList::iterator it=m_Chunks.begin();
   for (; it!=m_Chunks.end(); ++it) {
     CChunk* chunk=*it;
-    chunk->setCursorStartPosition(cursor.position());
+    chunk->setCursorStartPosition(cursor.position()+1);
     switch (chunk->type()) {
     case CChunk::Type::UNPARSED:
       printChunkUnparsed(cursor, chunk);

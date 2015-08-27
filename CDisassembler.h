@@ -47,6 +47,8 @@ public:
   ///@brief Показать на экране код с меткой под номером
   void navigateToLabel(int num);
 
+  void paintEvent(QPaintEvent* event);
+
 private:
   CDisassembler();
   void init();
