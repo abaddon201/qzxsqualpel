@@ -13,7 +13,7 @@
 #include "CReference.h"
 #include "CDisassembler.h"
 
-CReference::CReference(CAddr addr, ReferenceType type)
+CReference::CReference(CAddr addr, Type type)
   : m_From(addr), m_Type(type) {
 }
 
@@ -21,22 +21,22 @@ QString CReference::toString() {
   QString res="; XRef: ";
   res+=CDisassembler::inst()->labels().offsetInLabel(m_From);
   switch (m_Type) {
-  case JUMP:
+  case Type::JUMP:
     res+="/j";
     break;
-  case CALL:
+  case Type::CALL:
     res+="/c";
     break;
-  case READ_BYTE:
+  case Type::READ_BYTE:
     res+="/rb";
     break;
-  case WRITE_BYTE:
+  case Type::WRITE_BYTE:
     res+="/wb";
     break;
-  case READ_WORD:
+  case Type::READ_WORD:
     res+="/rw";
     break;
-  case WRITE_WORD:
+  case Type::WRITE_WORD:
     res+="/ww";
     break;
   };

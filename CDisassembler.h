@@ -46,7 +46,7 @@ private:
   CDisassembler();
   void init();
   bool isChunkEmpty(CChunk* chunk);
-  void makeJump(CAddr from_addr, CAddr jump_addr, CReference::ReferenceType ref_type);
+  void makeJump(CAddr from_addr, CAddr jump_addr, CReference::Type ref_type);
   void initialParse();
 
   void printCell(QTextCursor &cursor, QString text, int length, QTextCharFormat fmt);

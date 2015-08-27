@@ -36,7 +36,7 @@ public:
     return *this;
   }
   CChunk* splitAt(CAddr addr);
-  void addCrossRef(CAddr addr, CReference::ReferenceType type);
+  void addCrossRef(CAddr addr, CReference::Type type);
   void appendCommand(CCommand cmd);
   CCommand getCommand(int idx);
   CCommand lastCommand();
@@ -55,7 +55,7 @@ public:
   Type type() {
     return m_Type;
   }
-  QString setLabel(QString label=QString(), CReference::ReferenceType=CReference::JUMP);
+  QString setLabel(QString label=QString(), CReference::Type=CReference::Type::JUMP);
   void changeLabel(QString label) {
     m_Label=label;
   }

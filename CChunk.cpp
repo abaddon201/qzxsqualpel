@@ -15,7 +15,7 @@
 #include "CChunk.h"
 #include "CDisassembler.h"
 
-void CChunk::addCrossRef(CAddr addr, CReference::ReferenceType type) {
+void CChunk::addCrossRef(CAddr addr, CReference::Type type) {
   CReference ref(addr, type);
   references.append(ref);
 }
@@ -37,23 +37,23 @@ CCommand CChunk::lastCommand() {
   return m_Commands.last();
 }
 
-QString CChunk::setLabel(QString label, CReference::ReferenceType ref_type) {
+QString CChunk::setLabel(QString label, CReference::Type ref_type) {
   if (label.isEmpty()) {
     //generate from name
     QString t1=m_StartingAddr.offsetString();
     switch (ref_type) {
-    case CReference::JUMP:
+    case CReference::Type::JUMP:
       m_Label=QString("jmp_")+t1;
       break;
-    case CReference::CALL:
+    case CReference::Type::CALL:
       m_Label=QString("sub_")+t1;
       break;
-    case CReference::READ_BYTE:
-    case CReference::WRITE_BYTE:
+    case CReference::Type::READ_BYTE:
+    case CReference::Type::WRITE_BYTE:
       m_Label=QString("byte_")+t1;
       break;
-    case CReference::READ_WORD:
-    case CReference::WRITE_WORD:
+    case CReference::Type::READ_WORD:
+    case CReference::Type::WRITE_WORD:
       m_Label=QString("word_")+t1;
       break;
     }

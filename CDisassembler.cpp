@@ -247,7 +247,7 @@ int CDisassembler::disassembleInstruction(CAddr addr) {
   return len;
 }
 
-void CDisassembler::makeJump(CAddr from_addr, CAddr jump_addr, CReference::ReferenceType ref_type) {
+void CDisassembler::makeJump(CAddr from_addr, CAddr jump_addr, CReference::Type ref_type) {
   disassembleBlock(jump_addr);
   CChunk* jmp_chunk=m_Chunks.getChunk(jump_addr);
   if (jmp_chunk) {
@@ -316,18 +316,18 @@ void CDisassembler::disassembleBlock(CAddr addr) {
       //call
       qDebug()<<"call: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
       qDebug()<<"st_addr="<<st_addr.toString();
-      makeJump(addr, jump_addr, CReference::CALL);
+      makeJump(addr, jump_addr, CReference::Type::CALL);
       addr+=res;
       break;
     case IDisassemblerCore::Type::JT_COND_JUMP:
       //conditional jump
       qDebug()<<"cond jump: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
-      makeJump(addr, jump_addr, CReference::JUMP);
+      makeJump(addr, jump_addr, CReference::Type::JUMP);
       addr+=res;
       break;
     case IDisassemblerCore::Type::JT_JUMP:
       qDebug()<<"jump: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
-      makeJump(addr, jump_addr, CReference::JUMP);
+      makeJump(addr, jump_addr, CReference::Type::JUMP);
       res=0;
       break;
     case IDisassemblerCore::Type::JT_COND_RET:
