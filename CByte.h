@@ -18,10 +18,9 @@
 class CByte {
 public:
   CByte(unsigned char b=0) : m_Byte(b) {}
-  unsigned char toUChar() const {
-    return m_Byte;
-  }
   QString toString() const;
+  operator unsigned char() {return m_Byte;}
+
 private:
   unsigned char m_Byte;
 };

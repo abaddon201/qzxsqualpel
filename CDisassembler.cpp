@@ -14,7 +14,7 @@
 
 //compatibility hack for fuse disassembler
 unsigned char readbyte_internal(unsigned short addr) {
-  return CDisassembler::inst()->getMemoryByte(addr).toUChar();
+  return CDisassembler::inst()->getMemoryByte(addr);
 }
 
 CDisassembler* CDisassembler::m_Inst=0;
