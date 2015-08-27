@@ -18,6 +18,7 @@
 CLabelsWidget::CLabelsWidget(QWidget* par)
   : QTableWidget(par) {
   setSortingEnabled(true);
+  connect(this, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(jumpToLabel(int, int)));
 }
 
 void CLabelsWidget::refresh() {
@@ -42,4 +43,8 @@ void CLabelsWidget::refresh() {
     }
   }
   setSortingEnabled(true);
+}
+
+void CLabelsWidget::jumpToLabel(int row, int) {
+  CDisassembler::inst()->navigateToLabel(row);
 }

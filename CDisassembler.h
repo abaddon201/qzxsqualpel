@@ -22,6 +22,7 @@ public:
   void openRAWFile(QString fileName);
   void saveASMFile(QString fileName);
   void keyPressEvent ( QKeyEvent* );
+
   static CDisassembler* inst() {
     if (m_Inst==0) {
       //new CDisassembler;
@@ -42,6 +43,10 @@ public:
   CChunkList &chunks() {
     return m_Chunks;
   }
+
+  ///@brief Показать на экране код с меткой под номером
+  void navigateToLabel(int num);
+
 private:
   CDisassembler();
   void init();

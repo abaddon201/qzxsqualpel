@@ -27,51 +27,37 @@ public:
   };
   QString comment;
   QList<CReference> references;
-public:
+
   CChunk(const CChunk &ch) {
     makeCopy(ch);
   }
+  ~CChunk() {};
+
   CChunk &operator=(const CChunk &ch) {
     makeCopy(ch);
     return *this;
   }
+
   CChunk* splitAt(CAddr addr);
   void addCrossRef(CAddr addr, CReference::Type type);
   void appendCommand(CCommand cmd);
   CCommand getCommand(int idx) const;
   CCommand lastCommand();
-  int commandsCount() {
-    return m_Commands.count();
-  }
-  QList<CCommand> &commands() {
-    return m_Commands;
-  }
-  CAddr addr() {
-    return m_StartingAddr;
-  }
-  QString label() {
-    return m_Label;
-  }
-  Type type() {
-    return m_Type;
-  }
+  int commandsCount() {return m_Commands.count();}
+  QList<CCommand> &commands() {return m_Commands;}
+
+  CAddr addr() {return m_StartingAddr;}
+  Type type() {return m_Type;}
+
+  QString label() {return m_Label;}
   QString setLabel(QString label=QString(), CReference::Type=CReference::Type::JUMP);
-  void changeLabel(QString label) {
-    m_Label=label;
-  }
-  void setCursorEndPosition(int pos) {
-    m_EndCursorPosition=pos;
-  }
-  void setCursorStartPosition(int pos) {
-    m_StartCursorPosition=pos;
-  }
-  int cursorEndPosition() {
-    return m_EndCursorPosition;
-  }
-  int cursorStartPosition() {
-    return m_StartCursorPosition;
-  }
-  ~CChunk() {};
+  void changeLabel(QString label) {m_Label=label;}
+
+  void setCursorEndPosition(int pos) {m_EndCursorPosition=pos;}
+  void setCursorStartPosition(int pos) {m_StartCursorPosition=pos;}
+  int cursorEndPosition() const {return m_EndCursorPosition;}
+  int cursorStartPosition() const {return m_StartCursorPosition;}
+
 private:
   friend class CChunkList;
   CChunk() : m_Length(0) {};

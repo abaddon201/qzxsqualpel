@@ -46,5 +46,9 @@ private:
   CAddr m_Addr;
 };
 
+#include <QDebug>
+inline void operator<<(QDebug out, CLabel lab) {
+  out<<"Label: Name='"<<lab.name()<<"', addr="<<lab.addr().toString();
+}
 
 #endif

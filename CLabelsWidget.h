@@ -20,6 +20,8 @@ class CLabelsWidget : public QTableWidget {
 public:
   CLabelsWidget(QWidget* par);
   void refresh();
+public slots:
+  void jumpToLabel(int, int);
 };
 
 #endif

@@ -70,6 +70,17 @@ bool CDisassembler::labelPresent(CAddr addr) {
   return false;
 }
 
+void CDisassembler::navigateToLabel(int num) {
+  if (m_Labels.count()>num) {
+    const CLabel& label=m_Labels.at(num);
+    qDebug()<< label;
+    const CChunk* chunk = m_Chunks.getChunkContains(label.addr());
+    QTextCursor cursor(textCursor());
+    cursor.setPosition(chunk->cursorStartPosition());
+    setTextCursor(cursor);
+  }
+}
+
 void CDisassembler::keyPressEvent(QKeyEvent* event) {
   switch (event->key()) {
   case Qt::Key_C:
@@ -235,7 +246,7 @@ int CDisassembler::disassembleInstruction(CAddr addr) {
     cmd.opcodes.append(opcode);
     qDebug()<<"opcode appended";
     if (chunks.count()) {
-      foreach (const CChunk& cc, chunks) {
+      foreach (const CChunk &cc, chunks) {
         //becourse we works only from undefined chunks, we able to do this like that
         cmd.opcodes.append(cc.getCommand(0).opcodes[0]);
       }
