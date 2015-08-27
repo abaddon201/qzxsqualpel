@@ -83,7 +83,7 @@ CChunk* CChunk::splitAt(CAddr addr) {
     }
   }
   qDebug()<<"moving commands";
-  CChunk* new_chunk=CDisassembler::inst()->createChunk(addr, m_Type);
+  CChunk* new_chunk=CDisassembler::core_inst()->createChunk(addr, m_Type);
   if (new_chunk==0) {
     qDebug()<<"can't create chunk";
     return 0;

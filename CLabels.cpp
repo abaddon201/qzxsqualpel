@@ -21,7 +21,7 @@ QString CLabels::offsetInLabel(CAddr &addr) const {
     qDebug()<<"no labels";
     return addr.toString();
   }
-  CChunk* chunk=CDisassembler::inst()->chunks().getChunkContains(addr);
+  CChunk* chunk=CDisassembler::core_inst()->chunks().getChunkContains(addr);
   if (chunk==0) {
     qDebug()<<"no label for addr";
     return addr.toString();

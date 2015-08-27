@@ -31,47 +31,33 @@ public:
     return m_Inst;
   }
 
-  CByte getMemoryByte(CAddr addr);
-
-  int disassembleInstruction(CAddr addr);
-  void disassembleBlock(CAddr addr);
-  CChunk* createChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN);
-  CLabels labels() {
-    return m_Labels;
-  }
-  bool labelPresent(CAddr addr);
-  CChunkList &chunks() {
-    return m_Chunks;
+  static IDisassemblerCore* core_inst() {
+    if (m_DisassemblerCore==0) {
+      throw int(667);
+    }
+    return m_DisassemblerCore;
   }
 
   ///@brief Показать на экране код с меткой под номером
   void navigateToLabel(int num);
 
   void paintEvent(QPaintEvent* event);
+  void refreshView();
 
 private:
   CDisassembler();
   void init();
-  bool isChunkEmpty(CChunk* chunk);
-  void makeJump(CAddr from_addr, CAddr jump_addr, CReference::Type ref_type);
-  void initialParse();
 
   void printCell(QTextCursor &cursor, QString text, int length, QTextCharFormat fmt);
   void printCell(QTextCursor &cursor, QString text, int length);
   void printReferences(QTextCursor &cursor, CChunk* chunk);
   void printChunkUnparsed(QTextCursor &cursor, CChunk* chunk);
   void printChunkCode(QTextCursor &cursor, CChunk* chunk);
-  void refreshView();
 
   void changeNameUnderCursor();
   void makeCodeUnderCursor();
 
-  CByte m_MemoryPool[0xFFFF];
-  int m_ProgLength;
-  CChunkList m_Chunks;
-//    QList<CChunk> m_Chunks;
   static CDisassembler* m_Inst;
-  CLabels m_Labels;
 
   QTextCharFormat m_CellFormatAddr;
   QTextCharFormat m_CellFormatOpcodes;
@@ -90,18 +76,18 @@ private:
   int m_CellLengthCmdComment;
   int m_CellLengthReference;
 
-  static const int CELLLENGTHADDR=7;
-  static const int CELLLENGTHOPCODES=13;
-  static const int CELLLENGTHLABEL=10;
-  static const int CELLLENGTHCOMMAND=5;
-  static const int CELLLENGTHARGS=10;
-  static const int CELLLENGTHCMDCOMMENT=0;
-  static const int CELLLENGTHREFERENCE=0;
+  static const int CELL_LENGTH_ADDR = 7;
+  static const int CELL_LENGTH_OPCODES = 13;
+  static const int CELL_LENGTH_LABEL = 10;
+  static const int CELL_LENGTH_COMMAND = 5;
+  static const int CELL_LENGTH_ARGS = 10;
+  static const int CELL_LENGTH_CMD_COMMENT = 0;
+  static const int CELL_LENGTH_REFERENCE = 0;
 
   int m_ReferencesOnLine;
 
   CMainWindow* m_MainWindow;
-  IDisassemblerCore* m_DisassemblerCore;
+  static IDisassemblerCore* m_DisassemblerCore;
 };
 
 #endif

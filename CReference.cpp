@@ -19,7 +19,7 @@ CReference::CReference(CAddr addr, Type type)
 
 QString CReference::toString() {
   QString res="; XRef: ";
-  res+=CDisassembler::inst()->labels().offsetInLabel(m_From);
+  res+=CDisassembler::core_inst()->labels().offsetInLabel(m_From);
   switch (m_Type) {
   case Type::JUMP:
     res+="/j";

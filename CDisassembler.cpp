@@ -5,20 +5,14 @@
 #include <QFile>
 #include <QTextTable>
 #include <QKeyEvent>
-#if QT_VERSION>=0x040500
 #include <QTextDocumentWriter>
-#endif
 #include <QPainter>
 #include "CMainWindow.h"
 #include "CWidgetChangeLabel.h"
 
 
-//compatibility hack for fuse disassembler
-unsigned char readbyte_internal(unsigned short addr) {
-  return CDisassembler::inst()->getMemoryByte(addr);
-}
-
-CDisassembler* CDisassembler::m_Inst=0;
+CDisassembler* CDisassembler::m_Inst = 0;
+IDisassemblerCore* CDisassembler::m_DisassemblerCore = 0;
 
 CDisassembler::CDisassembler()
   : QPlainTextEdit() {
@@ -49,33 +43,22 @@ void CDisassembler::init() {
   m_CellFormatChunkComment.setForeground(QColor("#909090"));
   m_CellFormatReference.setForeground(QColor("#9090ff"));
 
-  m_CellLengthAddr=CELLLENGTHADDR;
-  m_CellLengthOpcodes=CELLLENGTHOPCODES;
-  m_CellLengthLabel=CELLLENGTHLABEL;
-  m_CellLengthCommand=CELLLENGTHCOMMAND;
-  m_CellLengthArgs=CELLLENGTHARGS;
-  m_CellLengthCmdComment=CELLLENGTHCMDCOMMENT;
-  m_CellLengthReference=CELLLENGTHREFERENCE;
+  m_CellLengthAddr=CELL_LENGTH_ADDR;
+  m_CellLengthOpcodes=CELL_LENGTH_OPCODES;
+  m_CellLengthLabel=CELL_LENGTH_LABEL;
+  m_CellLengthCommand=CELL_LENGTH_COMMAND;
+  m_CellLengthArgs=CELL_LENGTH_ARGS;
+  m_CellLengthCmdComment=CELL_LENGTH_CMD_COMMENT;
+  m_CellLengthReference=CELL_LENGTH_REFERENCE;
 
   m_ReferencesOnLine=3;
 }
 
-bool CDisassembler::labelPresent(CAddr addr) {
-  if (m_Labels.count()) {
-    foreach (CLabel lbl, m_Labels) {
-      if (lbl.addr()==addr) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
 void CDisassembler::navigateToLabel(int num) {
-  if (m_Labels.count()>num) {
-    const CLabel &label=m_Labels.at(num);
+  if (m_DisassemblerCore->labels().count()>num) {
+    const CLabel &label=m_DisassemblerCore->labels().at(num);
     qDebug()<< label;
-    const CChunk* chunk = m_Chunks.getChunkContains(label.addr());
+    const CChunk* chunk = m_DisassemblerCore->chunks().getChunkContains(label.addr());
     QTextCursor cursor(textCursor());
     cursor.setPosition(chunk->cursorStartPosition());
     setTextCursor(cursor);
@@ -123,19 +106,11 @@ void CDisassembler::keyPressEvent(QKeyEvent* event) {
     QPlainTextEdit::keyPressEvent(event);
 }
 
-CByte CDisassembler::getMemoryByte(CAddr addr) {
-  return m_MemoryPool[addr.offset()&0xFFFF];
-}
-
-CChunk* CDisassembler::createChunk(CAddr addr, CChunk::Type type) {
-  return m_Chunks.createChunk(addr, type);
-}
-
 void CDisassembler::changeNameUnderCursor() {
   QTextCursor cursor(textCursor());
   qDebug()<<"!!!!!!!!!!!:"<<cursor.block().text();
   qDebug()<<"Cursor pos:"<<cursor.position();
-  CChunk* chunk=m_Chunks.getChunkByPosition(cursor.position());
+  CChunk* chunk=m_DisassemblerCore->chunks().getChunkByPosition(cursor.position());
   if (0==chunk) {
     return;
   }
@@ -147,7 +122,7 @@ void CDisassembler::changeNameUnderCursor() {
        ) {
       CWidgetChangeLabel dlg(this, chunk->label());
       if (dlg.exec()) {
-        m_Labels.changeLabel(chunk, dlg.label());
+        m_DisassemblerCore->labels().changeLabel(chunk, dlg.label());
         refreshView();
       }
     }
@@ -158,220 +133,26 @@ void CDisassembler::makeCodeUnderCursor() {
   QTextCursor cursor(textCursor());
   qDebug()<<"!!!!!!!!!!!:"<<cursor.block().text();
   qDebug()<<"Cursor pos:"<<cursor.position();
-  CChunk* chunk=m_Chunks.getChunkByPosition(cursor.position());
+  CChunk* chunk=m_DisassemblerCore->chunks().getChunkByPosition(cursor.position());
   if (0==chunk) {
     return;
   }
-  if (chunk && isChunkEmpty(chunk)) {
-    disassembleBlock(chunk->addr());
+  if (chunk && chunk->isEmpty()) {
+    m_DisassemblerCore->disassembleBlock(chunk->addr());
     refreshView();
   }
 }
 
-bool CDisassembler::isChunkEmpty(CChunk* chunk) {
-  if ((chunk->type()!=CChunk::Type::UNPARSED) && (chunk->type()!=CChunk::Type::UNKNOWN)) {
-    return false;
-  }
-  return true;
-}
-
-int CDisassembler::disassembleInstruction(CAddr addr) {
-  QString res_str;
-  size_t len=m_DisassemblerCore->disassembleInstruction(&res_str, addr);
-  if (len) {
-    //initialize chunk
-    CChunk* chunk_i=0;
-    chunk_i=m_Chunks.getChunk(addr);
-    if (chunk_i==0) {
-      qDebug()<<"no instruction here";
-      return 0;
-    }
-    if (!isChunkEmpty(chunk_i))  {
-      qDebug()<<"allready parsed";
-      return 0;
-    }
-    CByte opcode=chunk_i->getCommand(0).opcodes[0];
-    m_Chunks.removeChunk(addr);
-    CChunk* target_chunk;
-    if (addr==0) {
-      //parsing current addr
-      qDebug()<<"disassembleInstruction, zero addr";
-      target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
-    } else {
-      qDebug()<<"disassembleInstruction, nonzero addr";
-      target_chunk=m_Chunks.getChunkContains(addr-1);
-      if (target_chunk==0) {
-        qDebug()<<"No target for disassemble";
-        target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
-      }
-      //appending to prev. parsed block
-      qDebug()<<"target_chunk type:"<<target_chunk->type()<<"addr:"<<target_chunk->addr().toString();
-      if (target_chunk->type()!=CChunk::Type::CODE) {
-        qDebug()<<"Not code previous chunk";
-        //parsing current addr
-        target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
-      }
-    }
-    qDebug()<<"target_chunk2 type:"<<target_chunk->type()<<"addr:"<<target_chunk->addr().toString();
-    qDebug()<<"addr="<<addr.toString()<<"command=" << res_str <<"len=" << len;
-    ///@bug must be in segment range check... think about it
-    if (addr+len>=m_Chunks.getMaxAddr()) {
-      qDebug()<<"instruction out of mem block";
-      return -3;
-    }
-    QList<CChunk> chunks;
-    if (len>1) {
-      for (size_t i=1; i<len; i++) {
-        CChunk* ch=m_Chunks[addr+i];
-        if (ch==0) {
-          qDebug()<<"Instrunction longer than unparsed block";
-          return -4;
-        }
-        if (ch->type()!=CChunk::Type::UNPARSED) {
-          qDebug()<<"Instrunction longer than unparsed block2";
-          return -4;
-        }
-      }
-      for (size_t i=1; i<len; i++) {
-        chunks.append(*m_Chunks.getChunk(addr+i));
-        m_Chunks.removeChunk(addr+i);
-      }
-    }
-    CCommand cmd;
-    cmd.setAddr(addr);
-    QStringList strlist=res_str.split(" ");
-    cmd.command=strlist[0];
-    qDebug()<<"strlist1="<<strlist;
-    if (strlist.count()>1) {
-      //has args
-      QStringList args=strlist[1].split(",");
-      qDebug()<<"argsstrlist1="<<args;
-      cmd.arg1=args[0];
-      if (args.count()==2) {
-        cmd.arg2=args[1];
-        qDebug()<<"arg2="<<cmd.arg2;
-      }
-    }
-    cmd.opcodes.append(opcode);
-    qDebug()<<"opcode appended";
-    if (chunks.count()) {
-      foreach (const CChunk &cc, chunks) {
-        //becourse we works only from undefined chunks, we able to do this like that
-        cmd.opcodes.append(cc.getCommand(0).opcodes[0]);
-      }
-    }
-    qDebug()<<"all opcodes appended";
-    target_chunk->appendCommand(cmd);
-    qDebug()<<"cmd appended";
-  }
-  return len;
-}
-
-void CDisassembler::makeJump(CAddr from_addr, CAddr jump_addr, CReference::Type ref_type) {
-  disassembleBlock(jump_addr);
-  CChunk* jmp_chunk=m_Chunks.getChunk(jump_addr);
-  if (jmp_chunk) {
-    jmp_chunk->addCrossRef(from_addr, ref_type);
-    QString lbl;
-    if (jmp_chunk->label().isEmpty()) {
-      lbl=jmp_chunk->setLabel(QString(), ref_type);
-    } else {
-      lbl=jmp_chunk->label();
-    }
-    if (!labelPresent(jump_addr)) {
-      CLabel label(jump_addr, lbl);
-      m_Labels.append(label);
-    }
-  } else {
-    qDebug()<<"Split chunk at jump";
-    // split target chunk
-    CChunk* near_chunk=m_Chunks.getChunkContains(jump_addr);
-    if (near_chunk==0) {
-      qDebug()<<"Fatal error on split: No target chunk";
-      return;
-    }
-    qDebug()<<"near_chunk:addr"<<near_chunk->addr().toString();
-    CChunk* jmp_chunk=near_chunk->splitAt(jump_addr);
-    if (jmp_chunk==0) {
-      qDebug()<<"Split impossible";
-      return;
-    }
-    qDebug()<<"jmp_chunk:addr"<<jmp_chunk->addr().toString();
-    jmp_chunk->addCrossRef(from_addr, ref_type);
-    QString lbl;
-    if (jmp_chunk->label().isEmpty()) {
-      lbl=jmp_chunk->setLabel(QString(), ref_type);
-    } else {
-      lbl=jmp_chunk->label();
-    }
-    if (!labelPresent(jump_addr)) {
-      CLabel label(jump_addr, lbl);
-      m_Labels.append(label);
-    }
-  }
-}
-
-void CDisassembler::disassembleBlock(CAddr addr) {
-  int res=0;
-  CAddr st_addr=addr;
-  qDebug()<<"disassembleBlock(): addr"<< addr.toString();
-  do {
-    res=disassembleInstruction(addr);
-    if (res==0) {
-      //end of block
-      break;
-    }
-    if (res<0) {
-      //parse error
-      return;
-    }
-    CAddr jump_addr;
-    CChunk* chunk=m_Chunks.getChunkContains(addr);
-    if (chunk==0) {
-      qDebug()<<"No chunk after disassemble instruction, addr:"<<addr.toString();
-      return;
-    }
-    switch (m_DisassemblerCore->getLastCmdJumpType(chunk, jump_addr)) {
-    case IDisassemblerCore::Type::JT_CALL:
-      //call
-      qDebug()<<"call: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
-      qDebug()<<"st_addr="<<st_addr.toString();
-      makeJump(addr, jump_addr, CReference::Type::CALL);
-      addr+=res;
-      break;
-    case IDisassemblerCore::Type::JT_COND_JUMP:
-      //conditional jump
-      qDebug()<<"cond jump: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
-      makeJump(addr, jump_addr, CReference::Type::JUMP);
-      addr+=res;
-      break;
-    case IDisassemblerCore::Type::JT_JUMP:
-      qDebug()<<"jump: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
-      makeJump(addr, jump_addr, CReference::Type::JUMP);
-      res=0;
-      break;
-    case IDisassemblerCore::Type::JT_COND_RET:
-      //conditional ret
-      qDebug()<<"cond_ret: addr=" <<addr.toString();
-      addr+=res;
-      break;
-    case IDisassemblerCore::Type::JT_RET:
-      qDebug()<<"ret: addr=" <<addr.toString();
-      res=0;
-      break;
-    case IDisassemblerCore::Type::JT_NONE:
-      addr+=res;
-      break;
-    }
-  } while (res);
-  qDebug()<<"finished chunk:st_addr="<<st_addr.toString()/*<<"commands count="<<chunk->commandsCount()*/<<"m_chunks.count="<<m_Chunks.count();
-}
-
 void CDisassembler::openRAWFile(QString fileName) {
+  unsigned char* buf = new unsigned char[65536];
+  size_t loaded;
   FILE* f=fopen(fileName.toLocal8Bit(), "rb");
-  m_ProgLength=fread(m_MemoryPool, 1, 65536, f);
+  loaded=fread(buf, 1, 65536, f);
   fclose(f);
-  initialParse();
+  m_DisassemblerCore->setRawMemory(buf, loaded);
+  delete[] buf;
+  ///@fixme: Add checks
+  m_DisassemblerCore->initialParse();
 }
 
 void CDisassembler::saveASMFile(QString fileName) {
@@ -386,22 +167,6 @@ void CDisassembler::saveASMFile(QString fileName) {
   out<<document()->toPlainText();
   f.close();
 #endif
-}
-
-void CDisassembler::initialParse() {
-  m_Chunks.clear();
-  m_ProgLength=10000;
-  for (int i=0; i<m_ProgLength; ++i) {
-    CChunk* chunk=m_Chunks.createChunk(i, CChunk::Type::UNPARSED);
-    CByte byte=m_MemoryPool[i];
-    CCommand cmd;
-    cmd.command="db";
-    cmd.setAddr(i);
-    cmd.opcodes.append(byte);
-    cmd.arg1=byte.toString();
-    chunk->appendCommand(cmd);
-  }
-  refreshView();
 }
 
 void CDisassembler::printCell(QTextCursor &cursor, QString text, int length, QTextCharFormat fmt) {
@@ -500,8 +265,8 @@ void CDisassembler::refreshView() {
   clear();
   QTextCursor cursor(textCursor());
   cursor.beginEditBlock();
-  CChunkList::iterator it=m_Chunks.begin();
-  for (; it!=m_Chunks.end(); ++it) {
+  CChunkList::iterator it=m_DisassemblerCore->chunks().begin();
+  for (; it!=m_DisassemblerCore->chunks().end(); ++it) {
     CChunk* chunk=*it;
     chunk->setCursorStartPosition(cursor.position()+1);
     switch (chunk->type()) {

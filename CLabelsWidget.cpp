@@ -23,7 +23,7 @@ CLabelsWidget::CLabelsWidget(QWidget* par)
 
 void CLabelsWidget::refresh() {
   clear();
-  QList<CLabel> my_labels=CDisassembler::inst()->labels();
+  QList<CLabel> my_labels=CDisassembler::core_inst()->labels();
   setRowCount(my_labels.count());
   setColumnCount(2);
   int i=0;

@@ -58,6 +58,13 @@ public:
   int cursorEndPosition() const {return m_EndCursorPosition;}
   int cursorStartPosition() const {return m_StartCursorPosition;}
 
+  bool isEmpty() {
+    if ((type()!=CChunk::Type::UNPARSED) && (type()!=CChunk::Type::UNKNOWN)) {
+      return false;
+    }
+    return true;
+  }
+
 private:
   friend class CChunkList;
   CChunk() : m_Length(0) {};

@@ -16,6 +16,9 @@
 #include "CChunk.h"
 #include "CAddr.h"
 
+class CLabels;
+class CChunkList;
+
 class IDisassemblerCore {
 public:
   enum class Type{
@@ -27,10 +30,20 @@ public:
     JT_RET,
   };
 
+  IDisassemblerCore() {}
   virtual ~IDisassemblerCore() {}
   virtual Type getLastCmdJumpType(CChunk* chunk, CAddr &jump_addr)=0;
-  virtual int disassembleInstruction(QString* res_str, CAddr addr)=0;
+  virtual int disassembleInstruction(CAddr addr)=0;
+  virtual void disassembleBlock(CAddr addr) = 0;
+  virtual CChunk* createChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN) = 0;
+  virtual CLabels labels() const = 0;
+  virtual CChunkList &chunks() = 0;
 
+  virtual void makeJump(CAddr from_addr, CAddr jump_addr, CReference::Type ref_type) = 0;
+  virtual void setRawMemory(unsigned char* buf, size_t size) = 0;
+  virtual void initialParse() = 0;
+
+  virtual CByte getMemoryByte(CAddr addr) const = 0;
 };
 
 #endif
