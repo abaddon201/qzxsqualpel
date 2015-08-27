@@ -12,21 +12,21 @@
 
 #ifndef CCHUNK_H
 #define CCHUNK_H
-
 #include "CReference.h"
 #include "CCommand.h"
 
+#include <QDebug>
+
 class CChunk {
 public:
-    typedef enum {
-        UNKNOWN=-1,
-        UNPARSED=0,
-        CODE=1,
-        DATA_BYTE=2,
-        DATA_WORD=3,
-        DATA_ARRAY=4
-    } ChunkType;
-
+  enum class Type {
+      UNKNOWN=-1,
+      UNPARSED=0,
+      CODE=1,
+      DATA_BYTE=2,
+      DATA_WORD=3,
+      DATA_ARRAY=4
+  };
     QString comment;
     QList<CReference> references;
 public:
@@ -54,7 +54,7 @@ public:
     QString label() {
         return m_Label;
     }
-    ChunkType type() {
+    Type type() {
         return m_Type;
     }
     QString setLabel(QString label=QString(), CReference::ReferenceType=CReference::JUMP);
@@ -67,7 +67,7 @@ public:
 private:
     friend class CChunkList;
     CChunk() : m_Length(0) {};
-    CChunk(CAddr addr, CChunk::ChunkType type=CChunk::UNKNOWN) : m_Type(type), m_StartingAddr(addr) {};
+    CChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN) : m_Type(type), m_StartingAddr(addr) {};
     void makeCopy(const CChunk& ch) {
         m_StartingAddr=ch.m_StartingAddr;
         m_Length=ch.m_Length;
@@ -82,11 +82,14 @@ private:
 
     QString m_Label;
     QList<CCommand> m_Commands;
-    ChunkType m_Type;
+    Type m_Type;
     CAddr m_StartingAddr;
     int m_StartCursorPosition;
     int m_EndCursorPosition;
     unsigned m_Length;
 };
+
+class QDebug;
+extern QDebug operator<<(QDebug out, CChunk::Type t);
 
 #endif

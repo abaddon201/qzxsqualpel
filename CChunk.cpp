@@ -99,3 +99,15 @@ CChunk* CChunk::splitAt(CAddr addr) {
     qDebug()<<"splitAt: commans.count="<<m_Commands.count()<<"new count"<<new_chunk->m_Commands.count();
     return new_chunk;
 }
+
+QDebug operator<<(QDebug out, CChunk::Type t) {
+  switch(t) {
+  case CChunk::Type::UNKNOWN: out<<"UNKNOWN";break;
+  case CChunk::Type::UNPARSED: out<<"UNPARSED";break;
+  case CChunk::Type::CODE: out<<"CODE";break;
+  case CChunk::Type::DATA_BYTE: out<<"DATA_BYTE";break;
+  case CChunk::Type::DATA_WORD: out<<"DATA_WORD";break;
+  case CChunk::Type::DATA_ARRAY: out<<"DATA_ARRAY";break;
+  }
+  return out;
+}

@@ -107,7 +107,7 @@ CByte CDisassembler::getMemoryByte(CAddr addr) {
     return m_MemoryPool[addr.offset()&0xFFFF];
 }
 
-CChunk* CDisassembler::createChunk(CAddr addr, CChunk::ChunkType type) {
+CChunk* CDisassembler::createChunk(CAddr addr, CChunk::Type type) {
     return m_Chunks.createChunk(addr, type);
 }
 
@@ -120,10 +120,10 @@ void CDisassembler::changeNameUnderCursor() {
         return;
     }
     if (chunk) {
-        if ((chunk->type()==CChunk::CODE)
-             || (chunk->type()==CChunk::DATA_BYTE)
-             || (chunk->type()==CChunk::DATA_ARRAY)
-             || (chunk->type()==CChunk::DATA_WORD)
+        if ((chunk->type()==CChunk::Type::CODE)
+             || (chunk->type()==CChunk::Type::DATA_BYTE)
+             || (chunk->type()==CChunk::Type::DATA_ARRAY)
+             || (chunk->type()==CChunk::Type::DATA_WORD)
            ) {
                 CWidgetChangeLabel dlg(this, chunk->label());
                 if (dlg.exec()) {
@@ -149,7 +149,7 @@ void CDisassembler::makeCodeUnderCursor() {
 }
 
 bool CDisassembler::isChunkEmpty(CChunk* chunk) {
-    if ((chunk->type()!=CChunk::UNPARSED) && (chunk->type()!=CChunk::UNKNOWN)) {
+    if ((chunk->type()!=CChunk::Type::UNPARSED) && (chunk->type()!=CChunk::Type::UNKNOWN)) {
         return false;
     }
     return true;
@@ -176,20 +176,20 @@ int CDisassembler::disassembleInstruction(CAddr addr) {
         if (addr==0) {
             //parsing current addr
             qDebug()<<"disassembleInstruction, zero addr";
-            target_chunk=m_Chunks.createChunk(addr, CChunk::CODE);
+            target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
         } else {
             qDebug()<<"disassembleInstruction, nonzero addr";
             target_chunk=m_Chunks.getChunkContains(addr-1);
             if (target_chunk==0) {
                 qDebug()<<"No target for disassemble";
-                target_chunk=m_Chunks.createChunk(addr, CChunk::CODE);
+                target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
             }
             //appending to prev. parsed block
             qDebug()<<"target_chunk type:"<<target_chunk->type()<<"addr:"<<target_chunk->addr().toString();
-            if (target_chunk->type()!=CChunk::CODE) {
+            if (target_chunk->type()!=CChunk::Type::CODE) {
                 qDebug()<<"Not code previous chunk";
                 //parsing current addr
-                target_chunk=m_Chunks.createChunk(addr, CChunk::CODE);
+                target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
             }
         }
         qDebug()<<"target_chunk2 type:"<<target_chunk->type()<<"addr:"<<target_chunk->addr().toString();
@@ -207,7 +207,7 @@ int CDisassembler::disassembleInstruction(CAddr addr) {
                     qDebug()<<"Instrunction longer than unparsed block";
                     return -4;
                 }
-                if (ch->type()!=CChunk::UNPARSED) {
+                if (ch->type()!=CChunk::Type::UNPARSED) {
                     qDebug()<<"Instrunction longer than unparsed block2";
                     return -4;
                 }
@@ -372,7 +372,7 @@ void CDisassembler::initialParse() {
     m_Chunks.clear();
     m_ProgLength=10000;
     for (int i=0;i<m_ProgLength; ++i) {
-        CChunk* chunk=m_Chunks.createChunk(i, CChunk::UNPARSED);
+        CChunk* chunk=m_Chunks.createChunk(i, CChunk::Type::UNPARSED);
         CByte byte=m_MemoryPool[i];
         CCommand cmd;
         cmd.command="db";
@@ -485,10 +485,10 @@ void CDisassembler::refreshView() {
         CChunk* chunk=*it;
         chunk->setCursorStartPosition(cursor.position());
         switch (chunk->type()) {
-            case CChunk::UNPARSED:
+            case CChunk::Type::UNPARSED:
                 printChunkUnparsed(cursor, chunk);
                 break;
-            case CChunk::CODE:
+            case CChunk::Type::CODE:
                 printChunkCode(cursor, chunk);
                 break;
         };

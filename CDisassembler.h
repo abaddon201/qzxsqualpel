@@ -34,7 +34,7 @@ public:
 
     int disassembleInstruction(CAddr addr);
     void disassembleBlock(CAddr addr);
-    CChunk* createChunk(CAddr addr, CChunk::ChunkType type=CChunk::UNKNOWN);
+    CChunk* createChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN);
     CLabels labels() {return m_Labels;}
     bool labelPresent(CAddr addr);
     CChunkList& chunks() {return m_Chunks;}

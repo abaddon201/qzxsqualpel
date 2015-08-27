@@ -21,7 +21,7 @@
 class CChunkList {
 public:
     CChunkList();
-    CChunk* createChunk(CAddr addr, CChunk::ChunkType type=CChunk::UNKNOWN);
+    CChunk* createChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN);
     CChunk* getChunk(const CAddr addr) const;
     CChunk* getChunkContains(CAddr addr) const;
     CChunk* getChunkByPosition(int pos) const;

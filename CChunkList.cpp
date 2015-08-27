@@ -17,7 +17,7 @@ CChunkList::CChunkList() {
     memset(m_Chunks, 0, sizeof(m_Chunks));
 }
 
-CChunk* CChunkList::createChunk(const CAddr addr, CChunk::ChunkType type) {
+CChunk* CChunkList::createChunk(const CAddr addr, CChunk::Type type) {
     if (m_Chunks[addr.offset()]!=0) {
         return 0;
     }
