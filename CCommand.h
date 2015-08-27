@@ -21,7 +21,7 @@
 
 class CCommand {
 public:
-  typedef enum {
+  enum class ArgType {
     ARG_UNKNOWN=0,
     ARG_REGISTER=1,
     ARG_DATAOFFSET=2,
@@ -29,7 +29,8 @@ public:
     ARG_VALUE=4,
     ARG_VALOFFSET=5,
     ARG_FLAG=6
-  } ArgType;
+  };
+
   QList<CByte> opcodes;
   QString command;
   QString arg1;
