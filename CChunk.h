@@ -38,7 +38,7 @@ public:
   CChunk* splitAt(CAddr addr);
   void addCrossRef(CAddr addr, CReference::Type type);
   void appendCommand(CCommand cmd);
-  CCommand getCommand(int idx);
+  CCommand getCommand(int idx) const;
   CCommand lastCommand();
   int commandsCount() {
     return m_Commands.count();

@@ -25,7 +25,7 @@ void CChunk::appendCommand(CCommand cmd) {
   m_Length+=cmd.opcodes.size();
 }
 
-CCommand CChunk::getCommand(int idx) {
+CCommand CChunk::getCommand(int idx) const {
   if (m_Commands.count()==0) {
     qDebug()<<"No commands here";
     throw int(666);

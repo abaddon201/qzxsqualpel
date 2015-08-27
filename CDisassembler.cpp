@@ -235,7 +235,7 @@ int CDisassembler::disassembleInstruction(CAddr addr) {
     cmd.opcodes.append(opcode);
     qDebug()<<"opcode appended";
     if (chunks.count()) {
-      foreach (CChunk cc, chunks) {
+      foreach (const CChunk& cc, chunks) {
         //becourse we works only from undefined chunks, we able to do this like that
         cmd.opcodes.append(cc.getCommand(0).opcodes[0]);
       }
