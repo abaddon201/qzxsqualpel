@@ -25,19 +25,12 @@
 
 */
 
-//#include <config.h>
-
 #include <stdio.h>
 #include "disassemble.h"
 
 #if _MSC_VER
 #define snprintf _snprintf
 #endif
-//#include <libspectrum.h>
-
-//#include "debugger.h"
-//#include "fuse.h"
-//#include "memory.h"
 
 /* Used to flag whether we're after a DD or FD prefix */
 enum hl_type { USE_HL, USE_IX, USE_IY };
@@ -45,11 +38,7 @@ enum hl_type { USE_HL, USE_IX, USE_IY };
 libspectrum_byte readbyte_internal(libspectrum_word addr);
 
 const int debugger_output_base=16;
-/*libspectrum_byte memory[65536];
-libspectrum_byte readbyte_internal(libspectrum_word addr) {
-  return memory[addr&0xFFFF];
-}
-*/
+
 static void disassemble_main( libspectrum_word address, char* buffer,
                               size_t buflen, size_t* length,
                               enum hl_type use_hl );
@@ -831,22 +820,3 @@ static int
 bit_op_bit( libspectrum_byte b ) {
   return ( b >> 3 ) & 0x07;
 }
-
-/*
-int main() {
-  FILE* f=fopen("img.bin", "rb");
-  fread(memory, 1, 0xFFFF, f);
-  fclose(f);
-
-  char buff[1024];
-  size_t len;
-  int i;
-  libspectrum_word addr=0;
-  for(i=0;i<10;i++) {
-     debugger_disassemble( buff, 1024, &len, addr );
-     printf("res=%s\n", buff);
-     addr+=len;
-  }
-  return 0;
-}
-*/
