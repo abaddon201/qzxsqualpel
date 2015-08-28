@@ -35,9 +35,9 @@ void CLabelsWidget::refresh() {
     QList<CLabel>::const_iterator it;
     for (it=my_labels.begin(); it!=my_labels.end(); ++it) {
       CLabel lbl=*it;
-      QTableWidgetItem* nameItem = new QTableWidgetItem(lbl.name());
+      QTableWidgetItem* nameItem = new QTableWidgetItem(lbl.name);
       setItem(i, 0, nameItem);
-      QTableWidgetItem* addrItem = new QTableWidgetItem(lbl.addr().toString());
+      QTableWidgetItem* addrItem = new QTableWidgetItem(lbl.addr.toString());
       setItem(i, 1, addrItem);
       i++;
     }

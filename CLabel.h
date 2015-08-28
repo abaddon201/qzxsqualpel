@@ -15,40 +15,28 @@
 
 #include "CAddr.h"
 
-class CLabel {
-public:
+struct CLabel {
   CLabel() {}
-  CLabel(CAddr addr, QString name) : m_Name(name), m_Addr(addr) {}
+  CLabel(CAddr addr, QString name) : name(name), addr(addr) {}
+
   CLabel(const CLabel &s) {
-    m_Addr=s.m_Addr;
-    m_Name=s.m_Name;
+    addr=s.addr;
+    name=s.name;
   }
   CLabel &operator = (const CLabel &s) {
-    m_Addr=s.m_Addr;
-    m_Name=s.m_Name;
+    addr=s.addr;
+    name=s.name;
     return *this;
   }
   ~CLabel() {}
-  QString name() const {
-    return m_Name;
-  }
-  CAddr addr() const {
-    return m_Addr;
-  }
-  void setAddr(const CAddr &addr) {
-    m_Addr=addr;
-  }
-  void setName(const QString &name) {
-    m_Name=name;
-  }
-private:
-  QString m_Name;
-  CAddr m_Addr;
+
+  QString name;
+  CAddr addr;
 };
 
 #include <QDebug>
 inline void operator<<(QDebug out, CLabel lab) {
-  out<<"Label: Name='"<<lab.name()<<"', addr="<<lab.addr().toString();
+  out<<"Label: Name='"<<lab.name<<"', addr="<<lab.addr.toString();
 }
 
 #endif

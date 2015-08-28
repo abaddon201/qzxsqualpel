@@ -44,9 +44,9 @@ void CLabels::changeLabel(CChunk* chunk, QString new_label) {
   QList<CLabel>::iterator it;
   for (it=begin(); it!=end(); ++it) {
     CLabel &lbl=*it;
-    if (lbl.addr()==chunk->addr()) {
+    if (lbl.addr==chunk->addr()) {
       //change and return;
-      lbl.setName(new_label);
+      lbl.name=new_label;
       return;
     }
   }

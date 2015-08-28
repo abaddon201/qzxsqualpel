@@ -58,7 +58,7 @@ void CDisassembler::navigateToLabel(int num) {
   if (m_DisassemblerCore->labels().count()>num) {
     const CLabel &label=m_DisassemblerCore->labels().at(num);
     qDebug()<< label;
-    const CChunk* chunk = m_DisassemblerCore->chunks().getChunkContains(label.addr());
+    const CChunk* chunk = m_DisassemblerCore->chunks().getChunkContains(label.addr);
     QTextCursor cursor(textCursor());
     cursor.setPosition(chunk->cursorStartPosition());
     setTextCursor(cursor);
