@@ -219,13 +219,13 @@ void CDisassembler::printReferences(QTextCursor &cursor, CChunk* chunk) {
 void CDisassembler::printChunkUnparsed(QTextCursor &cursor, CChunk* chunk) {
   cursor.insertBlock();
   CCommand cmd=chunk->getCommand(0);
-  printCell(cursor, cmd.addr().toString(), m_CellLengthAddr, m_CellFormatAddr);
+  printCell(cursor, cmd.addr.toString(), m_CellLengthAddr, m_CellFormatAddr);
   printCell(cursor, cmd.getOpcodesString(), m_CellLengthOpcodes, m_CellFormatOpcodes);
   printCell(cursor, QString(), m_CellLengthLabel, m_CellFormatLabel);
   printCell(cursor, cmd.command, m_CellLengthCommand, m_CellFormatCommand);
   printCell(cursor, cmd.getArgsString(), m_CellLengthArgs, m_CellFormatArgs);
-  if (!cmd.comment().isEmpty()) {
-    printCell(cursor, QString(";")+cmd.comment(), m_CellLengthCmdComment, m_CellFormatCmdComment);
+  if (!cmd.comment.isEmpty()) {
+    printCell(cursor, QString(";")+cmd.comment, m_CellLengthCmdComment, m_CellFormatCmdComment);
   }
 
   cursor.movePosition(QTextCursor::End);
@@ -248,13 +248,13 @@ void CDisassembler::printChunkCode(QTextCursor &cursor, CChunk* chunk) {
   }
   foreach (CCommand cmd, chunk->commands()) {
     cursor.insertBlock();
-    printCell(cursor, cmd.addr().toString(), m_CellLengthAddr, m_CellFormatAddr);
+    printCell(cursor, cmd.addr.toString(), m_CellLengthAddr, m_CellFormatAddr);
     printCell(cursor, cmd.getOpcodesString(), m_CellLengthOpcodes, m_CellFormatOpcodes);
     printCell(cursor, QString(), m_CellLengthLabel, m_CellFormatLabel);
     printCell(cursor, cmd.command, m_CellLengthCommand, m_CellFormatCommand);
     printCell(cursor, cmd.getArgsString(), m_CellLengthArgs, m_CellFormatArgs);
-    if (!cmd.comment().isEmpty()) {
-      printCell(cursor, QString(";")+cmd.comment(), m_CellLengthCmdComment, m_CellFormatCmdComment);
+    if (!cmd.comment.isEmpty()) {
+      printCell(cursor, QString(";")+cmd.comment, m_CellLengthCmdComment, m_CellFormatCmdComment);
     }
     cursor.movePosition(QTextCursor::End);
   }

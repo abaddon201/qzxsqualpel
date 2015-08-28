@@ -120,7 +120,7 @@ int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
       }
     }
     CCommand cmd;
-    cmd.setAddr(addr);
+    cmd.addr = addr;
     QStringList strlist=buff.split(" ");
     cmd.command=strlist[0];
     qDebug()<<"strlist1="<<strlist;
@@ -283,7 +283,7 @@ void CDisassemblerCoreZX::initialParse() {
     CByte byte=m_MemoryPool[i];
     CCommand cmd;
     cmd.command="db";
-    cmd.setAddr(i);
+    cmd.addr = i;
     cmd.opcodes.append(byte);
     cmd.arg1=byte.toString();
     chunk->appendCommand(cmd);

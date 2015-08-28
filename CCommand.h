@@ -19,8 +19,8 @@
 #include "CByte.h"
 #include "CAddr.h"
 
-class CCommand {
-public:
+///@brief Структура описывающая одну команду ассемблера
+struct CCommand {
   enum class ArgType {
     ARG_UNKNOWN=0,
     ARG_REGISTER=1,
@@ -35,41 +35,35 @@ public:
   QString command;
   QString arg1;
   QString arg2;
-public:
+  QString comment;
+  CAddr addr;
+
   CCommand() {}
   CCommand(const CCommand &c) {
-    m_Addr=c.m_Addr;
+    addr=c.addr;
     opcodes=c.opcodes;
     command=c.command;
     arg1=c.arg1;
     arg2=c.arg2;
-    m_Comment=c.m_Comment;
+    comment=c.comment;
   }
   CCommand &operator=(const CCommand &c) {
-    m_Addr=c.m_Addr;
+    addr=c.addr;
     opcodes=c.opcodes;
     command=c.command;
     arg1=c.arg1;
     arg2=c.arg2;
-    m_Comment=c.m_Comment;
+    comment=c.comment;
     return *this;
   }
-  QString getArgsString() const;
-  QString getOpcodesString() const;
-  CAddr getJmpAddr() const;
-  const CAddr &addr() const {
-    return m_Addr;
-  }
-  void setAddr(const CAddr &addr) {
-    m_Addr=addr;
-  }
-  QString comment() const {
-    return m_Comment;
-  }
-private:
-  QString m_Comment;
-  CAddr m_Addr;
 
+  ///@brief Возвращает аргументы команды в виде строки
+  QString getArgsString() const;
+  ///@brief Возвращает опкоды команды в виде строки
+  /// @todo стоит добавить ограничение на кол-во опкодов
+  QString getOpcodesString() const;
+  ///@brief Возвращает адрес перехода команды (первый либо второй аргумент)
+  CAddr getJmpAddr() const;
 };
 
 #endif
