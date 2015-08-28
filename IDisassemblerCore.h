@@ -16,8 +16,16 @@
 #include "CChunk.h"
 #include "CAddr.h"
 
+#include <functional>
+
 class CLabels;
 class CChunkList;
+
+class IGUIUpdater {
+public:
+  virtual void updateWidgets() = 0;
+  virtual ~IGUIUpdater() {}
+};
 
 class IDisassemblerCore {
 public:
@@ -30,7 +38,7 @@ public:
     JT_RET,
   };
 
-  IDisassemblerCore() {}
+  IDisassemblerCore(IGUIUpdater* updater_) : updater{updater_} {}
   virtual ~IDisassemblerCore() {}
   virtual Type getLastCmdJumpType(CChunk* chunk, CAddr &jump_addr)=0;
   virtual int disassembleInstruction(CAddr addr)=0;
@@ -44,6 +52,8 @@ public:
   virtual void initialParse() = 0;
 
   virtual CByte getMemoryByte(CAddr addr) const = 0;
+protected:
+  IGUIUpdater* updater;
 };
 
 #endif

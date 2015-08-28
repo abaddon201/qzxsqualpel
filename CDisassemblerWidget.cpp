@@ -1,6 +1,6 @@
 #include <QDebug>
 
-#include "CDisassembler.h"
+#include "CDisassemblerWidget.h"
 
 #include <QFile>
 #include <QTextTable>
@@ -11,22 +11,22 @@
 #include "CWidgetChangeLabel.h"
 
 
-CDisassembler* CDisassembler::m_Inst = 0;
-IDisassemblerCore* CDisassembler::m_DisassemblerCore = 0;
+CDisassemblerWidget* CDisassemblerWidget::m_Inst = 0;
+IDisassemblerCore* CDisassemblerWidget::m_DisassemblerCore = 0;
 
-CDisassembler::CDisassembler()
+CDisassemblerWidget::CDisassemblerWidget()
   : QPlainTextEdit() {
   init();
 }
 
-CDisassembler::CDisassembler(CMainWindow* mwnd)
+CDisassemblerWidget::CDisassemblerWidget(CMainWindow* mwnd)
   : QPlainTextEdit()
   , m_MainWindow(mwnd) {
 
   init();
 }
 
-void CDisassembler::init() {
+void CDisassemblerWidget::init() {
   QFont font;
   font.setFamily("Courier");
   font.setFixedPitch(true);
@@ -54,7 +54,7 @@ void CDisassembler::init() {
   m_ReferencesOnLine=3;
 }
 
-void CDisassembler::navigateToLabel(int num) {
+void CDisassemblerWidget::navigateToLabel(int num) {
   if (m_DisassemblerCore->labels().count()>num) {
     const CLabel &label=m_DisassemblerCore->labels().at(num);
     qDebug()<< label;
@@ -65,7 +65,7 @@ void CDisassembler::navigateToLabel(int num) {
   }
 }
 
-void CDisassembler::paintEvent(QPaintEvent* event) {
+void CDisassemblerWidget::paintEvent(QPaintEvent* event) {
   QPlainTextEdit::paintEvent(event);
   QPainter p(viewport());
   QRect cr = cursorRect();
@@ -73,7 +73,7 @@ void CDisassembler::paintEvent(QPaintEvent* event) {
   p.fillRect(cr, QBrush(QColor(0, 100, 255, 120)));
 }
 
-void CDisassembler::keyPressEvent(QKeyEvent* event) {
+void CDisassemblerWidget::keyPressEvent(QKeyEvent* event) {
   switch (event->key()) {
   case Qt::Key_C:
     // must codefi under cursor
@@ -106,7 +106,7 @@ void CDisassembler::keyPressEvent(QKeyEvent* event) {
     QPlainTextEdit::keyPressEvent(event);
 }
 
-void CDisassembler::changeNameUnderCursor() {
+void CDisassemblerWidget::changeNameUnderCursor() {
   QTextCursor cursor(textCursor());
   qDebug()<<"!!!!!!!!!!!:"<<cursor.block().text();
   qDebug()<<"Cursor pos:"<<cursor.position();
@@ -129,7 +129,7 @@ void CDisassembler::changeNameUnderCursor() {
   }
 }
 
-void CDisassembler::makeCodeUnderCursor() {
+void CDisassemblerWidget::makeCodeUnderCursor() {
   QTextCursor cursor(textCursor());
   qDebug()<<"!!!!!!!!!!!:"<<cursor.block().text();
   qDebug()<<"Cursor pos:"<<cursor.position();
@@ -143,7 +143,7 @@ void CDisassembler::makeCodeUnderCursor() {
   }
 }
 
-void CDisassembler::openRAWFile(QString fileName) {
+void CDisassemblerWidget::openRAWFile(QString fileName) {
   unsigned char* buf = new unsigned char[65536];
   size_t loaded;
   FILE* f=fopen(fileName.toLocal8Bit(), "rb");
@@ -155,7 +155,7 @@ void CDisassembler::openRAWFile(QString fileName) {
   m_DisassemblerCore->initialParse();
 }
 
-void CDisassembler::saveASMFile(QString fileName) {
+void CDisassemblerWidget::saveASMFile(QString fileName) {
 #if QT_VERSION>=0x040500
   QTextDocumentWriter writer(fileName);
   writer.setFormat("plaintext");
@@ -169,7 +169,7 @@ void CDisassembler::saveASMFile(QString fileName) {
 #endif
 }
 
-void CDisassembler::printCell(QTextCursor &cursor, QString text, int length, QTextCharFormat fmt) {
+void CDisassemblerWidget::printCell(QTextCursor &cursor, QString text, int length, QTextCharFormat fmt) {
   int spclen=length-text.length();
   if (spclen<0) {
     spclen=0;
@@ -178,7 +178,7 @@ void CDisassembler::printCell(QTextCursor &cursor, QString text, int length, QTe
   cursor.insertText(text+spcline, fmt);
 }
 
-void CDisassembler::printCell(QTextCursor &cursor, QString text, int length) {
+void CDisassemblerWidget::printCell(QTextCursor &cursor, QString text, int length) {
   int spclen=length-text.length();
   if (spclen<0) {
     spclen=0;
@@ -187,7 +187,7 @@ void CDisassembler::printCell(QTextCursor &cursor, QString text, int length) {
   cursor.insertText(text+spcline);
 }
 
-void CDisassembler::printReferences(QTextCursor &cursor, CChunk* chunk) {
+void CDisassemblerWidget::printReferences(QTextCursor &cursor, CChunk* chunk) {
   if (chunk->references().count()==0) {
     return;
   }
@@ -216,7 +216,7 @@ void CDisassembler::printReferences(QTextCursor &cursor, CChunk* chunk) {
   }
 }
 
-void CDisassembler::printChunkUnparsed(QTextCursor &cursor, CChunk* chunk) {
+void CDisassemblerWidget::printChunkUnparsed(QTextCursor &cursor, CChunk* chunk) {
   cursor.insertBlock();
   CCommand cmd=chunk->getCommand(0);
   printCell(cursor, cmd.addr.toString(), m_CellLengthAddr, m_CellFormatAddr);
@@ -231,7 +231,7 @@ void CDisassembler::printChunkUnparsed(QTextCursor &cursor, CChunk* chunk) {
   cursor.movePosition(QTextCursor::End);
 }
 
-void CDisassembler::printChunkCode(QTextCursor &cursor, CChunk* chunk) {
+void CDisassemblerWidget::printChunkCode(QTextCursor &cursor, CChunk* chunk) {
   if (!chunk->label().isEmpty()) {
     cursor.insertBlock();
     if (!chunk->comment().isEmpty()) {
@@ -261,7 +261,7 @@ void CDisassembler::printChunkCode(QTextCursor &cursor, CChunk* chunk) {
   cursor.movePosition(QTextCursor::End);
 }
 
-void CDisassembler::refreshView() {
+void CDisassemblerWidget::refreshView() {
   clear();
   QTextCursor cursor(textCursor());
   cursor.beginEditBlock();

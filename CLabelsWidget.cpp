@@ -13,17 +13,18 @@
 #include "CLabelsWidget.h"
 
 #include "CLabel.h"
-#include "CDisassembler.h"
+#include "CDisassemblerWidget.h"
 
-CLabelsWidget::CLabelsWidget(QWidget* par)
-  : QTableWidget(par) {
+CLabelsWidget::CLabelsWidget(QWidget* par, CDisassemblerWidget* disasm)
+  : QTableWidget(par),
+    _disasm{disasm} {
   setSortingEnabled(true);
   connect(this, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(jumpToLabel(int, int)));
 }
 
 void CLabelsWidget::refresh() {
   clear();
-  QList<CLabel> my_labels=CDisassembler::core_inst()->labels();
+  QList<CLabel> my_labels=_disasm->core_inst()->labels();
   setRowCount(my_labels.count());
   setColumnCount(2);
   int i=0;
@@ -46,5 +47,5 @@ void CLabelsWidget::refresh() {
 }
 
 void CLabelsWidget::jumpToLabel(int row, int) {
-  CDisassembler::inst()->navigateToLabel(row);
+  _disasm->navigateToLabel(row);
 }

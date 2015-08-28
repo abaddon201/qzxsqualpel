@@ -20,6 +20,8 @@
 
 class CDisassemblerCoreZX : public IDisassemblerCore {
 public:
+  CDisassemblerCoreZX(IGUIUpdater* updater) : IDisassemblerCore{updater} {}
+
   virtual Type getLastCmdJumpType(CChunk* chunk, CAddr &jump_addr) override;
   virtual int disassembleInstruction(CAddr addr) override;
   void disassembleBlock(CAddr addr) override;

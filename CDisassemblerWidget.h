@@ -13,9 +13,9 @@
 
 class CMainWindow;
 
-class CDisassembler : public QPlainTextEdit {
+class CDisassemblerWidget : public QPlainTextEdit {
 public:
-  CDisassembler(CMainWindow* mwnd);
+  CDisassemblerWidget(CMainWindow* mwnd);
   void setCore(IDisassemblerCore* core) {
     m_DisassemblerCore=core;
   }
@@ -23,14 +23,14 @@ public:
   void saveASMFile(QString fileName);
   void keyPressEvent ( QKeyEvent* );
 
-  static CDisassembler* inst() {
+/*  static CDisassemblerWidget* inst() {
     if (m_Inst==0) {
       //new CDisassembler;
       throw int(666);
     }
     return m_Inst;
   }
-
+*/
   static IDisassemblerCore* core_inst() {
     if (m_DisassemblerCore==0) {
       throw int(667);
@@ -45,11 +45,12 @@ public:
   void refreshView();
 
 private:
-  CDisassembler();
+  CDisassemblerWidget();
   void init();
 
   void printCell(QTextCursor &cursor, QString text, int length, QTextCharFormat fmt);
   void printCell(QTextCursor &cursor, QString text, int length);
+
   void printReferences(QTextCursor &cursor, CChunk* chunk);
   void printChunkUnparsed(QTextCursor &cursor, CChunk* chunk);
   void printChunkCode(QTextCursor &cursor, CChunk* chunk);
@@ -57,7 +58,7 @@ private:
   void changeNameUnderCursor();
   void makeCodeUnderCursor();
 
-  static CDisassembler* m_Inst;
+  static CDisassemblerWidget* m_Inst;
 
   QTextCharFormat m_CellFormatAddr;
   QTextCharFormat m_CellFormatOpcodes;

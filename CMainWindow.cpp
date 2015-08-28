@@ -8,15 +8,19 @@
 
 #include "CDisassemblerCoreZX.h"
 
+void CMainWindow::updateWidgets() {
+  m_DisassemblerWidget->refreshView();
+}
+
 CMainWindow::CMainWindow() {
   //ui.setupUi(this);
 
   setupFileMenu();
 
-  m_Disassembler=new CDisassembler(this);
+  m_DisassemblerWidget=new CDisassemblerWidget(this);
 
-  IDisassemblerCore* core=new CDisassemblerCoreZX();
-  m_Disassembler->setCore(core);
+  IDisassemblerCore* core=new CDisassemblerCoreZX(this);
+  m_DisassemblerWidget->setCore(core);
   QDockWidget* dock=new QDockWidget(tr("Navigation Stack"), this);
   dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
   navigationStack = new QListWidget(dock);
@@ -25,12 +29,12 @@ CMainWindow::CMainWindow() {
 
   dock=new QDockWidget(tr("Labels list"), this);
   dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-  m_LabelsWidget = new CLabelsWidget(dock);
+  m_LabelsWidget = new CLabelsWidget(dock, m_DisassemblerWidget);
   dock->setWidget(m_LabelsWidget);
   addDockWidget(Qt::RightDockWidgetArea, dock);
 
   //m_Highlighter=new Highlighter(m_Disassembler->document());
-  setCentralWidget(m_Disassembler);
+  setCentralWidget(m_DisassemblerWidget);
 }
 
 void CMainWindow::setupFileMenu() {
@@ -51,13 +55,13 @@ void CMainWindow::setupFileMenu() {
 void CMainWindow::openFile() {
   QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", "RAW ZX Files (*.raw)");
   if (!fileName.isEmpty()) {
-    m_Disassembler->openRAWFile(fileName);
+    m_DisassemblerWidget->openRAWFile(fileName);
   }
 }
 
 void CMainWindow::saveFile() {
   QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "", "ASM Files (*.asm)");
   if (!fileName.isEmpty()) {
-    m_Disassembler->saveASMFile(fileName);
+    m_DisassemblerWidget->saveASMFile(fileName);
   }
 }

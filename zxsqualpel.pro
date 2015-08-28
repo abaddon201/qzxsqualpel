@@ -16,7 +16,6 @@ HEADERS += CAddr.h \
            CChunk.h \
            CChunkList.h \
            CCommand.h \
-           CDisassembler.h \
            CDisassemblerCoreZX.h \
            CLabel.h \
            CLabels.h \
@@ -25,13 +24,13 @@ HEADERS += CAddr.h \
            CReference.h \
            CWidgetChangeLabel.h \
            disassemble.h \
-           IDisassemblerCore.h
+           IDisassemblerCore.h \
+           CDisassemblerWidget.h
 SOURCES += CAddr.cpp \
            CByte.cpp \
            CChunk.cpp \
            CChunkList.cpp \
            CCommand.cpp \
-           CDisassembler.cpp \
            CDisassemblerCoreZX.cpp \
            CLabel.cpp \
            CLabels.cpp \
@@ -40,7 +39,8 @@ SOURCES += CAddr.cpp \
            CReference.cpp \
            CWidgetChangeLabel.cpp \
            disassemble.cpp \
-           main.cpp
+           main.cpp \
+          CDisassemblerWidget.cpp
 
 #win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgets
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgetsd

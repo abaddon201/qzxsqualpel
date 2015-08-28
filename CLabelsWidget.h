@@ -14,14 +14,17 @@
 #define CLABELSWIDGET_H
 
 #include <QTableWidget>
+#include "CDisassemblerWidget.h"
 
 class CLabelsWidget : public QTableWidget {
   Q_OBJECT
 public:
-  CLabelsWidget(QWidget* par);
+  CLabelsWidget(QWidget* par, CDisassemblerWidget* disasm);
   void refresh();
 public slots:
   void jumpToLabel(int, int);
+private:
+  CDisassemblerWidget* _disasm;
 };
 
 #endif

@@ -4,25 +4,24 @@
 #include <QMainWindow>
 #include <QListWidget>
 
-//#include "ui_CMainWindow.h"
-
-//#include "CHighlighter.h"
-#include "CDisassembler.h"
+#include "CDisassemblerWidget.h"
 #include "CLabelsWidget.h"
 
 
-class CMainWindow : public QMainWindow {
+class CMainWindow : public QMainWindow, public IGUIUpdater {
   Q_OBJECT
 public:
   CMainWindow();
   CLabelsWidget* labelsWidget() {
     return m_LabelsWidget;
   }
+
+  void updateWidgets() override;
 private:
   //Ui::CMainWindow ui;
   QListWidget* navigationStack;
 //  Highlighter* m_Highlighter;
-  CDisassembler* m_Disassembler;
+  CDisassemblerWidget* m_DisassemblerWidget;
   CLabelsWidget* m_LabelsWidget;
 
   void setupFileMenu();
