@@ -17,7 +17,7 @@
 
 void CChunk::addCrossRef(CAddr addr, CReference::Type type) {
   CReference ref(addr, type);
-  references.append(ref);
+  _references.append(ref);
 }
 
 void CChunk::appendCommand(CCommand cmd) {
@@ -31,10 +31,6 @@ CCommand CChunk::getCommand(int idx) const {
     throw int(666);
   }
   return m_Commands[idx];
-}
-
-CCommand CChunk::lastCommand() {
-  return m_Commands.last();
 }
 
 QString CChunk::setLabel(QString label, CReference::Type ref_type) {

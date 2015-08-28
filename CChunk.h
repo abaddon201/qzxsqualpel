@@ -17,6 +17,7 @@
 
 class CChunk {
 public:
+  using ReferencesList = QList<CReference>;
   enum class Type {
     UNKNOWN=-1,
     UNPARSED=0,
@@ -25,68 +26,74 @@ public:
     DATA_WORD=3,
     DATA_ARRAY=4
   };
-  QString comment;
-  QList<CReference> references;
 
-  CChunk(const CChunk &ch) {
-    makeCopy(ch);
-  }
   ~CChunk() {};
 
-  CChunk &operator=(const CChunk &ch) {
-    makeCopy(ch);
-    return *this;
-  }
+  CChunk(const CChunk &ch) {makeCopy(ch);}
+  CChunk &operator=(const CChunk &ch) { makeCopy(ch); return *this; }
 
   CChunk* splitAt(CAddr addr);
   void addCrossRef(CAddr addr, CReference::Type type);
+
   void appendCommand(CCommand cmd);
   CCommand getCommand(int idx) const;
-  CCommand lastCommand();
-  int commandsCount() {return m_Commands.count();}
+  CCommand lastCommand() const { return m_Commands.last(); }
+
+  int commandsCount() const {return m_Commands.count();}
   QList<CCommand> &commands() {return m_Commands;}
 
-  CAddr addr() {return m_StartingAddr;}
-  Type type() {return m_Type;}
+  CAddr addr() const {return m_StartingAddr;}
+  Type type() const {return m_Type;}
 
-  QString label() {return m_Label;}
+  QString label() const {return m_Label;}
   QString setLabel(QString label=QString(), CReference::Type=CReference::Type::JUMP);
   void changeLabel(QString label) {m_Label=label;}
+
+  ReferencesList& references() {return _references;}
+  QString comment() const {return _comment;}
 
   void setCursorEndPosition(int pos) {m_EndCursorPosition=pos;}
   void setCursorStartPosition(int pos) {m_StartCursorPosition=pos;}
   int cursorEndPosition() const {return m_EndCursorPosition;}
   int cursorStartPosition() const {return m_StartCursorPosition;}
 
-  bool isEmpty() {
-    if ((type()!=CChunk::Type::UNPARSED) && (type()!=CChunk::Type::UNKNOWN)) {
-      return false;
-    }
-    return true;
-  }
+  bool isEmpty() const { return !((type()!=CChunk::Type::UNPARSED) && (type()!=CChunk::Type::UNKNOWN)); }
 
 private:
   friend class CChunkList;
+
   CChunk() : m_Length(0) {};
   CChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN) : m_Type(type), m_StartingAddr(addr) {};
+
   void makeCopy(const CChunk &ch) {
     m_StartingAddr=ch.m_StartingAddr;
     m_Length=ch.m_Length;
-    comment=ch.comment;
+    _comment=ch._comment;
     m_Commands=ch.m_Commands;
-    references=ch.references;
+    _references=ch._references;
     m_Label=ch.m_Label;
     m_Type=ch.m_Type;
     m_StartCursorPosition=ch.m_StartCursorPosition;
     m_EndCursorPosition=ch.m_EndCursorPosition;
   }
 
+  ///@brief Комментарий для блока
+  QString _comment;
+  ///@brief Ссылки на блок
+  ReferencesList _references;
+  ///@brief Метка блока
   QString m_Label;
+  ///@brief Команды блока
   QList<CCommand> m_Commands;
+  ///@brief Тип блока
   Type m_Type;
+  ///@brief Адрес начала блока
   CAddr m_StartingAddr;
+  ///@brief Позиция курсора в редакторе
+  ///@bug Должны быть в другом месте
   int m_StartCursorPosition;
   int m_EndCursorPosition;
+  ///@brief Длина блока
   unsigned m_Length;
 };
 

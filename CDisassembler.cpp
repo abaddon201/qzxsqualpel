@@ -188,7 +188,7 @@ void CDisassembler::printCell(QTextCursor &cursor, QString text, int length) {
 }
 
 void CDisassembler::printReferences(QTextCursor &cursor, CChunk* chunk) {
-  if (chunk->references.count()==0) {
+  if (chunk->references().count()==0) {
     return;
   }
   int skip_len=m_CellLengthCommand+m_CellLengthArgs;
@@ -196,7 +196,7 @@ void CDisassembler::printReferences(QTextCursor &cursor, CChunk* chunk) {
 
   QList<CReference>::const_iterator it;
   int l=0;
-  for (it=chunk->references.begin(); it!=chunk->references.end(); ++it) {
+  for (it=chunk->references().begin(); it!=chunk->references().end(); ++it) {
     if (l==0) {
       printCell(cursor, QString(), skip_len);
       l=1;
@@ -207,7 +207,7 @@ void CDisassembler::printReferences(QTextCursor &cursor, CChunk* chunk) {
       CReference ref=*it;
       printCell(cursor, ref.toString(), m_CellLengthReference, m_CellFormatReference);
       ++it;
-      if (it==chunk->references.end()) {
+      if (it==chunk->references().end()) {
         return;
       }
     }
@@ -234,10 +234,10 @@ void CDisassembler::printChunkUnparsed(QTextCursor &cursor, CChunk* chunk) {
 void CDisassembler::printChunkCode(QTextCursor &cursor, CChunk* chunk) {
   if (!chunk->label().isEmpty()) {
     cursor.insertBlock();
-    if (!chunk->comment.isEmpty()) {
+    if (!chunk->comment().isEmpty()) {
       printCell(cursor, chunk->addr().toString(), m_CellLengthAddr, m_CellFormatAddr);
       printCell(cursor, QString(), m_CellLengthOpcodes, m_CellFormatOpcodes);
-      printCell(cursor, QString(";")+chunk->comment, m_CellLengthLabel, m_CellFormatChunkComment);
+      printCell(cursor, QString(";")+chunk->comment(), m_CellLengthLabel, m_CellFormatChunkComment);
       cursor.movePosition(QTextCursor::End);
     }
     printCell(cursor, chunk->addr().toString(), m_CellLengthAddr, m_CellFormatAddr);
