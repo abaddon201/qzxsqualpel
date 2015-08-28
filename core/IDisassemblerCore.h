@@ -38,7 +38,7 @@ public:
     JT_RET,
   };
 
-  IDisassemblerCore(IGUIUpdater* updater_) : updater{updater_} {}
+  IDisassemblerCore(IGUIUpdater* updater_, IDisassemblerCore* inst) : updater{updater_} {_inst=inst;}
   virtual ~IDisassemblerCore() {}
   virtual Type getLastCmdJumpType(CChunk* chunk, CAddr &jump_addr)=0;
   virtual int disassembleInstruction(CAddr addr)=0;
@@ -52,8 +52,10 @@ public:
   virtual void initialParse() = 0;
 
   virtual CByte getMemoryByte(CAddr addr) const = 0;
+  static IDisassemblerCore* inst() {return _inst;}
 protected:
   IGUIUpdater* updater;
+  static IDisassemblerCore* _inst;
 };
 
 #endif

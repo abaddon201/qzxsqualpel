@@ -6,7 +6,7 @@
 #include <QMenuBar>
 #include <QApplication>
 
-#include "CDisassemblerCoreZX.h"
+#include "zx/CDisassemblerCoreZX.h"
 
 void CMainWindow::updateWidgets() {
   m_DisassemblerWidget->refreshView();

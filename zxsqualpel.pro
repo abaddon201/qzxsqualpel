@@ -11,36 +11,37 @@ QMAKE_CXXFLAGS += -std=c++14
 
 
 # Input
-HEADERS += CAddr.h \
-           CByte.h \
-           CChunk.h \
-           CChunkList.h \
-           CCommand.h \
-           CDisassemblerCoreZX.h \
-           CLabel.h \
-           CLabels.h \
-           CLabelsWidget.h \
-           CMainWindow.h \
-           CReference.h \
-           CWidgetChangeLabel.h \
-           disassemble.h \
-           IDisassemblerCore.h \
-           CDisassemblerWidget.h
-SOURCES += CAddr.cpp \
-           CByte.cpp \
-           CChunk.cpp \
-           CChunkList.cpp \
-           CCommand.cpp \
-           CDisassemblerCoreZX.cpp \
-           CLabel.cpp \
-           CLabels.cpp \
-           CLabelsWidget.cpp \
-           CMainWindow.cpp \
-           CReference.cpp \
-           CWidgetChangeLabel.cpp \
-           disassemble.cpp \
+HEADERS += core/CAddr.h \
+           core/CByte.h \
+           core/CChunk.h \
+           core/CChunkList.h \
+           core/CCommand.h \
+           core/IDisassemblerCore.h \
+           core/CLabel.h \
+           core/CReference.h \
+           core/CLabels.h \
+           gui/CWidgetChangeLabel.h \
+           zx/CDisassemblerCoreZX.h \
+           zx/disassemble.h \
+           gui/CLabelsWidget.h \
+           gui/CMainWindow.h \
+           gui/CDisassemblerWidget.h
+SOURCES += core/CAddr.cpp \
+           core/CByte.cpp \
+           core/CChunk.cpp \
+           core/CLabel.cpp \
+           core/CCommand.cpp \
+           core/CReference.cpp \
+           core/CChunkList.cpp \
+           core/CLabels.cpp \
+          core/IDisassemblerCore.cpp \
+           zx/CDisassemblerCoreZX.cpp \
+           zx/disassemble.cpp \
+           gui/CWidgetChangeLabel.cpp \
+           gui/CLabelsWidget.cpp \
+           gui/CMainWindow.cpp \
+           gui/CDisassemblerWidget.cpp \
            main.cpp \
-          CDisassemblerWidget.cpp
 
 #win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgets
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgetsd

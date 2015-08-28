@@ -6,10 +6,10 @@
 #include <QList>
 #include <QPlainTextEdit>
 
-#include "CChunkList.h"
-#include "CLabel.h"
-#include "CLabels.h"
-#include "IDisassemblerCore.h"
+#include "core/CChunkList.h"
+#include "core/CLabel.h"
+#include "core/CLabels.h"
+#include "core/IDisassemblerCore.h"
 
 class CMainWindow;
 
@@ -22,21 +22,6 @@ public:
   void openRAWFile(QString fileName);
   void saveASMFile(QString fileName);
   void keyPressEvent ( QKeyEvent* );
-
-/*  static CDisassemblerWidget* inst() {
-    if (m_Inst==0) {
-      //new CDisassembler;
-      throw int(666);
-    }
-    return m_Inst;
-  }
-*/
-  static IDisassemblerCore* core_inst() {
-    if (m_DisassemblerCore==0) {
-      throw int(667);
-    }
-    return m_DisassemblerCore;
-  }
 
   ///@brief Показать на экране код с меткой под номером
   void navigateToLabel(int num);
@@ -57,8 +42,6 @@ private:
 
   void changeNameUnderCursor();
   void makeCodeUnderCursor();
-
-  static CDisassemblerWidget* m_Inst;
 
   QTextCharFormat m_CellFormatAddr;
   QTextCharFormat m_CellFormatOpcodes;
@@ -88,7 +71,7 @@ private:
   int m_ReferencesOnLine;
 
   CMainWindow* m_MainWindow;
-  static IDisassemblerCore* m_DisassemblerCore;
+  IDisassemblerCore* m_DisassemblerCore;
 };
 
 #endif

@@ -11,7 +11,8 @@
 //
 
 #include "CReference.h"
-#include "CDisassemblerWidget.h"
+#include "CLabels.h"
+#include "IDisassemblerCore.h"
 
 CReference::CReference(CAddr addr_, Type type_)
   : addr(addr_), type(type_) {
@@ -19,7 +20,7 @@ CReference::CReference(CAddr addr_, Type type_)
 
 QString CReference::toString() {
   QString res="; XRef: ";
-  res+=CDisassemblerWidget::core_inst()->labels().offsetInLabel(addr);
+  res+=IDisassemblerCore::inst()->labels().offsetInLabel(addr);
   switch (type) {
   case Type::JUMP:
     res+="/j";

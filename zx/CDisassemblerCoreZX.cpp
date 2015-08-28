@@ -14,11 +14,10 @@
 #include "disassemble.h"
 
 #include "CDisassemblerCoreZX.h"
-#include "CDisassemblerWidget.h"
 
 //compatibility hack for fuse disassembler
 unsigned char readbyte_internal(unsigned short addr) {
-  return CDisassemblerWidget::core_inst()->getMemoryByte(addr);
+  return IDisassemblerCore::inst()->getMemoryByte(addr);
 }
 
 IDisassemblerCore::Type CDisassemblerCoreZX::getLastCmdJumpType(CChunk* chunk, CAddr &jump_addr) {

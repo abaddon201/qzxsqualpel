@@ -14,14 +14,15 @@
 
 #include "CLabels.h"
 #include "CChunk.h"
-#include "CDisassemblerWidget.h"
+#include "CChunkList.h"
+#include "IDisassemblerCore.h"
 
 QString CLabels::offsetInLabel(CAddr &addr) const {
   if (count()==0) {
     qDebug()<<"no labels";
     return addr.toString();
   }
-  CChunk* chunk=CDisassemblerWidget::core_inst()->chunks().getChunkContains(addr);
+  CChunk* chunk=IDisassemblerCore::inst()->chunks().getChunkContains(addr);
   if (chunk==0) {
     qDebug()<<"no label for addr";
     return addr.toString();

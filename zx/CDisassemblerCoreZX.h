@@ -13,14 +13,14 @@
 #ifndef CDISASSEMBLERCOREZX_H
 #define CDISASSEMBLERCOREZX_H
 
-#include "IDisassemblerCore.h"
+#include "core/IDisassemblerCore.h"
 
-#include "CChunkList.h"
-#include "CLabels.h"
+#include "core/CChunkList.h"
+#include "core/CLabels.h"
 
 class CDisassemblerCoreZX : public IDisassemblerCore {
 public:
-  CDisassemblerCoreZX(IGUIUpdater* updater) : IDisassemblerCore{updater} {}
+  CDisassemblerCoreZX(IGUIUpdater* updater) : IDisassemblerCore{updater, this} {}
 
   virtual Type getLastCmdJumpType(CChunk* chunk, CAddr &jump_addr) override;
   virtual int disassembleInstruction(CAddr addr) override;

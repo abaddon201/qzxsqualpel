@@ -11,9 +11,6 @@
 #include "CWidgetChangeLabel.h"
 
 
-CDisassemblerWidget* CDisassemblerWidget::m_Inst = 0;
-IDisassemblerCore* CDisassemblerWidget::m_DisassemblerCore = 0;
-
 CDisassemblerWidget::CDisassemblerWidget()
   : QPlainTextEdit() {
   init();
@@ -32,7 +29,6 @@ void CDisassemblerWidget::init() {
   font.setFixedPitch(true);
   font.setPointSize(10);
   setFont(font);
-  m_Inst=this;
 
   m_CellFormatAddr.setForeground(QColor("#000000"));
   m_CellFormatOpcodes.setForeground(QColor("#004000"));

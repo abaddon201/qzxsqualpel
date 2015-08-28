@@ -12,7 +12,7 @@
 
 #include "CLabelsWidget.h"
 
-#include "CLabel.h"
+#include "core/CLabel.h"
 #include "CDisassemblerWidget.h"
 
 CLabelsWidget::CLabelsWidget(QWidget* par, CDisassemblerWidget* disasm)
@@ -24,7 +24,7 @@ CLabelsWidget::CLabelsWidget(QWidget* par, CDisassemblerWidget* disasm)
 
 void CLabelsWidget::refresh() {
   clear();
-  QList<CLabel> my_labels=_disasm->core_inst()->labels();
+  QList<CLabel> my_labels=IDisassemblerCore::inst()->labels();
   setRowCount(my_labels.count());
   setColumnCount(2);
   int i=0;
