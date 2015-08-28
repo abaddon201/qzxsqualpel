@@ -17,69 +17,36 @@
 
 class CAddr {
 public:
-  CAddr(unsigned offs=0, unsigned seg=0) : m_Offset(offs), m_Segment(seg) {}
-  bool operator==(const CAddr &s) const {
-    if ((m_Offset==s.m_Offset) && (m_Segment==s.m_Segment)) {
-      return true;
-    }
-    return false;
-  }
-  bool operator!=(const CAddr &s) const {
-    if ((m_Offset!=s.m_Offset) || (m_Segment!=s.m_Segment)) {
-      return true;
-    }
-    return false;
-  }
-  bool operator>=(const CAddr &s) const {
-    if ((m_Offset>=s.m_Offset) && (m_Segment==s.m_Segment)) {
-      return true;
-    }
-    return false;
-  }
-  bool operator<=(const CAddr &s) const {
-    if ((m_Offset<=s.m_Offset) && (m_Segment==s.m_Segment)) {
-      return true;
-    }
-    return false;
-  }
-  bool operator>(const CAddr &s) const {
-    if ((m_Offset>s.m_Offset) && (m_Segment==s.m_Segment)) {
-      return true;
-    }
-    return false;
-  }
-  bool operator<(const CAddr &s) const {
-    if ((m_Offset>s.m_Offset) && (m_Segment==s.m_Segment)) {
-      return true;
-    }
-    return false;
-  }
-  CAddr &operator++() {
-    m_Offset++;
-    return*this;
-  }
-  CAddr &operator--() {
-    m_Offset--;
-    return*this;
-  }
-  CAddr operator+(unsigned offs) {
-    return m_Offset+offs;
-  }
-  CAddr operator-(const CAddr &raddr) {
-    return m_Offset-raddr.m_Offset;
-  }
-  CAddr &operator+=(unsigned offs) {
-    m_Offset+=offs;
-    return *this;
-  }
-  unsigned offset() const {
-    return m_Offset;
-  }
+  CAddr(unsigned long long offs=0, unsigned long long seg=0) : m_Offset{offs}, m_Segment{seg} {}
+
+  unsigned long long offset() const { return m_Offset; }
+  unsigned long long segment() const { return m_Segment; }
+
+  bool operator==(const CAddr &s) const { return ((m_Offset==s.m_Offset) && (m_Segment==s.m_Segment)); }
+  bool operator!=(const CAddr &s) const { return ((m_Offset!=s.m_Offset) || (m_Segment!=s.m_Segment)); }
+  ///@bug не учитывается сегмент в сравнениях больше/меньше
+  bool operator>=(const CAddr &s) const { return ((m_Offset>=s.m_Offset) && (m_Segment==s.m_Segment)); }
+  bool operator<=(const CAddr &s) const { return ((m_Offset<=s.m_Offset) && (m_Segment==s.m_Segment)); }
+  bool operator>(const CAddr &s) const { return ((m_Offset>s.m_Offset) && (m_Segment==s.m_Segment)); }
+  bool operator<(const CAddr &s) const { return ((m_Offset>s.m_Offset) && (m_Segment==s.m_Segment)); }
+
+  CAddr &operator++() { m_Offset++; return*this;}
+  CAddr &operator--() { m_Offset--; return*this;}
+
+  CAddr operator+(unsigned long long offs) {return m_Offset+offs;}
+  CAddr operator-(unsigned long long offs) {return m_Offset-offs;}
+  CAddr operator-(const CAddr &raddr) { return m_Offset-raddr.m_Offset; }
+  CAddr operator+(const CAddr &raddr) { return m_Offset+raddr.m_Offset; }
+
+  CAddr &operator+=(unsigned long long offs) { m_Offset+=offs; return *this; }
+  CAddr &operator-=(unsigned long long offs) { m_Offset-=offs; return *this; }
+
   QString toString() const;
   QString offsetString() const;
+
 private:
-  unsigned m_Offset;
-  unsigned m_Segment;
+  unsigned long long m_Offset;
+  unsigned long long m_Segment;
 };
 
 #endif
