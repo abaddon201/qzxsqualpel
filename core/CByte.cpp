@@ -11,13 +11,9 @@
 //
 
 #include "CByte.h"
+#include "utils.h"
 
-QString CByte::toString() const {
-  QString tmp2=QString::number(m_Byte, 16);
-  int dop=2-tmp2.length();
-  while (dop) {
-    tmp2.insert(0, "0");
-    dop--;
-  }
-  return tmp2.toUpper();
+std::string CByte::toString() const {
+  std::string tmp2=hexify<unsigned char>(m_Byte, 2);
+  return tmp2/*.toUpper()*/;
 }

@@ -13,14 +13,14 @@
 #ifndef CLABELS_H
 #define CLABELS_H
 
-#include <QList>
+#include <list>
 #include "CLabel.h"
 #include "CChunk.h"
 
-class CLabels : public QList<CLabel> {
+class CLabels : public std::vector<CLabel> {
 public:
-  QString offsetInLabel(CAddr &addr) const;
-  void changeLabel(CChunk* chunk, QString new_label);
+  std::string offsetInLabel(CAddr &addr) const;
+  void changeLabel(CChunk* chunk, std::string new_label);
 };
 
 #endif

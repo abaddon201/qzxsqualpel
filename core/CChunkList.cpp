@@ -82,6 +82,7 @@ void CChunkList::clear() {
   }
 }
 
+#include "debug_printers.h"
 void CChunkList::printDebug() const {
   CAddr addr;
   do {

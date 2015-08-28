@@ -9,7 +9,7 @@
 #include <QPainter>
 #include "CMainWindow.h"
 #include "CWidgetChangeLabel.h"
-
+#include "core/debug_printers.h"
 
 CDisassemblerWidget::CDisassemblerWidget()
   : QPlainTextEdit() {
@@ -50,9 +50,9 @@ void CDisassemblerWidget::init() {
   m_ReferencesOnLine=3;
 }
 
-void CDisassemblerWidget::navigateToLabel(int num) {
-  if (m_DisassemblerCore->labels().count()>num) {
-    const CLabel &label=m_DisassemblerCore->labels().at(num);
+void CDisassemblerWidget::navigateToLabel(size_t num) {
+  if (m_DisassemblerCore->labels().size()>num) {
+    const CLabel &label=m_DisassemblerCore->labels()[num];
     qDebug()<< label;
     const CChunk* chunk = m_DisassemblerCore->chunks().getChunkContains(label.addr);
     QTextCursor cursor(textCursor());
@@ -116,9 +116,9 @@ void CDisassemblerWidget::changeNameUnderCursor() {
         || (chunk->type()==CChunk::Type::DATA_ARRAY)
         || (chunk->type()==CChunk::Type::DATA_WORD)
        ) {
-      CWidgetChangeLabel dlg(this, chunk->label());
+      CWidgetChangeLabel dlg(this, QString::fromStdString(chunk->label()));
       if (dlg.exec()) {
-        m_DisassemblerCore->labels().changeLabel(chunk, dlg.label());
+        m_DisassemblerCore->labels().changeLabel(chunk, dlg.label().toStdString());
         refreshView();
       }
     }
@@ -165,39 +165,39 @@ void CDisassemblerWidget::saveASMFile(QString fileName) {
 #endif
 }
 
-void CDisassemblerWidget::printCell(QTextCursor &cursor, QString text, int length, QTextCharFormat fmt) {
+void CDisassemblerWidget::printCell(QTextCursor &cursor, std::string text, int length, QTextCharFormat fmt) {
   int spclen=length-text.length();
   if (spclen<0) {
     spclen=0;
   }
-  QString spcline(spclen, ' ');
-  cursor.insertText(text+spcline, fmt);
+  std::string spcline(spclen, ' ');
+  cursor.insertText(QString::fromStdString(text+spcline), fmt);
 }
 
-void CDisassemblerWidget::printCell(QTextCursor &cursor, QString text, int length) {
+void CDisassemblerWidget::printCell(QTextCursor &cursor, std::string text, int length) {
   int spclen=length-text.length();
   if (spclen<0) {
     spclen=0;
   }
-  QString spcline(spclen, ' ');
-  cursor.insertText(text+spcline);
+  std::string spcline(spclen, ' ');
+  cursor.insertText(QString::fromStdString(text+spcline));
 }
 
 void CDisassemblerWidget::printReferences(QTextCursor &cursor, CChunk* chunk) {
-  if (chunk->references().count()==0) {
+  if (chunk->references().size()==0) {
     return;
   }
   int skip_len=m_CellLengthCommand+m_CellLengthArgs;
   int skip_len2=m_CellLengthAddr+m_CellLengthOpcodes+m_CellLengthLabel+m_CellLengthCommand+m_CellLengthArgs;
 
-  QList<CReference>::const_iterator it;
+  CChunk::ReferencesList::const_iterator it;
   int l=0;
   for (it=chunk->references().begin(); it!=chunk->references().end(); ++it) {
     if (l==0) {
-      printCell(cursor, QString(), skip_len);
+      printCell(cursor, std::string(), skip_len);
       l=1;
     } else {
-      printCell(cursor, QString(), skip_len2);
+      printCell(cursor, std::string(), skip_len2);
     }
     for (int i=0; i<m_ReferencesOnLine; i++) {
       CReference ref=*it;
@@ -217,27 +217,27 @@ void CDisassemblerWidget::printChunkUnparsed(QTextCursor &cursor, CChunk* chunk)
   CCommand cmd=chunk->getCommand(0);
   printCell(cursor, cmd.addr.toString(), m_CellLengthAddr, m_CellFormatAddr);
   printCell(cursor, cmd.getOpcodesString(), m_CellLengthOpcodes, m_CellFormatOpcodes);
-  printCell(cursor, QString(), m_CellLengthLabel, m_CellFormatLabel);
+  printCell(cursor, std::string(), m_CellLengthLabel, m_CellFormatLabel);
   printCell(cursor, cmd.command, m_CellLengthCommand, m_CellFormatCommand);
   printCell(cursor, cmd.getArgsString(), m_CellLengthArgs, m_CellFormatArgs);
-  if (!cmd.comment.isEmpty()) {
-    printCell(cursor, QString(";")+cmd.comment, m_CellLengthCmdComment, m_CellFormatCmdComment);
+  if (!cmd.comment.empty()) {
+    printCell(cursor, std::string(";")+cmd.comment, m_CellLengthCmdComment, m_CellFormatCmdComment);
   }
 
   cursor.movePosition(QTextCursor::End);
 }
 
 void CDisassemblerWidget::printChunkCode(QTextCursor &cursor, CChunk* chunk) {
-  if (!chunk->label().isEmpty()) {
+  if (!chunk->label().empty()) {
     cursor.insertBlock();
-    if (!chunk->comment().isEmpty()) {
+    if (!chunk->comment().empty()) {
       printCell(cursor, chunk->addr().toString(), m_CellLengthAddr, m_CellFormatAddr);
-      printCell(cursor, QString(), m_CellLengthOpcodes, m_CellFormatOpcodes);
-      printCell(cursor, QString(";")+chunk->comment(), m_CellLengthLabel, m_CellFormatChunkComment);
+      printCell(cursor, std::string(), m_CellLengthOpcodes, m_CellFormatOpcodes);
+      printCell(cursor, std::string(";")+chunk->comment(), m_CellLengthLabel, m_CellFormatChunkComment);
       cursor.movePosition(QTextCursor::End);
     }
     printCell(cursor, chunk->addr().toString(), m_CellLengthAddr, m_CellFormatAddr);
-    printCell(cursor, QString(), m_CellLengthOpcodes, m_CellFormatOpcodes);
+    printCell(cursor, std::string(), m_CellLengthOpcodes, m_CellFormatOpcodes);
     printCell(cursor, chunk->label()+":", m_CellLengthLabel, m_CellFormatLabel);
     printReferences(cursor, chunk);
     cursor.movePosition(QTextCursor::End);
@@ -246,11 +246,11 @@ void CDisassemblerWidget::printChunkCode(QTextCursor &cursor, CChunk* chunk) {
     cursor.insertBlock();
     printCell(cursor, cmd.addr.toString(), m_CellLengthAddr, m_CellFormatAddr);
     printCell(cursor, cmd.getOpcodesString(), m_CellLengthOpcodes, m_CellFormatOpcodes);
-    printCell(cursor, QString(), m_CellLengthLabel, m_CellFormatLabel);
+    printCell(cursor, std::string(), m_CellLengthLabel, m_CellFormatLabel);
     printCell(cursor, cmd.command, m_CellLengthCommand, m_CellFormatCommand);
     printCell(cursor, cmd.getArgsString(), m_CellLengthArgs, m_CellFormatArgs);
-    if (!cmd.comment.isEmpty()) {
-      printCell(cursor, QString(";")+cmd.comment, m_CellLengthCmdComment, m_CellFormatCmdComment);
+    if (!cmd.comment.empty()) {
+      printCell(cursor, std::string(";")+cmd.comment, m_CellLengthCmdComment, m_CellFormatCmdComment);
     }
     cursor.movePosition(QTextCursor::End);
   }

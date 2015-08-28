@@ -9,11 +9,14 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-#include <QDebug>
-
+#include "core/debug_printers.h"
+#include "core/utils.h"
 #include "disassemble.h"
 
 #include "CDisassemblerCoreZX.h"
+
+#include <vector>
+#include <string>
 
 //compatibility hack for fuse disassembler
 unsigned char readbyte_internal(unsigned short addr) {
@@ -22,32 +25,32 @@ unsigned char readbyte_internal(unsigned short addr) {
 
 IDisassemblerCore::Type CDisassemblerCoreZX::getLastCmdJumpType(CChunk* chunk, CAddr &jump_addr) {
   CCommand cmd=chunk->lastCommand();
-  if (cmd.command.toLower()=="call") {
+  if (cmd.command=="CALL") {
     jump_addr=cmd.getJmpAddr();
     return Type::JT_CALL;
   }
-  if (((cmd.command.toLower()=="jr") || (cmd.command.toLower()=="jp")) && (cmd.arg2.isEmpty())) {
-    if (cmd.arg1.startsWith("(") || cmd.arg1.toLower().contains("ix") || cmd.arg1.toLower().contains("iy") || cmd.arg1.toLower().contains("hl")) {
+  if (((cmd.command=="JR") || (cmd.command=="JP")) && (cmd.arg2.empty())) {
+    if (cmd.arg1[0]=='"' || contains(cmd.arg1, "IX") || contains(cmd.arg1, "IY") || contains(cmd.arg1, "HL")) {
       //jump to (HL) or (IX) or (IY)
       return Type::JT_RET;
     }
     jump_addr=cmd.getJmpAddr();
     return Type::JT_JUMP;
   }
-  if (((cmd.command.toLower()=="jr") || (cmd.command.toLower()=="jp")) && (!cmd.arg2.isEmpty())) {
+  if (((cmd.command=="JR") || (cmd.command=="JP")) && (!cmd.arg2.empty())) {
     jump_addr=cmd.getJmpAddr();
     return Type::JT_COND_JUMP;
   }
-  if ((cmd.command.toLower()=="ret") && (!cmd.arg1.isEmpty())) {
+  if ((cmd.command=="RET") && (!cmd.arg1.empty())) {
     return Type::JT_COND_RET;
   }
-  if ((cmd.command.toLower()=="ret") && (cmd.arg1.isEmpty())) {
+  if ((cmd.command=="RET") && (cmd.arg1.empty())) {
     return Type::JT_RET;
   }
-  if (cmd.command.toLower()=="reti") {
+  if (cmd.command=="RETI") {
     return Type::JT_RET;
   }
-  if (cmd.command.toLower()=="retn") {
+  if (cmd.command=="RETN") {
     return Type::JT_RET;
   }
   return Type::JT_NONE;
@@ -59,7 +62,7 @@ int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
   debugger_disassemble( tbuff, 128, &len, addr.offset() );
 
   if (len) {
-    QString buff{tbuff};
+    std::string buff{tbuff};
     //initialize chunk
     CChunk* chunk_i=0;
     chunk_i=m_Chunks.getChunk(addr);
@@ -120,25 +123,25 @@ int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
     }
     CCommand cmd;
     cmd.addr = addr;
-    QStringList strlist=buff.split(" ");
+    std::vector<std::string> strlist=split(buff,' ');
     cmd.command=strlist[0];
     qDebug()<<"strlist1="<<strlist;
-    if (strlist.count()>1) {
+    if (strlist.size()>1) {
       //has args
-      QStringList args=strlist[1].split(",");
+      std::vector<std::string> args=split(strlist[1], ',');
       qDebug()<<"argsstrlist1="<<args;
       cmd.arg1=args[0];
-      if (args.count()==2) {
+      if (args.size()==2) {
         cmd.arg2=args[1];
         qDebug()<<"arg2="<<cmd.arg2;
       }
     }
-    cmd.opcodes.append(opcode);
+    cmd.opcodes.push_back(opcode);
     qDebug()<<"opcode appended";
     if (chunks.count()) {
       foreach (const CChunk &cc, chunks) {
         //becourse we works only from undefined chunks, we able to do this like that
-        cmd.opcodes.append(cc.getCommand(0).opcodes[0]);
+        cmd.opcodes.push_back(cc.getCommand(0).opcodes[0]);
       }
     }
     qDebug()<<"all opcodes appended";
@@ -205,7 +208,7 @@ void CDisassemblerCoreZX::disassembleBlock(CAddr addr) {
 }
 
 bool CDisassemblerCoreZX::labelPresent(CAddr addr) const {
-  if (m_Labels.count()) {
+  if (m_Labels.size()) {
     foreach (CLabel lbl, m_Labels) {
       if (lbl.addr==addr) {
         return true;
@@ -228,15 +231,15 @@ void CDisassemblerCoreZX::makeJump(CAddr from_addr, CAddr jump_addr, CReference:
   CChunk* jmp_chunk=m_Chunks.getChunk(jump_addr);
   if (jmp_chunk) {
     jmp_chunk->addCrossRef(from_addr, ref_type);
-    QString lbl;
-    if (jmp_chunk->label().isEmpty()) {
-      lbl=jmp_chunk->setLabel(QString(), ref_type);
+    std::string lbl;
+    if (jmp_chunk->label().empty()) {
+      lbl=jmp_chunk->setLabel(std::string(), ref_type);
     } else {
       lbl=jmp_chunk->label();
     }
     if (!labelPresent(jump_addr)) {
       CLabel label(jump_addr, lbl);
-      m_Labels.append(label);
+      m_Labels.push_back(label);
     }
   } else {
     qDebug()<<"Split chunk at jump";
@@ -254,15 +257,15 @@ void CDisassemblerCoreZX::makeJump(CAddr from_addr, CAddr jump_addr, CReference:
     }
     qDebug()<<"jmp_chunk:addr"<<jmp_chunk->addr().toString();
     jmp_chunk->addCrossRef(from_addr, ref_type);
-    QString lbl;
-    if (jmp_chunk->label().isEmpty()) {
-      lbl=jmp_chunk->setLabel(QString(), ref_type);
+    std::string lbl;
+    if (jmp_chunk->label().empty()) {
+      lbl=jmp_chunk->setLabel(std::string(), ref_type);
     } else {
       lbl=jmp_chunk->label();
     }
     if (!labelPresent(jump_addr)) {
       CLabel label(jump_addr, lbl);
-      m_Labels.append(label);
+      m_Labels.push_back(label);
     }
   }
 }
@@ -283,7 +286,7 @@ void CDisassemblerCoreZX::initialParse() {
     CCommand cmd;
     cmd.command="db";
     cmd.addr = i;
-    cmd.opcodes.append(byte);
+    cmd.opcodes.push_back(byte);
     cmd.arg1=byte.toString();
     chunk->appendCommand(cmd);
   }

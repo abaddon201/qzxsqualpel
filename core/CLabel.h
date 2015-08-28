@@ -17,7 +17,7 @@
 
 struct CLabel {
   CLabel() {}
-  CLabel(CAddr addr, QString name) : name(name), addr(addr) {}
+  CLabel(CAddr addr, std::string name) : name(name), addr(addr) {}
 
   CLabel(const CLabel &s) {
     addr=s.addr;
@@ -30,13 +30,8 @@ struct CLabel {
   }
   ~CLabel() {}
 
-  QString name;
+  std::string name;
   CAddr addr;
 };
-
-#include <QDebug>
-inline void operator<<(QDebug out, CLabel lab) {
-  out<<"Label: Name='"<<lab.name<<"', addr="<<lab.addr.toString();
-}
 
 #endif

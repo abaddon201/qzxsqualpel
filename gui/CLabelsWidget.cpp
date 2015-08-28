@@ -24,21 +24,21 @@ CLabelsWidget::CLabelsWidget(QWidget* par, CDisassemblerWidget* disasm)
 
 void CLabelsWidget::refresh() {
   clear();
-  QList<CLabel> my_labels=IDisassemblerCore::inst()->labels();
-  setRowCount(my_labels.count());
+  CLabels my_labels=IDisassemblerCore::inst()->labels();
+  setRowCount(my_labels.size());
   setColumnCount(2);
   int i=0;
   QStringList strlist;
   strlist<<tr("Name")<<tr("Address");
   setHorizontalHeaderLabels(strlist);
   setSortingEnabled(false);
-  if (my_labels.count()) {
-    QList<CLabel>::const_iterator it;
+  if (my_labels.size()) {
+    CLabels::const_iterator it;
     for (it=my_labels.begin(); it!=my_labels.end(); ++it) {
       CLabel lbl=*it;
-      QTableWidgetItem* nameItem = new QTableWidgetItem(lbl.name);
+      QTableWidgetItem* nameItem = new QTableWidgetItem(QString::fromStdString(lbl.name));
       setItem(i, 0, nameItem);
-      QTableWidgetItem* addrItem = new QTableWidgetItem(lbl.addr.toString());
+      QTableWidgetItem* addrItem = new QTableWidgetItem(QString::fromStdString(lbl.addr.toString()));
       setItem(i, 1, addrItem);
       i++;
     }

@@ -25,7 +25,7 @@ struct CReference {
     WRITE_WORD
   };
   CReference(CAddr addr_, Type type_);
-  QString toString();
+  std::string toString();
 
   CAddr addr;
   Type type;

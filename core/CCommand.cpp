@@ -13,32 +13,32 @@
 #include "CCommand.h"
 
 CAddr CCommand::getJmpAddr() const {
-  if (arg2.isEmpty()) {
+  if (arg2.empty()) {
     //get from arg1
-    return arg1.toInt(0, 16);
+    return std::stoi(arg1, nullptr, 16);
   } else {
     //get from arg2
-    return arg2.toInt(0, 16);
+    return std::stoi(arg2, nullptr, 16);
   }
 }
 
-QString CCommand::getArgsString() const {
-  if (arg1.isEmpty()) {
-    return QString();
+std::string CCommand::getArgsString() const {
+  if (arg1.empty()) {
+    return std::string();
   }
-  if (arg2.isEmpty()) {
-    return arg1.toUpper();
+  if (arg2.empty()) {
+    return arg1; //std::toupper(arg1);
   }
-  return arg1.toUpper()+QString(", ")+arg2.toUpper();
+//  return arg1.toUpper()+", "+arg2.toUpper();
+  return arg1+", "+arg2;
 }
 
-QString CCommand::getOpcodesString() const {
-  QString tmp;
-  QString tmp2;
-  foreach (CByte byte, opcodes) {
+std::string CCommand::getOpcodesString() const {
+  std::string tmp;
+  std::string tmp2;
+  for (CByte byte: opcodes) {
     tmp2=byte.toString();
     tmp+=tmp2+" ";
   }
-  return tmp.toUpper();
+  return tmp;
 }
-

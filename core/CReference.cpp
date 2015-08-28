@@ -18,8 +18,8 @@ CReference::CReference(CAddr addr_, Type type_)
   : addr(addr_), type(type_) {
 }
 
-QString CReference::toString() {
-  QString res="; XRef: ";
+std::string CReference::toString() {
+  std::string res="; XRef: ";
   res+=IDisassemblerCore::inst()->labels().offsetInLabel(addr);
   switch (type) {
   case Type::JUMP:

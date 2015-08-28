@@ -13,14 +13,14 @@
 #ifndef CCOMMAND_H
 #define CCOMMAND_H
 
-#include <QList>
-#include <QString>
-
 #include "CByte.h"
 #include "CAddr.h"
 
+#include <vector>
+
 ///@brief Структура описывающая одну команду ассемблера
 struct CCommand {
+  using OpcodesList = std::vector<CByte>;
   enum class ArgType {
     ARG_UNKNOWN=0,
     ARG_REGISTER=1,
@@ -31,11 +31,11 @@ struct CCommand {
     ARG_FLAG=6
   };
 
-  QList<CByte> opcodes;
-  QString command;
-  QString arg1;
-  QString arg2;
-  QString comment;
+  OpcodesList opcodes;
+  std::string command;
+  std::string arg1;
+  std::string arg2;
+  std::string comment;
   CAddr addr;
 
   CCommand() {}
@@ -58,10 +58,10 @@ struct CCommand {
   }
 
   ///@brief Возвращает аргументы команды в виде строки
-  QString getArgsString() const;
+  std::string getArgsString() const;
   ///@brief Возвращает опкоды команды в виде строки
   /// @todo стоит добавить ограничение на кол-во опкодов
-  QString getOpcodesString() const;
+  std::string getOpcodesString() const;
   ///@brief Возвращает адрес перехода команды (первый либо второй аргумент)
   CAddr getJmpAddr() const;
 };

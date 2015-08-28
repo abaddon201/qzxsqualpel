@@ -17,7 +17,8 @@
 
 class CChunk {
 public:
-  using ReferencesList = QList<CReference>;
+  using ReferencesList = std::vector<CReference>;
+  using CommandsList = std::vector<CCommand>;
   enum class Type {
     UNKNOWN=-1,
     UNPARSED=0,
@@ -37,20 +38,20 @@ public:
 
   void appendCommand(CCommand cmd);
   CCommand getCommand(int idx) const;
-  CCommand lastCommand() const { return m_Commands.last(); }
+  CCommand lastCommand() const { return m_Commands.back(); }
 
-  int commandsCount() const {return m_Commands.count();}
-  QList<CCommand> &commands() {return m_Commands;}
+  int commandsCount() const {return m_Commands.size();}
+  CommandsList &commands() {return m_Commands;}
 
   CAddr addr() const {return m_StartingAddr;}
   Type type() const {return m_Type;}
 
-  QString label() const {return m_Label;}
-  QString setLabel(QString label=QString(), CReference::Type=CReference::Type::JUMP);
-  void changeLabel(QString label) {m_Label=label;}
+  std::string label() const {return m_Label;}
+  std::string setLabel(std::string label=std::string(), CReference::Type=CReference::Type::JUMP);
+  void changeLabel(std::string label) {m_Label=label;}
 
   ReferencesList& references() {return _references;}
-  QString comment() const {return _comment;}
+  std::string comment() const {return _comment;}
 
   void setCursorEndPosition(int pos) {m_EndCursorPosition=pos;}
   void setCursorStartPosition(int pos) {m_StartCursorPosition=pos;}
@@ -78,13 +79,13 @@ private:
   }
 
   ///@brief Комментарий для блока
-  QString _comment;
+  std::string _comment;
   ///@brief Ссылки на блок
   ReferencesList _references;
   ///@brief Метка блока
-  QString m_Label;
+  std::string m_Label;
   ///@brief Команды блока
-  QList<CCommand> m_Commands;
+  CommandsList m_Commands;
   ///@brief Тип блока
   Type m_Type;
   ///@brief Адрес начала блока
@@ -96,8 +97,5 @@ private:
   ///@brief Длина блока
   unsigned m_Length;
 };
-
-class QDebug;
-extern QDebug operator<<(QDebug out, CChunk::Type t);
 
 #endif

@@ -10,39 +10,39 @@
 //
 //
 
-#include <QDebug>
-
 #include "CLabels.h"
 #include "CChunk.h"
 #include "CChunkList.h"
 #include "IDisassemblerCore.h"
 
-QString CLabels::offsetInLabel(CAddr &addr) const {
-  if (count()==0) {
-    qDebug()<<"no labels";
+#include "debug_printers.h"
+
+std::string CLabels::offsetInLabel(CAddr &addr) const {
+  if (size()==0) {
+    Debug()<<"no labels";
     return addr.toString();
   }
   CChunk* chunk=IDisassemblerCore::inst()->chunks().getChunkContains(addr);
   if (chunk==0) {
-    qDebug()<<"no label for addr";
+    Debug()<<"no label for addr";
     return addr.toString();
   }
   CAddr ch_addr=chunk->addr();
-  qDebug()<<"addr:"<<ch_addr.toString();
-  QString lbl=chunk->label();
-  if (lbl.isEmpty()) {
-    qDebug()<<"no label for chunk";
+  Debug()<<"addr:"<<ch_addr.toString();
+  std::string lbl=chunk->label();
+  if (lbl.empty()) {
+    Debug()<<"no label for chunk";
     return addr.toString();
   }
   CAddr delta=addr-ch_addr;
   //unsigned delta=;
-  return lbl+"+"+QString::number(delta.offset(), 10);
+  return lbl+"+"+std::to_string(delta.offset());
 }
 
 
-void CLabels::changeLabel(CChunk* chunk, QString new_label) {
+void CLabels::changeLabel(CChunk* chunk, std::string new_label) {
   chunk->changeLabel(new_label);
-  QList<CLabel>::iterator it;
+  CLabels::iterator it;
   for (it=begin(); it!=end(); ++it) {
     CLabel &lbl=*it;
     if (lbl.addr==chunk->addr()) {
@@ -52,5 +52,5 @@ void CLabels::changeLabel(CChunk* chunk, QString new_label) {
     }
   }
   CLabel lbl(chunk->addr(), new_label);
-  append(lbl);
+  push_back(lbl);
 }

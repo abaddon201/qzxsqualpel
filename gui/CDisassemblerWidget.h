@@ -24,7 +24,7 @@ public:
   void keyPressEvent ( QKeyEvent* );
 
   ///@brief Показать на экране код с меткой под номером
-  void navigateToLabel(int num);
+  void navigateToLabel(size_t num);
 
   void paintEvent(QPaintEvent* event);
   void refreshView();
@@ -33,8 +33,8 @@ private:
   CDisassemblerWidget();
   void init();
 
-  void printCell(QTextCursor &cursor, QString text, int length, QTextCharFormat fmt);
-  void printCell(QTextCursor &cursor, QString text, int length);
+  void printCell(QTextCursor &cursor, std::string text, int length, QTextCharFormat fmt);
+  void printCell(QTextCursor &cursor, std::string text, int length);
 
   void printReferences(QTextCursor &cursor, CChunk* chunk);
   void printChunkUnparsed(QTextCursor &cursor, CChunk* chunk);

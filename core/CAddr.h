@@ -13,7 +13,7 @@
 #ifndef CADDR_H
 #define CADDR_H
 
-#include <QString>
+#include <string>
 
 class CAddr {
 public:
@@ -41,8 +41,8 @@ public:
   CAddr &operator+=(unsigned long long offs) { m_Offset+=offs; return *this; }
   CAddr &operator-=(unsigned long long offs) { m_Offset-=offs; return *this; }
 
-  QString toString() const;
-  QString offsetString() const;
+  std::string toString() const;
+  std::string offsetString() const;
 
 private:
   unsigned long long m_Offset;

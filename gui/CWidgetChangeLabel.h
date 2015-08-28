@@ -20,9 +20,7 @@ class CWidgetChangeLabel : public QDialog {
   Q_OBJECT
 public:
   CWidgetChangeLabel(QWidget* par, QString old_link);
-  QString label() {
-    return m_LinkName->text();
-  }
+  QString label() { return m_LinkName->text(); }
 private:
   QLineEdit* m_LinkName;
 };

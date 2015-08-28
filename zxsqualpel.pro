@@ -25,7 +25,9 @@ HEADERS += core/CAddr.h \
            zx/disassemble.h \
            gui/CLabelsWidget.h \
            gui/CMainWindow.h \
-           gui/CDisassemblerWidget.h
+           gui/CDisassemblerWidget.h \
+    core/utils.h \
+    core/debug_printers.h
 SOURCES += core/CAddr.cpp \
            core/CByte.cpp \
            core/CChunk.cpp \

@@ -13,12 +13,12 @@
 #ifndef CBYTE_H
 #define CBYTE_H
 
-#include <QString>
+#include <string>
 
 class CByte {
 public:
   CByte(unsigned char b=0) : m_Byte(b) {}
-  QString toString() const;
+  std::string toString() const;
   operator unsigned char() const {return m_Byte;}
 
 private:
