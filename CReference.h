@@ -15,8 +15,7 @@
 
 #include "CAddr.h"
 
-class CReference {
-public:
+struct CReference {
   enum class Type {
     JUMP=1,
     CALL,
@@ -25,12 +24,11 @@ public:
     READ_WORD,
     WRITE_WORD
   };
-public:
-  CReference(CAddr addr, Type type);
+  CReference(CAddr addr_, Type type_);
   QString toString();
-private:
-  CAddr m_From;
-  Type m_Type;
+
+  CAddr addr;
+  Type type;
 };
 
 #endif

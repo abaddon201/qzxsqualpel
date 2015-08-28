@@ -208,7 +208,7 @@ void CDisassemblerCoreZX::disassembleBlock(CAddr addr) {
 bool CDisassemblerCoreZX::labelPresent(CAddr addr) const {
   if (m_Labels.count()) {
     foreach (CLabel lbl, m_Labels) {
-      if (lbl.addr()==addr) {
+      if (lbl.addr==addr) {
         return true;
       }
     }
