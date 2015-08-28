@@ -19,7 +19,7 @@ class CByte {
 public:
   CByte(unsigned char b=0) : m_Byte(b) {}
   QString toString() const;
-  operator unsigned char() {return m_Byte;}
+  operator unsigned char() const {return m_Byte;}
 
 private:
   unsigned char m_Byte;
