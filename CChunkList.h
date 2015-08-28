@@ -27,13 +27,12 @@ public:
   CChunk* getChunkByPosition(int pos) const;
   void removeChunk(const CAddr addr);
   /// @bug must be setted from memory image size
-  CAddr getMaxAddr() const {
-    return CAddr(0x0FFFF);
-  }
+  CAddr getMaxAddr() const { return CAddr(0x0FFFF); }
   int count() const;
   void clear();
 
-  void printDebug();
+  void printDebug() const;
+
   class iterator {
   public:
     iterator(const CChunkList* base, bool end=false, CAddr addr=CAddr()) : m_Addr(addr), m_End(end), m_Base(base) {}
@@ -48,27 +47,17 @@ public:
           return *this;
         }
       }
-    };
-    CChunk* operator*() {
-      return m_Base->getChunk(m_Addr);
     }
-    int operator !=(iterator s) {
-      if (s.m_End!=m_End) {
-        return true;
-      }
-      return false;
-    }
+    CChunk* operator*() { return m_Base->getChunk(m_Addr); }
+    int operator !=(iterator s) { return (s.m_End!=m_End); }
   private:
     CAddr m_Addr;
     bool m_End;
     const CChunkList* m_Base;
   };
-  iterator begin() const {
-    return iterator(this, false, 0);
-  }
-  iterator end() const {
-    return iterator(this, true);
-  }
+
+  iterator begin() const { return iterator(this, false, 0); }
+  iterator end() const { return iterator(this, true); }
   CChunk* operator[] (const CAddr idx) const {
     int i=idx.offset()&0xffff;
     if (m_Chunks[i]==0) {

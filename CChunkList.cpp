@@ -82,7 +82,7 @@ void CChunkList::clear() {
   }
 }
 
-void CChunkList::printDebug() {
+void CChunkList::printDebug() const {
   CAddr addr;
   do {
     CChunk* chunk=m_Chunks[addr.offset()];
