@@ -10,3 +10,4 @@
 -c #convert tabs to the spaces
 -xC200 #break line on 200 symbols
 -z2 #linux line endings
+-O # don't brake one liners
