@@ -11,6 +11,8 @@
 #include "core/CLabels.h"
 #include "core/IDisassemblerCore.h"
 
+#include "guichunklist.h"
+
 class CMainWindow;
 
 class CDisassemblerWidget : public QPlainTextEdit {
@@ -36,9 +38,9 @@ private:
   void printCell(QTextCursor &cursor, std::string text, int length, QTextCharFormat fmt);
   void printCell(QTextCursor &cursor, std::string text, int length);
 
-  void printReferences(QTextCursor &cursor, CChunk* chunk);
-  void printChunkUnparsed(QTextCursor &cursor, CChunk* chunk);
-  void printChunkCode(QTextCursor &cursor, CChunk* chunk);
+  void printReferences(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
+  void printChunkUnparsed(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
+  void printChunkCode(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
 
   void changeNameUnderCursor();
   void makeCodeUnderCursor();
@@ -72,6 +74,8 @@ private:
 
   CMainWindow* m_MainWindow;
   IDisassemblerCore* m_DisassemblerCore;
+
+  GUIChunkList _chunks;
 };
 
 #endif

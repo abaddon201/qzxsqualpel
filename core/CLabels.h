@@ -14,6 +14,8 @@
 #define CLABELS_H
 
 #include <list>
+#include <memory>
+
 #include "CLabel.h"
 #include "CChunk.h"
 
@@ -26,7 +28,7 @@ public:
    * @param chunk Указатель на блок, для которого меняется метка
    * @param new_label Новое название метки
    */
-  void changeLabel(CChunk *chunk, const std::string new_label);
+  void changeLabel(std::shared_ptr<CChunk> chunk, const std::string new_label);
 };
 
 #endif

@@ -27,7 +27,9 @@ HEADERS += core/CAddr.h \
            gui/CMainWindow.h \
            gui/CDisassemblerWidget.h \
     core/utils.h \
-    core/debug_printers.h
+    core/debug_printers.h \
+    gui/guichunk.h \
+    gui/guichunklist.h
 SOURCES += core/CAddr.cpp \
            core/CByte.cpp \
            core/CChunk.cpp \
@@ -44,6 +46,7 @@ SOURCES += core/CAddr.cpp \
            gui/CMainWindow.cpp \
            gui/CDisassemblerWidget.cpp \
            main.cpp \
+    gui/guichunklist.cpp
 
 #win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgets
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgetsd

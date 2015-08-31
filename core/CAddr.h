@@ -22,6 +22,7 @@ public:
   unsigned long long offset() const { return m_Offset; }
   unsigned long long segment() const { return m_Segment; }
 
+  bool compare(unsigned long long s) const { return m_Offset==s; }
   bool operator==(const CAddr &s) const { return ((m_Offset==s.m_Offset) && (m_Segment==s.m_Segment)); }
   bool operator!=(const CAddr &s) const { return ((m_Offset!=s.m_Offset) || (m_Segment!=s.m_Segment)); }
   ///@bug не учитывается сегмент в сравнениях больше/меньше

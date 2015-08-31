@@ -22,11 +22,11 @@ class CDisassemblerCoreZX : public IDisassemblerCore {
 public:
   CDisassemblerCoreZX(IGUIUpdater* updater) : IDisassemblerCore{updater, this} {}
 
-  virtual Type getLastCmdJumpType(CChunk* chunk, CAddr &jump_addr) override;
+  virtual Type getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr) override;
   virtual int disassembleInstruction(CAddr addr) override;
   void disassembleBlock(CAddr addr) override;
 
-  CChunk* createChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN) override;
+  std::shared_ptr<CChunk> createChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN) override;
 
   CLabels& labels() override {
     return m_Labels;

@@ -7,8 +7,12 @@
 #include <QKeyEvent>
 #include <QTextDocumentWriter>
 #include <QPainter>
+
+#include <memory>
+
 #include "CMainWindow.h"
 #include "CWidgetChangeLabel.h"
+#include "guichunk.h"
 #include "core/debug_printers.h"
 
 CDisassemblerWidget::CDisassemblerWidget()
@@ -52,7 +56,7 @@ void CDisassemblerWidget::init() {
 
 void CDisassemblerWidget::navigateToLabel(CAddr &addr) {
   qDebug()<< "navigate to label:" << addr.toString();
-  const CChunk* chunk = m_DisassemblerCore->chunks().getChunkContains(addr);
+  std::shared_ptr<GUIChunk> chunk = _chunks.getChunkContains(addr);
   if (nullptr!=chunk) {
     QTextCursor cursor(textCursor());
     cursor.setPosition(chunk->cursorStartPosition());
@@ -105,21 +109,19 @@ void CDisassemblerWidget::changeNameUnderCursor() {
   QTextCursor cursor(textCursor());
   qDebug()<<"!!!!!!!!!!!:"<<cursor.block().text();
   qDebug()<<"Cursor pos:"<<cursor.position();
-  CChunk* chunk=m_DisassemblerCore->chunks().getChunkByPosition(cursor.position());
-  if (0==chunk) {
+  std::shared_ptr<GUIChunk> chunk=_chunks.getChunkByPosition(cursor.position());
+  if (nullptr==chunk) {
     return;
   }
-  if (chunk) {
-    if ((chunk->type()==CChunk::Type::CODE)
-        || (chunk->type()==CChunk::Type::DATA_BYTE)
-        || (chunk->type()==CChunk::Type::DATA_ARRAY)
-        || (chunk->type()==CChunk::Type::DATA_WORD)
-       ) {
-      CWidgetChangeLabel dlg(this, QString::fromStdString(chunk->label()));
-      if (dlg.exec()) {
-        m_DisassemblerCore->labels().changeLabel(chunk, dlg.label().toStdString());
-        refreshView();
-      }
+  if ((chunk->core()->type()==CChunk::Type::CODE)
+      || (chunk->core()->type()==CChunk::Type::DATA_BYTE)
+      || (chunk->core()->type()==CChunk::Type::DATA_ARRAY)
+      || (chunk->core()->type()==CChunk::Type::DATA_WORD)
+     ) {
+    CWidgetChangeLabel dlg(this, QString::fromStdString(chunk->core()->label()));
+    if (dlg.exec()) {
+      m_DisassemblerCore->labels().changeLabel(chunk->core(), dlg.label().toStdString());
+      refreshView();
     }
   }
 }
@@ -128,12 +130,12 @@ void CDisassemblerWidget::makeCodeUnderCursor() {
   QTextCursor cursor(textCursor());
   qDebug()<<"!!!!!!!!!!!:"<<cursor.block().text();
   qDebug()<<"Cursor pos:"<<cursor.position();
-  CChunk* chunk=m_DisassemblerCore->chunks().getChunkByPosition(cursor.position());
-  if (0==chunk) {
+  std::shared_ptr<GUIChunk> chunk=_chunks.getChunkByPosition(cursor.position());
+  if (nullptr==chunk) {
     return;
   }
-  if (chunk && chunk->isEmpty()) {
-    m_DisassemblerCore->disassembleBlock(chunk->addr());
+  if (chunk->core()->isEmpty()) {
+    m_DisassemblerCore->disassembleBlock(chunk->core()->addr());
     refreshView();
   }
 }
@@ -182,38 +184,36 @@ void CDisassemblerWidget::printCell(QTextCursor &cursor, std::string text, int l
   cursor.insertText(QString::fromStdString(text+spcline));
 }
 
-void CDisassemblerWidget::printReferences(QTextCursor &cursor, CChunk* chunk) {
-  if (chunk->references().size()==0) {
+void CDisassemblerWidget::printReferences(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk) {
+  if (chunk->core()->references().size()==0) {
     return;
   }
   int skip_len=m_CellLengthCommand+m_CellLengthArgs;
   int skip_len2=m_CellLengthAddr+m_CellLengthOpcodes+m_CellLengthLabel+m_CellLengthCommand+m_CellLengthArgs;
 
-  CChunk::ReferencesList::const_iterator it;
   int l=0;
-  for (it=chunk->references().begin(); it!=chunk->references().end(); ++it) {
+  for (auto ref: chunk->core()->references()) {
     if (l==0) {
       printCell(cursor, std::string(), skip_len);
       l=1;
     } else {
       printCell(cursor, std::string(), skip_len2);
     }
-    for (int i=0; i<m_ReferencesOnLine; i++) {
-      CReference ref=*it;
+/*    for (int i=0; i<m_ReferencesOnLine; i++) {
+      CReference ref=it;*/
       printCell(cursor, ref.toString(), m_CellLengthReference, m_CellFormatReference);
-      ++it;
-      if (it==chunk->references().end()) {
+/*      ++it;
+      if (it==chunk->core()->references().end()) {
         return;
       }
-    }
-    --it;
+    }*/
     cursor.insertText("\n");
   }
 }
 
-void CDisassemblerWidget::printChunkUnparsed(QTextCursor &cursor, CChunk* chunk) {
+void CDisassemblerWidget::printChunkUnparsed(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk) {
   cursor.insertBlock();
-  CCommand cmd=chunk->getCommand(0);
+  CCommand cmd=chunk->core()->getCommand(0);
   printCell(cursor, cmd.addr.toString(), m_CellLengthAddr, m_CellFormatAddr);
   printCell(cursor, cmd.getOpcodesString(), m_CellLengthOpcodes, m_CellFormatOpcodes);
   printCell(cursor, std::string(), m_CellLengthLabel, m_CellFormatLabel);
@@ -226,22 +226,22 @@ void CDisassemblerWidget::printChunkUnparsed(QTextCursor &cursor, CChunk* chunk)
   cursor.movePosition(QTextCursor::End);
 }
 
-void CDisassemblerWidget::printChunkCode(QTextCursor &cursor, CChunk* chunk) {
-  if (!chunk->label().empty()) {
+void CDisassemblerWidget::printChunkCode(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk) {
+  if (!chunk->core()->label().empty()) {
     cursor.insertBlock();
-    if (!chunk->comment().empty()) {
-      printCell(cursor, chunk->addr().toString(), m_CellLengthAddr, m_CellFormatAddr);
+    if (!chunk->core()->comment().empty()) {
+      printCell(cursor, chunk->core()->addr().toString(), m_CellLengthAddr, m_CellFormatAddr);
       printCell(cursor, std::string(), m_CellLengthOpcodes, m_CellFormatOpcodes);
-      printCell(cursor, std::string(";")+chunk->comment(), m_CellLengthLabel, m_CellFormatChunkComment);
+      printCell(cursor, std::string(";")+chunk->core()->comment(), m_CellLengthLabel, m_CellFormatChunkComment);
       cursor.movePosition(QTextCursor::End);
     }
-    printCell(cursor, chunk->addr().toString(), m_CellLengthAddr, m_CellFormatAddr);
+    printCell(cursor, chunk->core()->addr().toString(), m_CellLengthAddr, m_CellFormatAddr);
     printCell(cursor, std::string(), m_CellLengthOpcodes, m_CellFormatOpcodes);
-    printCell(cursor, chunk->label()+":", m_CellLengthLabel, m_CellFormatLabel);
+    printCell(cursor, chunk->core()->label()+":", m_CellLengthLabel, m_CellFormatLabel);
     printReferences(cursor, chunk);
     cursor.movePosition(QTextCursor::End);
   }
-  foreach (CCommand cmd, chunk->commands()) {
+  foreach (CCommand cmd, chunk->core()->commands()) {
     cursor.insertBlock();
     printCell(cursor, cmd.addr.toString(), m_CellLengthAddr, m_CellFormatAddr);
     printCell(cursor, cmd.getOpcodesString(), m_CellLengthOpcodes, m_CellFormatOpcodes);
@@ -257,14 +257,14 @@ void CDisassemblerWidget::printChunkCode(QTextCursor &cursor, CChunk* chunk) {
 }
 
 void CDisassemblerWidget::refreshView() {
+  _chunks.update(m_DisassemblerCore->chunks());
   clear();
   QTextCursor cursor(textCursor());
   cursor.beginEditBlock();
-  CChunkList::iterator it=m_DisassemblerCore->chunks().begin();
-  for (; it!=m_DisassemblerCore->chunks().end(); ++it) {
-    CChunk* chunk=*it;
+  int i=0;
+  for (auto chunk: _chunks.chunks()) {
     chunk->setCursorStartPosition(cursor.position()+1);
-    switch (chunk->type()) {
+    switch (chunk->core()->type()) {
     case CChunk::Type::UNPARSED:
       printChunkUnparsed(cursor, chunk);
       break;
@@ -273,6 +273,7 @@ void CDisassemblerWidget::refreshView() {
       break;
     };
     chunk->setCursorEndPosition(cursor.position());
+    i++;
   }
   cursor.endEditBlock();
 //    m_Chunks.printDebug();

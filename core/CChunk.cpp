@@ -58,7 +58,7 @@ std::string CChunk::setLabel(std::string label, CReference::Type ref_type) {
   return m_Label;
 }
 
-CChunk* CChunk::splitAt(CAddr addr) {
+std::shared_ptr<CChunk> CChunk::splitAt(CAddr addr) {
   qDebug()<<"splitAt: commans.count="<<m_Commands.size();
   if (m_Commands.size()<2) {
     //split impossible, too short chunk
@@ -78,7 +78,7 @@ CChunk* CChunk::splitAt(CAddr addr) {
     }
   }
   qDebug()<<"moving commands";
-  CChunk* new_chunk=IDisassemblerCore::inst()->createChunk(addr, m_Type);
+  std::shared_ptr<CChunk> new_chunk=IDisassemblerCore::inst()->createChunk(addr, m_Type);
   if (new_chunk==0) {
     qDebug()<<"can't create chunk";
     return 0;

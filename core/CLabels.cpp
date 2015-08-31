@@ -32,7 +32,7 @@ std::string CLabels::offsetInLabel(const CAddr &addr) const {
     Debug()<<"no labels";
     return addr.toString();
   }
-  CChunk* chunk=IDisassemblerCore::inst()->chunks().getChunkContains(addr);
+  std::shared_ptr<CChunk> chunk=IDisassemblerCore::inst()->chunks().getChunkContains(addr);
   if (chunk==nullptr) {
     Debug()<<"no label for addr";
     return addr.toString();
@@ -51,8 +51,7 @@ std::string CLabels::offsetInLabel(const CAddr &addr) const {
   return lbl+"+"+std::to_string(delta.offset());
 }
 
-
-void CLabels::changeLabel(CChunk *chunk, const std::string new_label) {
+void CLabels::changeLabel(std::shared_ptr<CChunk> chunk, const std::string new_label) {
   chunk->changeLabel(new_label);
   for (auto lbl: *this) {
     if (lbl.addr == chunk->addr()) {

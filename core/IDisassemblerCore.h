@@ -16,6 +16,7 @@
 #include "CChunk.h"
 #include "CAddr.h"
 
+#include <memory>
 #include <functional>
 
 class CLabels;
@@ -40,19 +41,23 @@ public:
 
   IDisassemblerCore(IGUIUpdater* updater_, IDisassemblerCore* inst) : updater{updater_} {_inst=inst;}
   virtual ~IDisassemblerCore() {}
-  virtual Type getLastCmdJumpType(CChunk* chunk, CAddr &jump_addr)=0;
+
   virtual int disassembleInstruction(CAddr addr)=0;
   virtual void disassembleBlock(CAddr addr) = 0;
-  virtual CChunk* createChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN) = 0;
-  virtual CLabels& labels() = 0;
-  virtual CChunkList &chunks() = 0;
-
-  virtual void makeJump(CAddr from_addr, CAddr jump_addr, CReference::Type ref_type) = 0;
   virtual void setRawMemory(unsigned char* buf, size_t size) = 0;
   virtual void initialParse() = 0;
 
+  virtual std::shared_ptr<CChunk> createChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN) = 0;
+  virtual CChunkList &chunks() = 0;
+
+  virtual CLabels& labels() = 0;
+
+  virtual void makeJump(CAddr from_addr, CAddr jump_addr, CReference::Type ref_type) = 0;
+  virtual Type getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr)=0;
+
   virtual CByte getMemoryByte(CAddr addr) const = 0;
   static IDisassemblerCore* inst() {return _inst;}
+
 protected:
   IGUIUpdater* updater;
   static IDisassemblerCore* _inst;

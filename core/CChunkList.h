@@ -13,6 +13,9 @@
 #ifndef CCHUNKLIST_H
 #define CCHUNKLIST_H
 
+#include <memory>
+#include <vector>
+
 #include "CChunk.h"
 
 /**
@@ -20,12 +23,14 @@
  */
 class CChunkList {
 public:
+  using List = std::vector<std::shared_ptr<CChunk>>;
+
   CChunkList();
-  CChunk* createChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN);
-  CChunk* getChunk(const CAddr addr) const;
-  CChunk* getChunkContains(CAddr addr) const;
-  CChunk* getChunkByPosition(int pos) const;
+  std::shared_ptr<CChunk> createChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN);
+  std::shared_ptr<CChunk> getChunk(const CAddr addr) const;
+  std::shared_ptr<CChunk> getChunkContains(CAddr addr) const;
   void removeChunk(const CAddr addr);
+  List& chunks() {return m_Chunks;}
   /// @bug must be setted from memory image size
   CAddr getMaxAddr() const { return CAddr(0x0FFFF); }
   int count() const;
@@ -48,7 +53,7 @@ public:
         }
       }
     }
-    CChunk* operator*() { return m_Base->getChunk(m_Addr); }
+    std::shared_ptr<CChunk> operator*() { return m_Base->getChunk(m_Addr); }
     int operator !=(iterator s) { return (s.m_End!=m_End); }
   private:
     CAddr m_Addr;
@@ -58,7 +63,7 @@ public:
 
   iterator begin() const { return iterator(this, false, 0); }
   iterator end() const { return iterator(this, true); }
-  CChunk* operator[] (const CAddr idx) const {
+  std::shared_ptr<CChunk> operator[] (const CAddr idx) const {
     int i=idx.offset()&0xffff;
     if (m_Chunks[i]==0) {
       return 0;
@@ -66,8 +71,7 @@ public:
     return m_Chunks[i];
   }
 private:
-  //currently this realized by fixed size array
-  CChunk* m_Chunks[65536];
+  List m_Chunks;
 };
 
 #endif
