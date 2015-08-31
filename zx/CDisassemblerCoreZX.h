@@ -28,7 +28,7 @@ public:
 
   CChunk* createChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN) override;
 
-  CLabels labels() const override {
+  CLabels& labels() override {
     return m_Labels;
   }
 

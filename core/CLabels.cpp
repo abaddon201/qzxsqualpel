@@ -17,13 +17,23 @@
 
 #include "debug_printers.h"
 
-std::string CLabels::offsetInLabel(CAddr &addr) const {
+/**
+ * @brief Вовращает сроку адреса относительно метки.
+ * @param addr Искомый адрес
+ * @return Отформатированная строка для отображения метки
+ *
+ * 1. Если существует блок, покрывающий запрошенный адрес, берётся метка этого блока, в противном случае, возвращается
+ * строка вида <address>
+ * 2. Если метка существует, то вычисляется смещение запрошенного адреса, относительно метки
+ * и формируется строка вида <label>+<offset>, если смещение не нулевое, и <label>, в противном случае
+ */
+std::string CLabels::offsetInLabel(const CAddr &addr) const {
   if (size()==0) {
     Debug()<<"no labels";
     return addr.toString();
   }
   CChunk* chunk=IDisassemblerCore::inst()->chunks().getChunkContains(addr);
-  if (chunk==0) {
+  if (chunk==nullptr) {
     Debug()<<"no label for addr";
     return addr.toString();
   }
@@ -35,19 +45,19 @@ std::string CLabels::offsetInLabel(CAddr &addr) const {
     return addr.toString();
   }
   CAddr delta=addr-ch_addr;
-  //unsigned delta=;
+  if (delta == 0) {
+    return lbl;
+  }
   return lbl+"+"+std::to_string(delta.offset());
 }
 
 
-void CLabels::changeLabel(CChunk* chunk, std::string new_label) {
+void CLabels::changeLabel(CChunk *chunk, const std::string new_label) {
   chunk->changeLabel(new_label);
-  CLabels::iterator it;
-  for (it=begin(); it!=end(); ++it) {
-    CLabel &lbl=*it;
-    if (lbl.addr==chunk->addr()) {
+  for (auto lbl: *this) {
+    if (lbl.addr == chunk->addr()) {
       //change and return;
-      lbl.name=new_label;
+      lbl.name = new_label;
       return;
     }
   }

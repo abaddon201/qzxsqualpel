@@ -44,7 +44,7 @@ public:
   virtual int disassembleInstruction(CAddr addr)=0;
   virtual void disassembleBlock(CAddr addr) = 0;
   virtual CChunk* createChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN) = 0;
-  virtual CLabels labels() const = 0;
+  virtual CLabels& labels() = 0;
   virtual CChunkList &chunks() = 0;
 
   virtual void makeJump(CAddr from_addr, CAddr jump_addr, CReference::Type ref_type) = 0;

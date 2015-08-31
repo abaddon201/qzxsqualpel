@@ -19,8 +19,14 @@
 
 class CLabels : public std::vector<CLabel> {
 public:
-  std::string offsetInLabel(CAddr &addr) const;
-  void changeLabel(CChunk* chunk, std::string new_label);
+  ///@brief Вовращает сроку адреса относительно метки.
+  std::string offsetInLabel(const CAddr &addr) const;
+  /**
+   * @brief Изменяет метку. Создаёт если не найдена соотв. метка
+   * @param chunk Указатель на блок, для которого меняется метка
+   * @param new_label Новое название метки
+   */
+  void changeLabel(CChunk *chunk, const std::string new_label);
 };
 
 #endif

@@ -33,10 +33,10 @@ public:
   CAddr &operator++() { m_Offset++; return*this;}
   CAddr &operator--() { m_Offset--; return*this;}
 
-  CAddr operator+(unsigned long long offs) {return m_Offset+offs;}
-  CAddr operator-(unsigned long long offs) {return m_Offset-offs;}
-  CAddr operator-(const CAddr &raddr) { return m_Offset-raddr.m_Offset; }
-  CAddr operator+(const CAddr &raddr) { return m_Offset+raddr.m_Offset; }
+  CAddr operator+(unsigned long long offs) const {return m_Offset+offs;}
+  CAddr operator-(unsigned long long offs) const {return m_Offset-offs;}
+  CAddr operator-(const CAddr &raddr) const { return m_Offset-raddr.m_Offset; }
+  CAddr operator+(const CAddr &raddr) const { return m_Offset+raddr.m_Offset; }
 
   CAddr &operator+=(unsigned long long offs) { m_Offset+=offs; return *this; }
   CAddr &operator-=(unsigned long long offs) { m_Offset-=offs; return *this; }
