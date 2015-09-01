@@ -20,37 +20,28 @@
 
 class CDisassemblerCoreZX : public IDisassemblerCore {
 public:
-  CDisassemblerCoreZX(IGUIUpdater* updater) : IDisassemblerCore{updater, this} {}
+  CDisassemblerCoreZX(IGUIUpdater* updater);
 
-  virtual Type getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr) override;
   virtual int disassembleInstruction(CAddr addr) override;
   void disassembleBlock(CAddr addr) override;
+  void initialParse() override;
+
+
+  CLabels& labels() override { return m_Labels;}
+  bool labelPresent(CAddr addr) const;
 
   std::shared_ptr<CChunk> createChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN) override;
-
-  CLabels& labels() override {
-    return m_Labels;
-  }
-
-  bool labelPresent(CAddr addr) const ;
-
-  CChunkList &chunks() override {
-    return m_Chunks;
-  }
+  CChunkList &chunks() override {return m_Chunks;}
+  bool isChunkEmpty(CChunk* chunk);
 
   void makeJump(CAddr from_addr, CAddr jump_addr, CReference::Type ref_type) override;
-  void setRawMemory(unsigned char* buf, size_t size) override;
+  virtual Type getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr) override;
 
-  bool isChunkEmpty(CChunk* chunk);
-  void initialParse() override;
+  void setRawMemory(unsigned char* buf, size_t size) override;
 
 private:
   CChunkList m_Chunks;
   CLabels m_Labels;
-  int m_ProgLength;
-  CByte m_MemoryPool[0xFFFF];
-
-  CByte getMemoryByte(CAddr addr) const override;
 };
 
 #endif

@@ -13,11 +13,12 @@
 #ifndef IDISASSEMBLERCORE_H
 #define IDISASSEMBLERCORE_H
 
-#include "CChunk.h"
-#include "CAddr.h"
-
 #include <memory>
 #include <functional>
+
+#include "CChunk.h"
+#include "CAddr.h"
+#include "memory.h"
 
 class CLabels;
 class CChunkList;
@@ -39,7 +40,7 @@ public:
     JT_RET,
   };
 
-  IDisassemblerCore(IGUIUpdater* updater_, IDisassemblerCore* inst) : updater{updater_} {_inst=inst;}
+  IDisassemblerCore(IGUIUpdater* updater_, IDisassemblerCore* inst) : updater{updater_} {_inst=inst; _memory=std::unique_ptr<Memory> {new Memory()};}
   virtual ~IDisassemblerCore() {}
 
   virtual int disassembleInstruction(CAddr addr)=0;
@@ -55,12 +56,16 @@ public:
   virtual void makeJump(CAddr from_addr, CAddr jump_addr, CReference::Type ref_type) = 0;
   virtual Type getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr)=0;
 
-  virtual CByte getMemoryByte(CAddr addr) const = 0;
+  CByte getMemoryByte(CAddr addr) const {
+    return _memory->getByte(addr);
+  }
+
   static IDisassemblerCore* inst() {return _inst;}
 
 protected:
   IGUIUpdater* updater;
   static IDisassemblerCore* _inst;
+  std::unique_ptr<Memory> _memory;
 };
 
 #endif

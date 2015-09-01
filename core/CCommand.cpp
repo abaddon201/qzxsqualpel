@@ -11,6 +11,7 @@
 //
 
 #include "CCommand.h"
+#include "IDisassemblerCore.h"
 
 CAddr CCommand::getJmpAddr() const {
   if (arg2.empty()) {
@@ -35,10 +36,14 @@ std::string CCommand::getArgsString() const {
 
 std::string CCommand::getOpcodesString() const {
   std::string tmp;
-  std::string tmp2;
-  for (CByte byte: opcodes) {
-    tmp2=byte.toString();
-    tmp+=tmp2+" ";
+  int l1=len;
+  CAddr a = addr;
+  for (; l1; --l1, ++a) {
+    tmp += " " + IDisassemblerCore::inst()->getMemoryByte(a).toString();
   }
   return tmp;
+}
+
+CByte CCommand::opcodes(unsigned long long offs) const {
+  return IDisassemblerCore::inst()->getMemoryByte(addr + offs);
 }

@@ -20,7 +20,7 @@
 
 ///@brief Структура описывающая одну команду ассемблера
 struct CCommand {
-  using OpcodesList = std::vector<CByte>;
+  //using OpcodesList = std::vector<CByte>;
   enum class ArgType {
     ARG_UNKNOWN=0,
     ARG_REGISTER=1,
@@ -31,17 +31,26 @@ struct CCommand {
     ARG_FLAG=6
   };
 
-  OpcodesList opcodes;
+  //OpcodesList opcodes;
+  ///@brief символьное представление команды
   std::string command;
+  ///@brief символьное представление первого аргумента
   std::string arg1;
+  ///@brief символьное представление второго аргумента
   std::string arg2;
+  ///@brief комментарий к команде
   std::string comment;
+  ///@brief Адрес начала команды
+  /// @todo Команда может быть разорвана по сегментам
   CAddr addr;
+  ///@brief Длина команды в байтах
+  int len;
 
-  CCommand() {}
+  CCommand() : len{0} {}
   CCommand(const CCommand &c) {
     addr=c.addr;
-    opcodes=c.opcodes;
+    len=c.len;
+    //opcodes=c.opcodes;
     command=c.command;
     arg1=c.arg1;
     arg2=c.arg2;
@@ -49,7 +58,8 @@ struct CCommand {
   }
   CCommand &operator=(const CCommand &c) {
     addr=c.addr;
-    opcodes=c.opcodes;
+    len=c.len;
+    //opcodes=c.opcodes;
     command=c.command;
     arg1=c.arg1;
     arg2=c.arg2;
@@ -62,6 +72,7 @@ struct CCommand {
   ///@brief Возвращает опкоды команды в виде строки
   /// @todo стоит добавить ограничение на кол-во опкодов
   std::string getOpcodesString() const;
+  CByte opcodes(unsigned long long offs) const;
   ///@brief Возвращает адрес перехода команды (первый либо второй аргумент)
   CAddr getJmpAddr() const;
 };

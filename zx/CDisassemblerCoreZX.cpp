@@ -12,7 +12,7 @@
 #include "core/debug_printers.h"
 #include "core/utils.h"
 #include "disassemble.h"
-
+#include "memory.h"
 #include "CDisassemblerCoreZX.h"
 
 #include <vector>
@@ -56,6 +56,12 @@ IDisassemblerCore::Type CDisassemblerCoreZX::getLastCmdJumpType(std::shared_ptr<
   return Type::JT_NONE;
 }
 
+CDisassemblerCoreZX::CDisassemblerCoreZX(IGUIUpdater* updater)
+  : IDisassemblerCore{updater, this} {
+  ///@bug zx 128 have multiple segments 8k size each
+  _memory->createSegment(0, 0xFFFF);
+}
+
 int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
   char tbuff[128];
   size_t len;
@@ -74,7 +80,7 @@ int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
       qDebug()<<"allready parsed";
       return 0;
     }
-    CByte opcode=chunk_i->getCommand(0).opcodes[0];
+    CByte opcode=chunk_i->getCommand(0).opcodes(0);
     m_Chunks.removeChunk(addr);
     std::shared_ptr<CChunk> target_chunk;
     if (addr.compare(0)) {
@@ -136,14 +142,15 @@ int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
         qDebug()<<"arg2="<<cmd.arg2;
       }
     }
-    cmd.opcodes.push_back(opcode);
+    cmd.len++;
+    /*cmd.opcodes.push_back(opcode);
     qDebug()<<"opcode appended";
     if (chunks.size()) {
       for (auto cc: chunks) {
         //becourse we works only from undefined chunks, we able to do this like that
         cmd.opcodes.push_back(cc->getCommand(0).opcodes[0]);
       }
-    }
+    }*/
     qDebug()<<"all opcodes appended";
     target_chunk->appendCommand(cmd);
     qDebug()<<"cmd appended";
@@ -218,10 +225,6 @@ bool CDisassemblerCoreZX::labelPresent(CAddr addr) const {
   return false;
 }
 
-CByte CDisassemblerCoreZX::getMemoryByte(CAddr addr) const {
-  return m_MemoryPool[addr.offset()&0xFFFF];
-}
-
 std::shared_ptr<CChunk> CDisassemblerCoreZX::createChunk(CAddr addr, CChunk::Type type) {
   return m_Chunks.createChunk(addr, type);
 }
@@ -271,22 +274,18 @@ void CDisassemblerCoreZX::makeJump(CAddr from_addr, CAddr jump_addr, CReference:
 }
 
 void CDisassemblerCoreZX::setRawMemory(unsigned char* buf, size_t size) {
-  m_ProgLength = size;
-  memcpy(m_MemoryPool, buf, size);
-  ///@fixme must chek sizes
-  m_ProgLength = 10000;
-  ///@fixme remove limitation
+  _memory->getSegment(0).fill(buf, size);
 }
 
 void CDisassemblerCoreZX::initialParse() {
   m_Chunks.clear();
-  for (int i=0; i<m_ProgLength; ++i) {
+  for (unsigned long long i=0; i<_memory->wholeSize(); ++i) {
     std::shared_ptr<CChunk> chunk=m_Chunks.createChunk(i, CChunk::Type::UNPARSED);
-    CByte byte=m_MemoryPool[i];
+    CByte byte=_memory->getByte(i);
     CCommand cmd;
     cmd.command="db";
     cmd.addr = i;
-    cmd.opcodes.push_back(byte);
+    cmd.len=1;
     cmd.arg1=byte.toString();
     chunk->appendCommand(cmd);
   }

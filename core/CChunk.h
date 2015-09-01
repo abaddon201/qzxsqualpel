@@ -59,7 +59,7 @@ public:
 
   bool isEmpty() const { return !((type()!=CChunk::Type::UNPARSED) && (type()!=CChunk::Type::UNKNOWN)); }
 
-  CChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN) : m_Type(type), m_StartingAddr(addr) {}
+  CChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN) : m_Type(type), m_StartingAddr(addr), m_Length{0} {}
 
 private:
 //  friend class CChunkList;

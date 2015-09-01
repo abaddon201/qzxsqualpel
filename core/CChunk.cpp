@@ -21,7 +21,7 @@ void CChunk::addCrossRef(CAddr addr, CReference::Type type) {
 
 void CChunk::appendCommand(CCommand cmd) {
   m_Commands.push_back(cmd);
-  m_Length+=cmd.opcodes.size();
+  m_Length+=cmd.len;
 }
 
 CCommand CChunk::getCommand(int idx) const {
@@ -67,7 +67,7 @@ std::shared_ptr<CChunk> CChunk::splitAt(CAddr addr) {
   CommandsList::iterator it;
   CAddr cur_addr=m_StartingAddr;
   for (it=m_Commands.begin(); it!=m_Commands.end(); ++it) {
-    cur_addr+=(*it).opcodes.size();
+    cur_addr+=(*it).len;
     qDebug()<<"caddr"<<cur_addr.toString();
     if (cur_addr==addr) {
       //start splitting
