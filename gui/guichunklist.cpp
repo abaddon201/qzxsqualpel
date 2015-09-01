@@ -24,8 +24,8 @@ std::shared_ptr<GUIChunk> GUIChunkList::getChunkContains(CAddr &addr) const {
 void GUIChunkList::update(CChunkList &chunks) {
   _chunks.clear();
   for (auto ch: chunks.chunks()) {
-    if (ch == nullptr)
+    if (ch.second == nullptr)
       break;
-    _chunks.push_back(std::make_shared<GUIChunk>(ch));
+    _chunks.push_back(std::make_shared<GUIChunk>(ch.second));
   }
 }

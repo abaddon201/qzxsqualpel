@@ -123,7 +123,7 @@ int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
         }
       }
       for (size_t i=1; i<len; i++) {
-        chunks.push_back(m_Chunks.getChunk(addr+i));
+        chunks[addr+i]=m_Chunks.getChunk(addr+i);
         m_Chunks.removeChunk(addr+i);
       }
     }

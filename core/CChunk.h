@@ -48,6 +48,9 @@ public:
 
   CAddr addr() const {return m_StartingAddr;}
   bool containsAddr(const CAddr& addr) const {return (addr>=m_StartingAddr) && (addr<m_StartingAddr+m_Length);}
+
+  unsigned long long length() const {return m_Length;}
+
   Type type() const {return m_Type;}
 
   std::string label() const {return m_Label;}
@@ -89,7 +92,7 @@ private:
   ///@brief Адрес начала блока
   CAddr m_StartingAddr;
   ///@brief Длина блока
-  unsigned m_Length;
+  unsigned long long m_Length;
 };
 
 #endif

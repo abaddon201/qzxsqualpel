@@ -14,8 +14,6 @@
 #include "CChunkList.h"
 
 CChunkList::CChunkList() {
-  ///@bug должен определяться загруженным куском
-  m_Chunks.resize(65536);
 }
 
 std::shared_ptr<CChunk> CChunkList::createChunk(const CAddr addr, CChunk::Type type) {
@@ -28,27 +26,25 @@ std::shared_ptr<CChunk> CChunkList::createChunk(const CAddr addr, CChunk::Type t
 }
 
 std::shared_ptr<CChunk> CChunkList::getChunk(const CAddr addr) const {
-  auto c=std::find_if(m_Chunks.begin(), m_Chunks.end(), [addr](auto c) {return (c!=nullptr) && (c->addr() == addr);});
+  auto c=std::find_if(m_Chunks.begin(), m_Chunks.end(), [addr](auto c) {return (c.second!=nullptr) && (c.second->addr() == addr);});
   if (c == m_Chunks.end())
     return nullptr;
-  return *c;
+  return c->second;
 }
 
 std::shared_ptr<CChunk> CChunkList::getChunkContains(CAddr addr) const {
-  if (m_Chunks[addr.offset()]==0) {
-    while (addr!=0) {
-      --addr;
-      if (m_Chunks[addr.offset()]!=0) {
-        return m_Chunks[addr.offset()];
-      }
-    }
-    return 0;
-  }
-  return m_Chunks[addr.offset()];
+  auto res = std::find_if(m_Chunks.begin(), m_Chunks.end(), [&addr](auto p) {return (p.second->addr()<=addr) && (p.second->addr()+p.second->length()>addr); });
+  if (res == m_Chunks.end())
+    return nullptr;
+  else
+    return res->second;
 }
 
 void CChunkList::removeChunk(CAddr addr) {
-  std::remove_if(m_Chunks.begin(), m_Chunks.end(), [&addr](auto ptr) {return ptr && (ptr->addr()==addr);});
+  auto it = find_if(m_Chunks.begin(), m_Chunks.end(), [addr](auto ptr) {return ptr.second && (ptr.second->addr()==addr);});
+  if (it!=m_Chunks.end())
+    m_Chunks.erase(it);
+  ///@bug нужно разобраться с этой хренью:std::remove_if(m_Chunks.begin(), m_Chunks.end(), [addr](auto ptr) {return false;/*return ptr.second && (ptr.second->addr()==addr);*/});
 }
 
 int CChunkList::count() const {
@@ -63,15 +59,13 @@ int CChunkList::count() const {
 
 void CChunkList::clear() {
   m_Chunks.clear();
-  ///@bug должен определять из исходного
-  m_Chunks.resize(10000);
 }
 
 #include "debug_printers.h"
 void CChunkList::printDebug() const {
   CAddr addr;
   do {
-    std::shared_ptr<CChunk> chunk=m_Chunks[addr.offset()];
+    const std::shared_ptr<CChunk> chunk=(*this)[addr];
     if (chunk) {
       qDebug()<<"chunk addr:"<<chunk->addr().toString()<<"addr:"<<addr.toString();
     }
