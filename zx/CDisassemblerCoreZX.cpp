@@ -25,6 +25,14 @@ unsigned char readbyte_internal(unsigned short addr) {
 
 IDisassemblerCore::Type CDisassemblerCoreZX::getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr) {
   CCommand cmd=chunk->lastCommand();
+  ///@bug Нет анализа RST
+  /// @bug RST 28 Нужно анализировать особо... после RST располагается набор инструкций для вычислений (bcalc)
+  /// Пример:
+  /// 2E24 PF-SMALL RST 0028, FP-CALC
+  ///               DEFB +E2,get-mem-2
+  ///               DEFB +38,end-calc
+  /// Собственно, стоит сделать умный анализ этого RST
+  /// В помощь книга: http://dac.escet.urjc.es/~csanchez/pfcs/zxspectrum/CompleteSpectrumROMDisassemblyThe.pdf
   if (cmd.command=="CALL") {
     jump_addr=cmd.getJmpAddr();
     return Type::JT_CALL;
@@ -260,8 +268,8 @@ void CDisassemblerCoreZX::makeJump(const CAddr& from_addr, const CAddr& jump_add
 }
 
 void CDisassemblerCoreZX::setRawMemory(unsigned char* buf, size_t size) {
-  _memory->getSegment(0)->fill(buf, 10000);
-  ///@bug: _memory->getSegment(0)->fill(buf, size);
+  //_memory->getSegment(0)->fill(buf, 10000);
+  _memory->getSegment(0)->fill(buf, size);
 }
 
 void CDisassemblerCoreZX::initialParse() {
