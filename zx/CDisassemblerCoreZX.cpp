@@ -70,8 +70,7 @@ int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
   if (len) {
     std::string buff{tbuff};
     //initialize chunk
-    std::shared_ptr<CChunk> chunk_i=nullptr;
-    chunk_i=m_Chunks.getChunk(addr);
+    std::shared_ptr<CChunk> chunk_i = m_Chunks.getChunk(addr);
     if (chunk_i==0) {
       qDebug()<<"no instruction here";
       return 0;
@@ -80,7 +79,6 @@ int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
       qDebug()<<"allready parsed";
       return 0;
     }
-    CByte opcode=chunk_i->getCommand(0).opcodes(0);
     m_Chunks.removeChunk(addr);
     std::shared_ptr<CChunk> target_chunk;
     if (addr.compare(0)) {
@@ -129,20 +127,8 @@ int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
     }
     CCommand cmd;
     cmd.addr = addr;
-    std::vector<std::string> strlist=split(buff,' ');
-    cmd.command=strlist[0];
-    qDebug()<<"strlist1="<<strlist;
-    if (strlist.size()>1) {
-      //has args
-      std::vector<std::string> args=split(strlist[1], ',');
-      qDebug()<<"argsstrlist1="<<args;
-      cmd.arg1=args[0];
-      if (args.size()==2) {
-        cmd.arg2=args[1];
-        qDebug()<<"arg2="<<cmd.arg2;
-      }
-    }
-    cmd.len++;
+    cmd.len+=len;
+    parseCommand(buff, cmd);
     /*cmd.opcodes.push_back(opcode);
     qDebug()<<"opcode appended";
     if (chunks.size()) {
@@ -156,6 +142,22 @@ int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
     qDebug()<<"cmd appended";
   }
   return len;
+}
+
+void CDisassemblerCoreZX::parseCommand(std::string &src, CCommand &out_command) {
+  std::vector<std::string> strlist=split(src,' ');
+  out_command.command=strlist[0];
+  qDebug()<<"strlist1="<<strlist;
+  if (strlist.size()>1) {
+    //has args
+    std::vector<std::string> args=split(strlist[1], ',');
+    qDebug()<<"argsstrlist1="<<args;
+    out_command.arg1=args[0];
+    if (args.size()==2) {
+      out_command.arg2=args[1];
+      qDebug()<<"arg2="<<out_command.arg2;
+    }
+  }
 }
 
 void CDisassemblerCoreZX::disassembleBlock(CAddr addr) {
@@ -274,7 +276,8 @@ void CDisassemblerCoreZX::makeJump(CAddr from_addr, CAddr jump_addr, CReference:
 }
 
 void CDisassemblerCoreZX::setRawMemory(unsigned char* buf, size_t size) {
-  _memory->getSegment(0)->fill(buf, size);
+  _memory->getSegment(0)->fill(buf, 10000);
+  ///@bug: _memory->getSegment(0)->fill(buf, size);
 }
 
 void CDisassemblerCoreZX::initialParse() {

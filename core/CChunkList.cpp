@@ -50,12 +50,6 @@ void CChunkList::removeChunk(CAddr addr) {
 }
 
 int CChunkList::count() const {
-  /*int count=0;
-  for (int i=0; i<65536; i++) {
-    if (m_Chunks[i]!=0)
-      count++;
-  }
-  return count;*/
   return m_Chunks.size();
 }
 

@@ -40,6 +40,8 @@ public:
   void setRawMemory(unsigned char* buf, size_t size) override;
 
 private:
+  void parseCommand(std::string& src, CCommand& out_command);
+
   CChunkList m_Chunks;
   CLabels m_Labels;
 };

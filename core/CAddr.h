@@ -48,7 +48,7 @@ public:
 private:
   unsigned long long m_Offset;
   unsigned long long m_Segment;
-
+///@todo не всегда нужен кэш строки... Может стоит разбить на 2 класса
   mutable std::string _hex_cache;
 };
 
