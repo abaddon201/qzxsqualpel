@@ -4,29 +4,25 @@ Memory::Memory() {
 }
 
 void Memory::createSegment(Segment::IdType id, unsigned long long size) {
-  Segment s{id, size};
-  std::vector<Segment>::iterator right;
+  //std::map<Segment::IdType, Segment>::iterator right;
   if (!_segments.empty()) {
-    right = std::find_if(_segments.begin(), _segments.end(), [id](auto seg) { return seg.id()> id;});
-  } else {
-    right = _segments.end();
+    if (std::find_if(_segments.begin(), _segments.end(), [id](auto seg) { return seg.second->id() == id;})!=_segments.end()) {
+      ///@bug: segment exists. What we must do?
+      return;
+    }
   }
-  _segments.insert(right, s);
+  _segments[id] = std::make_shared<Segment>(id, size);
 }
 
 CByte Memory::getByte(CAddr addr) {
-  auto seg = std::find_if(_segments.begin(), _segments.end(), [&addr](auto seg) { return seg.id() == addr.segment();});
-  if (seg == _segments.end()) {
-    return 0; ///@todo Segment not found, but we don't crash here. Think about what to do... may be throw
-  }
-  return seg->getByte(addr.offset());
+  return _segments[addr.segment()]->getByte(addr.offset());
 }
 
 unsigned long long Memory::wholeSize() {
   unsigned long long res = 0;
 
   for (auto s: _segments) {
-    res+=s.dataSize();
+    res+=s.second->dataSize();
   }
   return res;
 }

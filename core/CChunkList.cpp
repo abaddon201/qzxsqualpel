@@ -17,12 +17,14 @@ CChunkList::CChunkList() {
 }
 
 std::shared_ptr<CChunk> CChunkList::createChunk(const CAddr addr, CChunk::Type type) {
-  if (m_Chunks[addr.offset()]!=0) {
-    if (m_Chunks[addr.offset()]->type()!=CChunk::Type::UNPARSED)
+  auto ch = m_Chunks[addr.offset()];
+  if (ch!=0) {
+    if (ch->type()!=CChunk::Type::UNPARSED)
       return 0;
   }
-  m_Chunks[addr.offset()]=std::make_shared<CChunk>(addr, type);
-  return m_Chunks[addr.offset()];
+  ch = std::make_shared<CChunk>(addr, type);
+  m_Chunks[addr.offset()]=ch;
+  return ch;
 }
 
 std::shared_ptr<CChunk> CChunkList::getChunk(const CAddr addr) const {

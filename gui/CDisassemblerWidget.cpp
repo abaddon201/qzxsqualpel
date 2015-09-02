@@ -168,11 +168,12 @@ void CDisassemblerWidget::saveASMFile(QString fileName) {
 
 void CDisassemblerWidget::printCell(QTextCursor &cursor, std::string text, int length, QTextCharFormat fmt) {
   int spclen=length-text.length();
-  if (spclen<0) {
-    spclen=0;
+  if (spclen>0) {
+    std::string spcline(spclen, ' ');
+    cursor.insertText(QString::fromStdString(text+spcline), fmt);
+  } else {
+    cursor.insertText(QString::fromStdString(text), fmt);
   }
-  std::string spcline(spclen, ' ');
-  cursor.insertText(QString::fromStdString(text+spcline), fmt);
 }
 
 void CDisassemblerWidget::printCell(QTextCursor &cursor, std::string text, int length) {
@@ -199,14 +200,14 @@ void CDisassemblerWidget::printReferences(QTextCursor &cursor, std::shared_ptr<G
     } else {
       printCell(cursor, std::string(), skip_len2);
     }
-/*    for (int i=0; i<m_ReferencesOnLine; i++) {
-      CReference ref=it;*/
-      printCell(cursor, ref.toString(), m_CellLengthReference, m_CellFormatReference);
-/*      ++it;
-      if (it==chunk->core()->references().end()) {
-        return;
-      }
-    }*/
+    /*    for (int i=0; i<m_ReferencesOnLine; i++) {
+          CReference ref=it;*/
+    printCell(cursor, ref.toString(), m_CellLengthReference, m_CellFormatReference);
+    /*      ++it;
+          if (it==chunk->core()->references().end()) {
+            return;
+          }
+        }*/
     cursor.insertText("\n");
   }
 }
@@ -222,8 +223,8 @@ void CDisassemblerWidget::printChunkUnparsed(QTextCursor &cursor, std::shared_pt
   if (!cmd.comment.empty()) {
     printCell(cursor, std::string(";")+cmd.comment, m_CellLengthCmdComment, m_CellFormatCmdComment);
   }
-
-  cursor.movePosition(QTextCursor::End);
+///@bug В профайлере - это самая дорогая операция... Стоит пересмотеть способ вывода
+  //cursor.movePosition(QTextCursor::End);
 }
 
 void CDisassemblerWidget::printChunkCode(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk) {

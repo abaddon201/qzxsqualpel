@@ -29,18 +29,18 @@ public:
   bool operator>=(const CAddr &s) const { return ((m_Offset>=s.m_Offset) && (m_Segment==s.m_Segment)); }
   bool operator<=(const CAddr &s) const { return ((m_Offset<=s.m_Offset) && (m_Segment==s.m_Segment)); }
   bool operator>(const CAddr &s) const { return ((m_Offset>s.m_Offset) && (m_Segment==s.m_Segment)); }
-  bool operator<(const CAddr &s) const { return ((m_Offset>s.m_Offset) && (m_Segment==s.m_Segment)); }
+  bool operator<(const CAddr &s) const { return ((m_Offset<s.m_Offset) && (m_Segment==s.m_Segment)); }
 
-  CAddr &operator++() { m_Offset++; return*this;}
-  CAddr &operator--() { m_Offset--; return*this;}
+  CAddr &operator++() { m_Offset++; _hex_cache.clear();return*this;}
+  CAddr &operator--() { m_Offset--; _hex_cache.clear();return*this;}
 
   CAddr operator+(unsigned long long offs) const {return m_Offset+offs;}
   CAddr operator-(unsigned long long offs) const {return m_Offset-offs;}
   CAddr operator-(const CAddr &raddr) const { return m_Offset-raddr.m_Offset; }
   CAddr operator+(const CAddr &raddr) const { return m_Offset+raddr.m_Offset; }
 
-  CAddr &operator+=(unsigned long long offs) { m_Offset+=offs; return *this; }
-  CAddr &operator-=(unsigned long long offs) { m_Offset-=offs; return *this; }
+  CAddr &operator+=(unsigned long long offs) { m_Offset+=offs; _hex_cache.clear(); return *this; }
+  CAddr &operator-=(unsigned long long offs) { m_Offset-=offs; _hex_cache.clear(); return *this; }
 
   std::string toString() const;
   std::string offsetString() const;
@@ -48,6 +48,8 @@ public:
 private:
   unsigned long long m_Offset;
   unsigned long long m_Segment;
+
+  mutable std::string _hex_cache;
 };
 
 #endif

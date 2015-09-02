@@ -19,6 +19,7 @@ public:
     DATA
   };
 
+  Segment() : _size{0}, _dataSize{0}, _id{0} {}
   Segment(IdType id, unsigned long long sz) : _size{sz}, _dataSize{0}, _id{id} {}
   void fill(unsigned char buff[], unsigned long long size);
 

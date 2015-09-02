@@ -12,8 +12,3 @@
 
 #include "CByte.h"
 #include "utils.h"
-
-std::string CByte::toString() const {
-  std::string tmp2=hexify<unsigned char>(m_Byte, 2);
-  return tmp2/*.toUpper()*/;
-}

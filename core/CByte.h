@@ -14,11 +14,12 @@
 #define CBYTE_H
 
 #include <string>
+#include "utils.h"
 
 class CByte {
 public:
   CByte(unsigned char b=0) : m_Byte(b) {}
-  std::string toString() const;
+  inline std::string toString() const {return byte2hex(m_Byte);}
   operator unsigned char() const {return m_Byte;}
 
 private:

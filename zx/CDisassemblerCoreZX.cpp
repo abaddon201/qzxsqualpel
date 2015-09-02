@@ -274,7 +274,7 @@ void CDisassemblerCoreZX::makeJump(CAddr from_addr, CAddr jump_addr, CReference:
 }
 
 void CDisassemblerCoreZX::setRawMemory(unsigned char* buf, size_t size) {
-  _memory->getSegment(0).fill(buf, size);
+  _memory->getSegment(0)->fill(buf, size);
 }
 
 void CDisassemblerCoreZX::initialParse() {

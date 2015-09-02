@@ -14,8 +14,9 @@
 #include "utils.h"
 
 std::string CAddr::toString() const {
-  std::string tmp = hexify(m_Segment, 4) + ":" + hexify(m_Offset, 4);
-  return tmp;
+  if (_hex_cache.empty())
+    _hex_cache = hexify(m_Segment, 4) + ":" + hexify(m_Offset, 4);
+  return _hex_cache;
 }
 
 std::string CAddr::offsetString() const {
