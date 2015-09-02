@@ -62,7 +62,7 @@ CDisassemblerCoreZX::CDisassemblerCoreZX(IGUIUpdater* updater)
   _memory->createSegment(0, 0xFFFF);
 }
 
-int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
+int CDisassemblerCoreZX::disassembleInstruction(const CAddr& addr) {
   char tbuff[128];
   size_t len;
   debugger_disassemble( tbuff, 128, &len, addr.offset() );
@@ -83,23 +83,19 @@ int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
     std::shared_ptr<CChunk> target_chunk;
     if (addr.compare(0)) {
       //parsing current addr
-      qDebug()<<"disassembleInstruction, zero addr";
       target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
     } else {
-      qDebug()<<"disassembleInstruction, nonzero addr";
       target_chunk=m_Chunks.getChunkContains(addr-1);
       if (target_chunk==0) {
         qDebug()<<"No target for disassemble";
         target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
       }
       //appending to prev. parsed block
-      qDebug()<<"target_chunk type:"<<target_chunk->type()<<"addr:"<<target_chunk->addr().toString();
       if (target_chunk->type()!=CChunk::Type::CODE) {
         qDebug()<<"Not code previous chunk";
         //parsing current addr
         target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
       }
-      qDebug()<<"target_chunk2 type:"<<target_chunk->type()<<"addr:"<<target_chunk->addr().toString();
     }
     qDebug()<<"addr="<<addr.toString()<<"command=" << buff <<"len=" << len;
     ///@bug must be in segment range check... think about it
@@ -129,15 +125,6 @@ int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
     cmd.addr = addr;
     cmd.len+=len;
     parseCommand(buff, cmd);
-    /*cmd.opcodes.push_back(opcode);
-    qDebug()<<"opcode appended";
-    if (chunks.size()) {
-      for (auto cc: chunks) {
-        //becourse we works only from undefined chunks, we able to do this like that
-        cmd.opcodes.push_back(cc->getCommand(0).opcodes[0]);
-      }
-    }*/
-    qDebug()<<"all opcodes appended";
     target_chunk->appendCommand(cmd);
     qDebug()<<"cmd appended";
   }
@@ -147,22 +134,19 @@ int CDisassemblerCoreZX::disassembleInstruction(CAddr addr) {
 void CDisassemblerCoreZX::parseCommand(std::string &src, CCommand &out_command) {
   std::vector<std::string> strlist=split(src,' ');
   out_command.command=strlist[0];
-  qDebug()<<"strlist1="<<strlist;
   if (strlist.size()>1) {
     //has args
     std::vector<std::string> args=split(strlist[1], ',');
-    qDebug()<<"argsstrlist1="<<args;
     out_command.arg1=args[0];
     if (args.size()==2) {
       out_command.arg2=args[1];
-      qDebug()<<"arg2="<<out_command.arg2;
     }
   }
 }
 
-void CDisassemblerCoreZX::disassembleBlock(CAddr addr) {
+void CDisassemblerCoreZX::disassembleBlock(const CAddr& st_addr) {
   int res=0;
-  CAddr st_addr=addr;
+  CAddr addr = st_addr;
   qDebug()<<"disassembleBlock(): addr"<< addr.toString();
   do {
     res=disassembleInstruction(addr);
@@ -227,11 +211,11 @@ bool CDisassemblerCoreZX::labelPresent(CAddr addr) const {
   return false;
 }
 
-std::shared_ptr<CChunk> CDisassemblerCoreZX::createChunk(CAddr addr, CChunk::Type type) {
+std::shared_ptr<CChunk> CDisassemblerCoreZX::createChunk(const CAddr& addr, CChunk::Type type) {
   return m_Chunks.createChunk(addr, type);
 }
 
-void CDisassemblerCoreZX::makeJump(CAddr from_addr, CAddr jump_addr, CReference::Type ref_type) {
+void CDisassemblerCoreZX::makeJump(const CAddr& from_addr, const CAddr& jump_addr, CReference::Type ref_type) {
   disassembleBlock(jump_addr);
   std::shared_ptr<CChunk> jmp_chunk=m_Chunks.getChunk(jump_addr);
   if (jmp_chunk) {

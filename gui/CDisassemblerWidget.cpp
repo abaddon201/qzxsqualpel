@@ -234,13 +234,13 @@ void CDisassemblerWidget::printChunkCode(QTextCursor &cursor, std::shared_ptr<GU
       printCell(cursor, chunk->core()->addr().toString(), m_CellLengthAddr, m_CellFormatAddr);
       printCell(cursor, std::string(), m_CellLengthOpcodes, m_CellFormatOpcodes);
       printCell(cursor, std::string(";")+chunk->core()->comment(), m_CellLengthLabel, m_CellFormatChunkComment);
-      cursor.movePosition(QTextCursor::End);
+//      cursor.movePosition(QTextCursor::End);
     }
     printCell(cursor, chunk->core()->addr().toString(), m_CellLengthAddr, m_CellFormatAddr);
     printCell(cursor, std::string(), m_CellLengthOpcodes, m_CellFormatOpcodes);
     printCell(cursor, chunk->core()->label()+":", m_CellLengthLabel, m_CellFormatLabel);
     printReferences(cursor, chunk);
-    cursor.movePosition(QTextCursor::End);
+//    cursor.movePosition(QTextCursor::End);
   }
   foreach (CCommand cmd, chunk->core()->commands()) {
     cursor.insertBlock();
@@ -252,9 +252,9 @@ void CDisassemblerWidget::printChunkCode(QTextCursor &cursor, std::shared_ptr<GU
     if (!cmd.comment.empty()) {
       printCell(cursor, std::string(";")+cmd.comment, m_CellLengthCmdComment, m_CellFormatCmdComment);
     }
-    cursor.movePosition(QTextCursor::End);
+//    cursor.movePosition(QTextCursor::End);
   }
-  cursor.movePosition(QTextCursor::End);
+//  cursor.movePosition(QTextCursor::End);
 }
 
 void CDisassemblerWidget::refreshView() {

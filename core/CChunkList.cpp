@@ -16,7 +16,7 @@
 CChunkList::CChunkList() {
 }
 
-std::shared_ptr<CChunk> CChunkList::createChunk(const CAddr addr, CChunk::Type type) {
+std::shared_ptr<CChunk> CChunkList::createChunk(const CAddr& addr, CChunk::Type type) {
   auto ch = m_Chunks[addr.offset()];
   if (ch!=0) {
     if (ch->type()!=CChunk::Type::UNPARSED)
@@ -27,23 +27,26 @@ std::shared_ptr<CChunk> CChunkList::createChunk(const CAddr addr, CChunk::Type t
   return ch;
 }
 
-std::shared_ptr<CChunk> CChunkList::getChunk(const CAddr addr) const {
-  auto c=std::find_if(m_Chunks.begin(), m_Chunks.end(), [addr](auto c) {return (c.second!=nullptr) && (c.second->addr() == addr);});
+std::shared_ptr<CChunk> CChunkList::getChunk(const CAddr& addr) {
+  /*auto c=std::find_if(m_Chunks.begin(), m_Chunks.end(), [addr](auto c) {return (c.second!=nullptr) && (c.second->addr() == addr);});
   if (c == m_Chunks.end())
     return nullptr;
-  return c->second;
+  return c->second;*/
+  return m_Chunks[addr];
 }
 
-std::shared_ptr<CChunk> CChunkList::getChunkContains(CAddr addr) const {
-  auto res = std::find_if(m_Chunks.begin(), m_Chunks.end(), [&addr](auto p) {return (p.second->addr()<=addr) && (p.second->addr()+p.second->length()>addr); });
+std::shared_ptr<CChunk> CChunkList::getChunkContains(const CAddr& addr) const {
+  ///@todo: Переместить арифметику в чанк, чтобы считалась один раз, при создании.
+  /// при мелком дизассембле опреатор + вызывается 15 млн. раз... и несёт максимальную нагрузку
+  auto res = std::find_if(m_Chunks.begin(), m_Chunks.end(), [&addr](auto& p) {return p.second && (p.second->addr()<=addr) && (p.second->addr()+p.second->length()>addr); });
   if (res == m_Chunks.end())
     return nullptr;
   else
     return res->second;
 }
 
-void CChunkList::removeChunk(CAddr addr) {
-  auto it = find_if(m_Chunks.begin(), m_Chunks.end(), [addr](auto ptr) {return ptr.second && (ptr.second->addr()==addr);});
+void CChunkList::removeChunk(const CAddr& addr) {
+  auto it = find_if(m_Chunks.begin(), m_Chunks.end(), [addr](auto& ptr) {return ptr.second && (ptr.second->addr()==addr);});
   if (it!=m_Chunks.end())
     m_Chunks.erase(it);
   ///@bug нужно разобраться с этой хренью:std::remove_if(m_Chunks.begin(), m_Chunks.end(), [addr](auto ptr) {return false;/*return ptr.second && (ptr.second->addr()==addr);*/});

@@ -43,20 +43,20 @@ public:
   IDisassemblerCore(IGUIUpdater* updater_, IDisassemblerCore* inst) : updater{updater_} {_inst=inst; _memory=std::unique_ptr<Memory> {new Memory()};}
   virtual ~IDisassemblerCore() {}
 
-  virtual int disassembleInstruction(CAddr addr)=0;
-  virtual void disassembleBlock(CAddr addr) = 0;
+  virtual int disassembleInstruction(const CAddr& addr)=0;
+  virtual void disassembleBlock(const CAddr& addr) = 0;
   virtual void setRawMemory(unsigned char* buf, size_t size) = 0;
   virtual void initialParse() = 0;
 
-  virtual std::shared_ptr<CChunk> createChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN) = 0;
+  virtual std::shared_ptr<CChunk> createChunk(const CAddr& addr, CChunk::Type type=CChunk::Type::UNKNOWN) = 0;
   virtual CChunkList &chunks() = 0;
 
   virtual CLabels& labels() = 0;
 
-  virtual void makeJump(CAddr from_addr, CAddr jump_addr, CReference::Type ref_type) = 0;
+  virtual void makeJump(const CAddr& from_addr, const CAddr& jump_addr, CReference::Type ref_type) = 0;
   virtual Type getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr)=0;
 
-  CByte getMemoryByte(CAddr addr) const {
+  CByte getMemoryByte(const CAddr& addr) const {
     return _memory->getByte(addr);
   }
 

@@ -43,10 +43,10 @@ public:
   CCommand getCommand(int idx) const;
   CCommand lastCommand() const { return m_Commands.back(); }
 
-  int commandsCount() const {return m_Commands.size();}
-  CommandsList &commands() {return m_Commands;}
+  inline int commandsCount() const {return m_Commands.size();}
+  inline CommandsList &commands() {return m_Commands;}
 
-  CAddr addr() const {return m_StartingAddr;}
+  inline const CAddr& addr() const {return m_StartingAddr;}
   bool containsAddr(const CAddr& addr) const {return (addr>=m_StartingAddr) && (addr<m_StartingAddr+m_Length);}
 
   unsigned long long length() const {return m_Length;}

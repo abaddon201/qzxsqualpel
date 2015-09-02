@@ -18,7 +18,7 @@ public:
   void switchSegment(Segment::IdType src, Segment::IdType dst);
   std::shared_ptr<Segment> getSegment(Segment::IdType id) {return _segments[id];}
 
-  CByte getByte(CAddr addr);
+  CByte getByte(const CAddr& addr);
 
   unsigned long long wholeSize();
 private:
