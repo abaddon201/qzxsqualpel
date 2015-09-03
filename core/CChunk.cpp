@@ -53,7 +53,7 @@ std::string CChunk::setLabel(std::string label, CReference::Type ref_type) {
       break;
     }
   } else {
-    m_Label=label;
+    m_Label = label;
   }
   return m_Label;
 }

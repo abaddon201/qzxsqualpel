@@ -20,6 +20,7 @@ CMainWindow::CMainWindow() {
   m_DisassemblerWidget=new CDisassemblerWidget(this);
 
   IDisassemblerCore* core=new CDisassemblerCoreZX(this);
+  core->init();
   m_DisassemblerWidget->setCore(core);
   QDockWidget* dock=new QDockWidget(tr("Navigation Stack"), this);
   dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);

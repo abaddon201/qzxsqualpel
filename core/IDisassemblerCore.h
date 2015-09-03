@@ -43,6 +43,8 @@ public:
   IDisassemblerCore(IGUIUpdater* updater_, IDisassemblerCore* inst) : updater{updater_} {_inst=inst; _memory=std::unique_ptr<Memory> {new Memory()};}
   virtual ~IDisassemblerCore() {}
 
+  virtual void init() = 0;
+
   virtual int disassembleInstruction(const CAddr& addr)=0;
   virtual void disassembleBlock(const CAddr& addr) = 0;
   virtual void setRawMemory(unsigned char* buf, size_t size) = 0;

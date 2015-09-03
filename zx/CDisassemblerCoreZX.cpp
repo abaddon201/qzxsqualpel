@@ -63,6 +63,11 @@ CDisassemblerCoreZX::CDisassemblerCoreZX(IGUIUpdater* updater)
   _memory->createSegment(0, 0xFFFF);
 }
 
+void CDisassemblerCoreZX::init() {
+  _known_labels.push_back(CLabel(0x2DC1, "LOG_2_A"));
+  _known_labels.push_back(CLabel(0x2E24, "PF_SMALL"));
+}
+
 int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
   char tbuff[128];
   size_t len;
@@ -141,6 +146,7 @@ void CDisassemblerCoreZX::parseCommand(std::string &src, CCommand &out_command) 
     if (args.size()==2) {
       out_command.arg2=args[1];
     }
+    autoCommentCommand(out_command);
   }
 }
 
@@ -239,7 +245,7 @@ void CDisassemblerCoreZX::disassembleBlock(const CAddr &st_addr) {
   qDebug()<<"finished chunk:st_addr="<<st_addr.toString()/*<<"commands count="<<chunk->commandsCount()*/<<"m_chunks.count="<<m_Chunks.count();
 }
 
-bool CDisassemblerCoreZX::labelPresent(CAddr addr) const {
+bool CDisassemblerCoreZX::labelPresent(const CAddr &addr) const {
   if (m_Labels.size()) {
     foreach (CLabel lbl, m_Labels) {
       if (lbl.addr==addr) {
@@ -254,14 +260,23 @@ std::shared_ptr<CChunk> CDisassemblerCoreZX::createChunk(const CAddr &addr, CChu
   return m_Chunks.createChunk(addr, type);
 }
 
+std::string CDisassemblerCoreZX::findKnownLabel(const CAddr &addr) {
+  for (auto lbl: _known_labels) {
+    if (lbl.addr==addr) {
+      return lbl.name;
+    }
+  }
+  return std::string();
+}
+
 void CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &jump_addr, CReference::Type ref_type) {
   disassembleBlock(jump_addr);
   std::shared_ptr<CChunk> jmp_chunk=m_Chunks.getChunk(jump_addr);
   if (jmp_chunk) {
     jmp_chunk->addCrossRef(from_addr, ref_type);
-    std::string lbl;
+    std::string lbl = findKnownLabel(jump_addr);
     if (jmp_chunk->label().empty()) {
-      lbl=jmp_chunk->setLabel(std::string(), ref_type);
+      lbl=jmp_chunk->setLabel(lbl, ref_type);
     } else {
       lbl=jmp_chunk->label();
     }

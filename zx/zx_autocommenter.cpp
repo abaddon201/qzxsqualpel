@@ -1,5 +1,20 @@
 #include "CDisassemblerCoreZX.h"
 
+void CDisassemblerCoreZX::autoCommentCommand(CCommand &out_command) {
+  if (out_command.command=="RST") {
+    //known RST's
+    if (out_command.arg1=="18") {
+      out_command.auto_comment="NEXT_CHAR";
+    } else if (out_command.arg1=="20") {
+      out_command.auto_comment="GET_CHAR";
+    } else if (out_command.arg1=="28") {
+      out_command.auto_comment="FP_CALC";
+    }
+  } else if (out_command.command=="CALL") {
+    //known CALL's
+  }
+}
+
 std::string CDisassemblerCoreZX::getRST28AutoComment(unsigned char b) {
   switch (b) {
   case 0x00:
@@ -11,7 +26,7 @@ std::string CDisassemblerCoreZX::getRST28AutoComment(unsigned char b) {
   case 0x03:
     return "substract";
   case 0x04:
-    return "multiply";
+    return "multiply"; //1 byte arg
   case 0x05:
     return "division";
   case 0x06:
@@ -134,8 +149,34 @@ std::string CDisassemblerCoreZX::getRST28AutoComment(unsigned char b) {
     return "st-mem-0";
   case 0x41:
     return "get-mem-0";
+  case 0x92:
+    return "delete";
+  case 0xA0:
+    return "stk-zero";
+  case 0xA1:
+    return "stk-one";
+  case 0xA2:
+    return "stk-half";
+  case 0xA4:
+    return "stk-ten";
+  case 0xC0:
+    return "st-mem-0";
+  case 0xC1:
+    return "st-mem-1";
+  case 0xC3:
+    return "st-mem-3";
+  case 0xC4:
+    return "st-mem-4";
+  case 0xC5:
+    return "st-mem-5";
+  case 0xE0:
+    return "get-mem-0";
+  case 0xE1:
+    return "get-mem-1";
   case 0xE2:
     return "get-mem-2";
+  case 0xEF:
+    return "exponent +7F"; //4 bytes arg
   default:
     return "unkn_fp_command";
   }
