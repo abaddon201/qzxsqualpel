@@ -41,6 +41,7 @@ public:
 
 private:
   void parseCommand(std::string& src, CCommand& out_command);
+  int postProcessChunk(std::shared_ptr<CChunk> chunk, int len);
 
   CChunkList m_Chunks;
   CLabels m_Labels;

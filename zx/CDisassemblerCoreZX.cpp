@@ -24,16 +24,9 @@ unsigned char readbyte_internal(unsigned short addr) {
 }
 
 IDisassemblerCore::Type CDisassemblerCoreZX::getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr) {
+  ///@bug rst 28 not last command in the chunk
   CCommand cmd=chunk->lastCommand();
-  ///@bug Нет анализа RST
-  /// @bug RST 28 Нужно анализировать особо... после RST располагается набор инструкций для вычислений (bcalc)
-  /// Пример:
-  /// 2E24 PF-SMALL RST 0028, FP-CALC
-  ///               DEFB +E2,get-mem-2
-  ///               DEFB +38,end-calc
-  /// Собственно, стоит сделать умный анализ этого RST
-  /// В помощь книга: http://dac.escet.urjc.es/~csanchez/pfcs/zxspectrum/CompleteSpectrumROMDisassemblyThe.pdf
-  if (cmd.command=="CALL") {
+  if ((cmd.command=="CALL") || (cmd.command=="RST")) {
     jump_addr=cmd.getJmpAddr();
     return Type::JT_CALL;
   }
@@ -70,7 +63,7 @@ CDisassemblerCoreZX::CDisassemblerCoreZX(IGUIUpdater* updater)
   _memory->createSegment(0, 0xFFFF);
 }
 
-int CDisassemblerCoreZX::disassembleInstruction(const CAddr& addr) {
+int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
   char tbuff[128];
   size_t len;
   debugger_disassemble( tbuff, 128, &len, addr.offset() );
@@ -111,7 +104,6 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr& addr) {
       qDebug()<<"instruction out of mem block";
       return -3;
     }
-    CChunkList::List chunks;
     if (len>1) {
       for (size_t i=1; i<len; i++) {
         std::shared_ptr<CChunk> ch=m_Chunks[addr+i];
@@ -125,7 +117,6 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr& addr) {
         }
       }
       for (size_t i=1; i<len; i++) {
-        chunks[addr+i]=m_Chunks.getChunk(addr+i);
         m_Chunks.removeChunk(addr+i);
       }
     }
@@ -135,6 +126,7 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr& addr) {
     parseCommand(buff, cmd);
     target_chunk->appendCommand(cmd);
     qDebug()<<"cmd appended";
+    len = postProcessChunk(target_chunk, len);
   }
   return len;
 }
@@ -152,7 +144,44 @@ void CDisassemblerCoreZX::parseCommand(std::string &src, CCommand &out_command) 
   }
 }
 
-void CDisassemblerCoreZX::disassembleBlock(const CAddr& st_addr) {
+int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len) {
+  /// RST 28 Нужно анализировать особо... после RST располагается набор инструкций для вычислений (bcalc)
+  /// Пример:
+  /// 2E24 PF-SMALL RST 0028, FP-CALC
+  ///               DEFB +E2,get-mem-2
+  ///               DEFB +38,end-calc
+  /// Собственно, стоит сделать умный анализ этого RST
+  /// В помощь книга: http://dac.escet.urjc.es/~csanchez/pfcs/zxspectrum/CompleteSpectrumROMDisassemblyThe.pdf
+  auto cmd = chunk->lastCommand();
+  if ((cmd.command=="RST") && (cmd.arg1=="28")) {
+    CAddr a=cmd.addr+1;
+
+    CByte b;
+    CCommand c;
+    while ((b=_memory->getByte(a))!=0x38) {
+      c.addr=a;
+      c.command="DB";
+      c.arg1=b.toString();
+      c.len=1;
+
+      m_Chunks.removeChunk(a);
+      chunk->appendCommand(c);
+      len++;
+      ++a;
+    }
+    c.addr=a;
+    c.command="DB";
+    c.arg1=b.toString();
+    c.len=1;
+
+    m_Chunks.removeChunk(a);
+    chunk->appendCommand(c);
+    len++;
+  }
+  return len;
+}
+
+void CDisassemblerCoreZX::disassembleBlock(const CAddr &st_addr) {
   int res=0;
   CAddr addr = st_addr;
   qDebug()<<"disassembleBlock(): addr"<< addr.toString();
@@ -219,11 +248,11 @@ bool CDisassemblerCoreZX::labelPresent(CAddr addr) const {
   return false;
 }
 
-std::shared_ptr<CChunk> CDisassemblerCoreZX::createChunk(const CAddr& addr, CChunk::Type type) {
+std::shared_ptr<CChunk> CDisassemblerCoreZX::createChunk(const CAddr &addr, CChunk::Type type) {
   return m_Chunks.createChunk(addr, type);
 }
 
-void CDisassemblerCoreZX::makeJump(const CAddr& from_addr, const CAddr& jump_addr, CReference::Type ref_type) {
+void CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &jump_addr, CReference::Type ref_type) {
   disassembleBlock(jump_addr);
   std::shared_ptr<CChunk> jmp_chunk=m_Chunks.getChunk(jump_addr);
   if (jmp_chunk) {
