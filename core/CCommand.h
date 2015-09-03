@@ -57,6 +57,7 @@ struct CCommand {
     arg1=c.arg1;
     arg2=c.arg2;
     comment=c.comment;
+    auto_comment=c.auto_comment;
   }
   CCommand &operator=(const CCommand &c) {
     addr=c.addr;
@@ -66,6 +67,7 @@ struct CCommand {
     arg1=c.arg1;
     arg2=c.arg2;
     comment=c.comment;
+    auto_comment=c.auto_comment;
     return *this;
   }
 

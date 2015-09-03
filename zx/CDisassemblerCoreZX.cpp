@@ -163,6 +163,7 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
       c.command="DB";
       c.arg1=b.toString();
       c.len=1;
+      c.auto_comment = getRST28AutoComment(b);
 
       m_Chunks.removeChunk(a);
       chunk->appendCommand(c);
@@ -173,6 +174,7 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
     c.command="DB";
     c.arg1=b.toString();
     c.len=1;
+    c.auto_comment = getRST28AutoComment(b);
 
     m_Chunks.removeChunk(a);
     chunk->appendCommand(c);

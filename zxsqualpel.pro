@@ -51,7 +51,8 @@ SOURCES += core/CAddr.cpp \
     gui/guichunklist.cpp \
     core/segment.cpp \
     core/memory.cpp \
-    core/utils.cpp
+    core/utils.cpp \
+    zx/zx_autocommenter.cpp
 
 #win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgets
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgetsd
