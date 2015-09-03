@@ -52,6 +52,7 @@ void CDisassemblerWidget::init() {
   m_CellLengthReference=CELL_LENGTH_REFERENCE;
 
   m_ReferencesOnLine=3;
+  setMinimumWidth(600);
 }
 
 void CDisassemblerWidget::navigateToLabel(CAddr &addr) {
