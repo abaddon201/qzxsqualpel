@@ -303,7 +303,6 @@ void CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &jump_add
 }
 
 void CDisassemblerCoreZX::setRawMemory(unsigned char* buf, size_t size) {
-  //_memory->getSegment(0)->fill(buf, 10000);
   _memory->getSegment(0)->fill(buf, size);
 }
 
