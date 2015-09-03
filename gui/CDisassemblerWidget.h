@@ -26,7 +26,7 @@ public:
   void keyPressEvent ( QKeyEvent* );
 
   ///@brief Показать на экране код с меткой под номером
-  void navigateToLabel(CAddr &addr);
+  void navigateToAddress(CAddr &addr);
 
   void paintEvent(QPaintEvent* event);
   void refreshView();

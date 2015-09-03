@@ -56,7 +56,7 @@ void CDisassemblerWidget::init() {
   setMinimumWidth(600);
 }
 
-void CDisassemblerWidget::navigateToLabel(CAddr &addr) {
+void CDisassemblerWidget::navigateToAddress(CAddr &addr) {
   qDebug()<< "navigate to label:" << addr.toString();
   std::shared_ptr<GUIChunk> chunk = _chunks.getChunkContains(addr);
   if (nullptr!=chunk) {
@@ -137,8 +137,10 @@ void CDisassemblerWidget::makeCodeUnderCursor() {
     return;
   }
   if (chunk->core()->isEmpty()) {
+    CAddr ret_addr = chunk->core()->addr();
     m_DisassemblerCore->disassembleBlock(chunk->core()->addr());
     refreshView();
+    navigateToAddress(ret_addr);
   }
 }
 

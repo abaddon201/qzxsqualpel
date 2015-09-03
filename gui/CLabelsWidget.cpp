@@ -49,5 +49,5 @@ void CLabelsWidget::refresh() {
 
 void CLabelsWidget::jumpToLabel(int row, int) {
   CAddr addr = item(row,0)->data(Qt::UserRole).value<CAddr>();
-  _disasm->navigateToLabel(addr);
+  _disasm->navigateToAddress(addr);
 }
