@@ -66,6 +66,7 @@ void CDisassemblerWidget::navigateToAddress(const CAddr &addr) {
     cursor.setPosition(chunk->cursorStartPosition());
     setTextCursor(cursor);
   }
+  centerCursor();
 }
 
 void CDisassemblerWidget::paintEvent(QPaintEvent* event) {
