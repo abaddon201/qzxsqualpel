@@ -40,6 +40,8 @@ struct CCommand {
   std::string arg2;
   ///@brief комментарий к команде
   std::string comment;
+  ///@brief комментарий к команде
+  std::string auto_comment;
   ///@brief Адрес начала команды
   /// @todo Команда может быть разорвана по сегментам
   CAddr addr;

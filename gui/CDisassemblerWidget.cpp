@@ -40,6 +40,7 @@ void CDisassemblerWidget::init() {
   m_CellFormatCommand.setForeground(QColor("#0000d0"));
   m_CellFormatArgs.setForeground(QColor("#000000"));
   m_CellFormatCmdComment.setForeground(QColor("#909090"));
+  m_CellFormatCmdAutoComment.setForeground(QColor("#109090"));
   m_CellFormatChunkComment.setForeground(QColor("#909090"));
   m_CellFormatReference.setForeground(QColor("#9090ff"));
 
@@ -213,9 +214,8 @@ void CDisassemblerWidget::printReferences(QTextCursor &cursor, std::shared_ptr<G
   }
 }
 
-void CDisassemblerWidget::printChunkUnparsed(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk) {
+void CDisassemblerWidget::printCommand(QTextCursor &cursor, const CCommand &cmd) {
   cursor.insertBlock();
-  CCommand cmd=chunk->core()->getCommand(0);
   printCell(cursor, cmd.addr.toString(), m_CellLengthAddr, m_CellFormatAddr);
   printCell(cursor, cmd.getOpcodesString(), m_CellLengthOpcodes, m_CellFormatOpcodes);
   printCell(cursor, std::string(), m_CellLengthLabel, m_CellFormatLabel);
@@ -223,7 +223,13 @@ void CDisassemblerWidget::printChunkUnparsed(QTextCursor &cursor, std::shared_pt
   printCell(cursor, cmd.getArgsString(), m_CellLengthArgs, m_CellFormatArgs);
   if (!cmd.comment.empty()) {
     printCell(cursor, std::string(";")+cmd.comment, m_CellLengthCmdComment, m_CellFormatCmdComment);
+  } else if (!cmd.auto_comment.empty()) {
+    printCell(cursor, std::string(";")+cmd.auto_comment, m_CellLengthCmdComment, m_CellFormatCmdAutoComment);
   }
+}
+
+void CDisassemblerWidget::printChunkUnparsed(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk) {
+  printCommand(cursor, chunk->core()->getCommand(0));
 ///@bug В профайлере - это самая дорогая операция... Стоит пересмотеть способ вывода
   //cursor.movePosition(QTextCursor::End);
 }
@@ -235,24 +241,14 @@ void CDisassemblerWidget::printChunkCode(QTextCursor &cursor, std::shared_ptr<GU
       printCell(cursor, chunk->core()->addr().toString(), m_CellLengthAddr, m_CellFormatAddr);
       printCell(cursor, std::string(), m_CellLengthOpcodes, m_CellFormatOpcodes);
       printCell(cursor, std::string(";")+chunk->core()->comment(), m_CellLengthLabel, m_CellFormatChunkComment);
-//      cursor.movePosition(QTextCursor::End);
     }
     printCell(cursor, chunk->core()->addr().toString(), m_CellLengthAddr, m_CellFormatAddr);
     printCell(cursor, std::string(), m_CellLengthOpcodes, m_CellFormatOpcodes);
     printCell(cursor, chunk->core()->label()+":", m_CellLengthLabel, m_CellFormatLabel);
     printReferences(cursor, chunk);
-//    cursor.movePosition(QTextCursor::End);
   }
   foreach (CCommand cmd, chunk->core()->commands()) {
-    cursor.insertBlock();
-    printCell(cursor, cmd.addr.toString(), m_CellLengthAddr, m_CellFormatAddr);
-    printCell(cursor, cmd.getOpcodesString(), m_CellLengthOpcodes, m_CellFormatOpcodes);
-    printCell(cursor, std::string(), m_CellLengthLabel, m_CellFormatLabel);
-    printCell(cursor, cmd.command, m_CellLengthCommand, m_CellFormatCommand);
-    printCell(cursor, cmd.getArgsString(), m_CellLengthArgs, m_CellFormatArgs);
-    if (!cmd.comment.empty()) {
-      printCell(cursor, std::string(";")+cmd.comment, m_CellLengthCmdComment, m_CellFormatCmdComment);
-    }
+    printCommand(cursor, cmd);
 //    cursor.movePosition(QTextCursor::End);
   }
 //  cursor.movePosition(QTextCursor::End);

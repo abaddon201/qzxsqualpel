@@ -26,7 +26,7 @@ public:
   void keyPressEvent ( QKeyEvent* );
 
   ///@brief Показать на экране код с меткой под номером
-  void navigateToLabel(CAddr& addr);
+  void navigateToLabel(CAddr &addr);
 
   void paintEvent(QPaintEvent* event);
   void refreshView();
@@ -39,6 +39,7 @@ private:
   void printCell(QTextCursor &cursor, std::string text, int length);
 
   void printReferences(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
+  void printCommand(QTextCursor &cursor, const CCommand &cmd);
   void printChunkUnparsed(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
   void printChunkCode(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
 
@@ -51,6 +52,7 @@ private:
   QTextCharFormat m_CellFormatCommand;
   QTextCharFormat m_CellFormatArgs;
   QTextCharFormat m_CellFormatCmdComment;
+  QTextCharFormat m_CellFormatCmdAutoComment;
   QTextCharFormat m_CellFormatChunkComment;
   QTextCharFormat m_CellFormatReference;
 
