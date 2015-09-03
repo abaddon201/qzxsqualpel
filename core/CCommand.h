@@ -79,6 +79,8 @@ struct CCommand {
   CByte opcodes(unsigned long long offs) const;
   ///@brief Возвращает адрес перехода команды (первый либо второй аргумент)
   CAddr getJmpAddr() const;
+  ///@brief Устанавливает метку перехода команды (первый либо второй аргумент)
+  void setJmpAddr(const std::string label);
 };
 
 #endif

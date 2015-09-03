@@ -23,6 +23,14 @@ CAddr CCommand::getJmpAddr() const {
   }
 }
 
+void CCommand::setJmpAddr(const std::string label) {
+  if (arg2.empty()) {
+    arg1 = label;
+  } else {
+    arg2 = label;
+  }
+}
+
 std::string CCommand::getArgsString() const {
   if (arg1.empty()) {
     return std::string();

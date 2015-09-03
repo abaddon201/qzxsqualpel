@@ -216,18 +216,18 @@ void CDisassemblerCoreZX::disassembleBlock(const CAddr &st_addr) {
       //call
       qDebug()<<"call: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
       qDebug()<<"st_addr="<<st_addr.toString();
-      makeJump(addr, jump_addr, CReference::Type::CALL);
+      chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, CReference::Type::CALL));
       addr+=res;
       break;
     case IDisassemblerCore::Type::JT_COND_JUMP:
       //conditional jump
       qDebug()<<"cond jump: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
-      makeJump(addr, jump_addr, CReference::Type::JUMP);
+      chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, CReference::Type::JUMP));
       addr+=res;
       break;
     case IDisassemblerCore::Type::JT_JUMP:
       qDebug()<<"jump: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
-      makeJump(addr, jump_addr, CReference::Type::JUMP);
+      chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, CReference::Type::JUMP));
       res=0;
       break;
     case IDisassemblerCore::Type::JT_COND_RET:
@@ -271,7 +271,7 @@ std::string CDisassemblerCoreZX::findKnownLabel(const CAddr &addr) {
   return std::string();
 }
 
-void CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &jump_addr, CReference::Type ref_type) {
+std::string CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &jump_addr, CReference::Type ref_type) {
   disassembleBlock(jump_addr);
   std::shared_ptr<CChunk> jmp_chunk=m_Chunks.getChunk(jump_addr);
   if (jmp_chunk == nullptr) {
@@ -280,13 +280,13 @@ void CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &jump_add
     std::shared_ptr<CChunk> near_chunk=m_Chunks.getChunkContains(jump_addr);
     if (near_chunk==0) {
       qDebug()<<"Fatal error on split: No target chunk";
-      return;
+      return std::string();
     }
     qDebug()<<"near_chunk:addr"<<near_chunk->addr().toString();
     jmp_chunk=near_chunk->splitAt(jump_addr);
     if (jmp_chunk==0) {
       qDebug()<<"Split impossible";
-      return;
+      return std::string();
     }
   }
   jmp_chunk->addCrossRef(from_addr, ref_type);
@@ -300,6 +300,7 @@ void CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &jump_add
     CLabel label(jump_addr, lbl);
     m_Labels.push_back(label);
   }
+  return lbl;
 }
 
 void CDisassemblerCoreZX::setRawMemory(unsigned char* buf, size_t size) {
