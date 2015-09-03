@@ -24,7 +24,7 @@ void CChunk::appendCommand(CCommand cmd) {
   m_Length+=cmd.len;
 }
 
-CCommand CChunk::getCommand(int idx) const {
+CCommand &CChunk::getCommand(int idx) {
   if (m_Commands.size()==0) {
     qDebug()<<"No commands here";
     throw int(666);
@@ -66,8 +66,8 @@ std::shared_ptr<CChunk> CChunk::splitAt(CAddr addr) {
   }
   CommandsList::iterator it;
   CAddr cur_addr=m_StartingAddr;
+  int len=0;
   for (it=m_Commands.begin(); it!=m_Commands.end(); ++it) {
-    cur_addr+=(*it).len;
     qDebug()<<"caddr"<<cur_addr.toString();
     if (cur_addr==addr) {
       //start splitting
@@ -76,7 +76,10 @@ std::shared_ptr<CChunk> CChunk::splitAt(CAddr addr) {
       //split impossible, allready busy
       return 0;
     }
+    cur_addr+=(*it).len;
+    len+=(*it).len;
   }
+  m_Length = len;
   qDebug()<<"moving commands";
   std::shared_ptr<CChunk> new_chunk=IDisassemblerCore::inst()->createChunk(addr, m_Type);
   if (new_chunk==0) {
@@ -84,11 +87,11 @@ std::shared_ptr<CChunk> CChunk::splitAt(CAddr addr) {
     return 0;
   }
   int cnt=0;
+  len = 0;
   for (; it!=m_Commands.end();) {
     qDebug()<<"count"<<cnt;
     cnt++;
-    //new_chunk->appendCommand(*it);
-    new_chunk->m_Commands.push_back(*it);
+    new_chunk->appendCommand(*it);
     it=m_Commands.erase(it);
     //if (it==m_Commands.end()) break;
   }

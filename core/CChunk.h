@@ -40,8 +40,8 @@ public:
   void addCrossRef(CAddr addr, CReference::Type type);
 
   void appendCommand(CCommand cmd);
-  CCommand getCommand(int idx) const;
-  CCommand lastCommand() const { return m_Commands.back(); }
+  CCommand& getCommand(int idx) ;
+  CCommand& lastCommand() { return m_Commands.back(); }
 
   inline int commandsCount() const {return m_Commands.size();}
   inline CommandsList &commands() {return m_Commands;}
