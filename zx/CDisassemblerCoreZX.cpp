@@ -64,8 +64,10 @@ CDisassemblerCoreZX::CDisassemblerCoreZX(IGUIUpdater* updater)
 }
 
 void CDisassemblerCoreZX::init() {
+  _known_labels.push_back(CLabel(0x2DAD, "FP_DELETE"));
   _known_labels.push_back(CLabel(0x2DC1, "LOG_2_A"));
-  _known_labels.push_back(CLabel(0x2E24, "PF_SMALL"));
+  _known_labels.push_back(CLabel(0x2DE3, "PRINT_FP"));
+  _known_labels.push_back(CLabel(0x2E24, "pf_small_jmp"));
 }
 
 int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
@@ -272,19 +274,7 @@ std::string CDisassemblerCoreZX::findKnownLabel(const CAddr &addr) {
 void CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &jump_addr, CReference::Type ref_type) {
   disassembleBlock(jump_addr);
   std::shared_ptr<CChunk> jmp_chunk=m_Chunks.getChunk(jump_addr);
-  if (jmp_chunk) {
-    jmp_chunk->addCrossRef(from_addr, ref_type);
-    std::string lbl = findKnownLabel(jump_addr);
-    if (jmp_chunk->label().empty()) {
-      lbl=jmp_chunk->setLabel(lbl, ref_type);
-    } else {
-      lbl=jmp_chunk->label();
-    }
-    if (!labelPresent(jump_addr)) {
-      CLabel label(jump_addr, lbl);
-      m_Labels.push_back(label);
-    }
-  } else {
+  if (jmp_chunk == nullptr) {
     qDebug()<<"Split chunk at jump";
     // split target chunk
     std::shared_ptr<CChunk> near_chunk=m_Chunks.getChunkContains(jump_addr);
@@ -293,23 +283,22 @@ void CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &jump_add
       return;
     }
     qDebug()<<"near_chunk:addr"<<near_chunk->addr().toString();
-    std::shared_ptr<CChunk> jmp_chunk=near_chunk->splitAt(jump_addr);
+    jmp_chunk=near_chunk->splitAt(jump_addr);
     if (jmp_chunk==0) {
       qDebug()<<"Split impossible";
       return;
     }
-    qDebug()<<"jmp_chunk:addr"<<jmp_chunk->addr().toString();
-    jmp_chunk->addCrossRef(from_addr, ref_type);
-    std::string lbl;
-    if (jmp_chunk->label().empty()) {
-      lbl=jmp_chunk->setLabel(std::string(), ref_type);
-    } else {
-      lbl=jmp_chunk->label();
-    }
-    if (!labelPresent(jump_addr)) {
-      CLabel label(jump_addr, lbl);
-      m_Labels.push_back(label);
-    }
+  }
+  jmp_chunk->addCrossRef(from_addr, ref_type);
+  std::string lbl = findKnownLabel(jump_addr);
+  if (jmp_chunk->label().empty()) {
+    lbl=jmp_chunk->setLabel(lbl, ref_type);
+  } else {
+    lbl=jmp_chunk->label();
+  }
+  if (!labelPresent(jump_addr)) {
+    CLabel label(jump_addr, lbl);
+    m_Labels.push_back(label);
   }
 }
 
