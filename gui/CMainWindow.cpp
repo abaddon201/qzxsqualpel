@@ -51,12 +51,25 @@ void CMainWindow::setupFileMenu() {
   fileMenu->addAction(tr("E&xit"), qApp, SLOT(quit()),
                       QKeySequence(tr("Ctrl+Q",
                                       "File|Exit")));
+  QMenu* toolsMenu = new QMenu(tr("&Tools"), this);
+  menuBar()->addMenu(toolsMenu);
+
+  toolsMenu->addAction(tr("&Load guesses..."), this, SLOT(loadGuesses()),
+                      QKeySequence(tr("Ctrl+L",
+                                      "File|Load")));
 }
 
 void CMainWindow::openFile() {
   QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", "RAW ZX Files (*.raw)");
   if (!fileName.isEmpty()) {
     m_DisassemblerWidget->openRAWFile(fileName);
+  }
+}
+
+void CMainWindow::loadGuesses() {
+  QString fileName = QFileDialog::getOpenFileName(this, tr("Load Guesses file"), "", "QSqualpel Guess Files (*.qzg)");
+  if (!fileName.isEmpty()) {
+    IDisassemblerCore::inst()->loadGuessFile(fileName.toStdString());
   }
 }
 

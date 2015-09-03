@@ -26,6 +26,8 @@ private:
 
   void setupFileMenu();
 private slots:
+  void loadGuesses();
+
   void openFile();
   void saveFile();
 };

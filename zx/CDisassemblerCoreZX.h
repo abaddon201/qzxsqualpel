@@ -23,6 +23,7 @@ public:
   CDisassemblerCoreZX(IGUIUpdater* updater);
 
   void init() override;
+  void loadGuessFile(const std::string& fname) override;
   virtual int disassembleInstruction(const CAddr &addr) override;
   void disassembleBlock(const CAddr &st_addr) override;
   void initialParse() override;

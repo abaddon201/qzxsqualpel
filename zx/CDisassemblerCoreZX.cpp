@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
 
 //compatibility hack for fuse disassembler
 unsigned char readbyte_internal(unsigned short addr) {
@@ -64,10 +65,20 @@ CDisassemblerCoreZX::CDisassemblerCoreZX(IGUIUpdater* updater)
 }
 
 void CDisassemblerCoreZX::init() {
-  _known_labels.push_back(CLabel(0x2DAD, "FP_DELETE"));
-  _known_labels.push_back(CLabel(0x2DC1, "LOG_2_A"));
-  _known_labels.push_back(CLabel(0x2DE3, "PRINT_FP"));
-  _known_labels.push_back(CLabel(0x2E24, "pf_small_jmp"));
+}
+
+void CDisassemblerCoreZX::loadGuessFile(const std::string &fname) {
+  std::ifstream f(fname);
+  while (!f.eof()) {
+    unsigned long long seg, off;
+    std::string nm;
+    f >> std::hex >> seg;
+    f.ignore(1);
+    f >> std::hex >> off;
+    f >> nm;
+    if (!nm.empty())
+      _known_labels.push_back(CLabel(CAddr(off, seg), nm));
+  }
 }
 
 int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {

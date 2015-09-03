@@ -58,9 +58,9 @@ public:
   virtual std::string makeJump(const CAddr& from_addr, const CAddr& jump_addr, CReference::Type ref_type) = 0;
   virtual Type getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr)=0;
 
-  CByte getMemoryByte(const CAddr& addr) const {
-    return _memory->getByte(addr);
-  }
+  CByte getMemoryByte(const CAddr& addr) const {return _memory->getByte(addr);}
+
+  virtual void loadGuessFile(const std::string& fname) = 0;
 
   static IDisassemblerCore* inst() {return _inst;}
 

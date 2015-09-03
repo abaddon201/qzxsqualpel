@@ -1,0 +1,4 @@
+0:2DAD FP_DELETE
+0:2DC1 LOG_2_A
+0:2DE3 PRINT_FP
+0:2E24 pf_small_jmp
