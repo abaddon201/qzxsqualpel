@@ -26,7 +26,7 @@ public:
   void keyPressEvent ( QKeyEvent* );
 
   ///@brief Показать на экране код с меткой под номером
-  void navigateToAddress(CAddr &addr);
+  void navigateToAddress(const CAddr &addr);
 
   void paintEvent(QPaintEvent* event);
   void refreshView();
@@ -45,6 +45,8 @@ private:
 
   void changeNameUnderCursor();
   void makeCodeUnderCursor();
+
+  void navigateToAddrDlg();
 
   QTextCharFormat m_CellFormatAddr;
   QTextCharFormat m_CellFormatOpcodes;

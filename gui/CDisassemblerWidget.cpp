@@ -1,5 +1,7 @@
 #include <QDebug>
 
+#include "helper_widgets.h"
+
 #include "CDisassemblerWidget.h"
 
 #include <QFile>
@@ -56,8 +58,8 @@ void CDisassemblerWidget::init() {
   setMinimumWidth(600);
 }
 
-void CDisassemblerWidget::navigateToAddress(CAddr &addr) {
-  qDebug()<< "navigate to label:" << addr.toString();
+void CDisassemblerWidget::navigateToAddress(const CAddr &addr) {
+  qDebug()<< "navigate to address:" << addr.toString();
   std::shared_ptr<GUIChunk> chunk = _chunks.getChunkContains(addr);
   if (nullptr!=chunk) {
     QTextCursor cursor(textCursor());
@@ -90,6 +92,13 @@ void CDisassemblerWidget::keyPressEvent(QKeyEvent* event) {
   case Qt::Key_O:
     // must set offset under cursor
     return;
+  case Qt::Key_G:
+    // jump to addr
+  {
+    NavigateToAddrDlg a{this};
+    a();
+    return;
+  }
   case Qt::Key_Enter:
     // follow
     return;

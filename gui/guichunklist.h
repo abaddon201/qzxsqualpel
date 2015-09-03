@@ -12,7 +12,7 @@ class CChunkList;
 class GUIChunkList {
 public:
   std::shared_ptr<GUIChunk> getChunkByPosition(int pos) const;
-  std::shared_ptr<GUIChunk> getChunkContains(CAddr& addr) const;
+  std::shared_ptr<GUIChunk> getChunkContains(const CAddr& addr) const;
 
   std::list<std::shared_ptr<GUIChunk>>& chunks() {return _chunks;}
 

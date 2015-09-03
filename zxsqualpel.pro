@@ -31,7 +31,8 @@ HEADERS += core/CAddr.h \
     gui/guichunk.h \
     gui/guichunklist.h \
     core/segment.h \
-    core/memory.h
+    core/memory.h \
+    gui/helper_widgets.h
 SOURCES += core/CAddr.cpp \
            core/CByte.cpp \
            core/CChunk.cpp \
@@ -63,3 +64,6 @@ SOURCES += core/CAddr.cpp \
 
 DISTFILES += \
     .astylerc
+
+FORMS += \
+    gui/goto_address.ui
