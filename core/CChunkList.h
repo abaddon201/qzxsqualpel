@@ -26,11 +26,12 @@ public:
   using List = std::map<const CAddr, std::shared_ptr<CChunk>>;
 
   CChunkList();
-  std::shared_ptr<CChunk> createChunk(const CAddr& addr, CChunk::Type type=CChunk::Type::UNKNOWN);
-  std::shared_ptr<CChunk> getChunk(const CAddr& addr);
-  std::shared_ptr<CChunk> getChunkContains(const CAddr& addr) const;
-  void removeChunk(const CAddr& addr);
-  List& chunks() {return m_Chunks;}
+  std::shared_ptr<CChunk> createChunk(const CAddr &addr, CChunk::Type type=CChunk::Type::UNKNOWN);
+  std::shared_ptr<CChunk> getChunk(const CAddr &addr);
+  std::shared_ptr<CChunk> getChunkContains(const CAddr &addr) const;
+  void removeChunk(const CAddr &addr);
+  void addChunk(const CAddr &addr, std::shared_ptr<CChunk> chunk) {m_Chunks[addr]=chunk;}
+  List &chunks() {return m_Chunks;}
   /// @bug must be setted from memory image size
   CAddr getMaxAddr() const { return CAddr(0x0FFFF); }
   int count() const;
@@ -38,7 +39,7 @@ public:
 
   void printDebug() const;
 
-  std::shared_ptr<CChunk> operator[] (const CAddr& idx) const {
+  std::shared_ptr<CChunk> operator[] (const CAddr &idx) const {
     auto res = m_Chunks.find(idx);
 
     if (res == m_Chunks.end())

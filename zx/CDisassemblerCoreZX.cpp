@@ -91,13 +91,14 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
     //initialize chunk
     std::shared_ptr<CChunk> chunk_i = m_Chunks.getChunk(addr);
     if (chunk_i==0) {
-      qDebug()<<"no instruction here";
+      qDebug()<<"no instruction here: "<<QString::fromStdString(addr.toString());
       return 0;
     }
     if (!chunk_i->isEmpty())  {
-      qDebug()<<"allready parsed";
+      qDebug()<<"allready parsed: "<<QString::fromStdString(addr.toString());
       return 0;
     }
+    std::shared_ptr<CChunk> old_chunk = m_Chunks.getChunk(addr);
     m_Chunks.removeChunk(addr);
     std::shared_ptr<CChunk> target_chunk;
     if (addr.compare(0)) {
@@ -120,6 +121,7 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
     ///@bug must be in segment range check... think about it
     if (addr+len>=m_Chunks.getMaxAddr()) {
       qDebug()<<"instruction out of mem block";
+      m_Chunks.addChunk(addr, old_chunk);
       return -3;
     }
     if (len>1) {
@@ -127,10 +129,14 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
         std::shared_ptr<CChunk> ch=m_Chunks[addr+i];
         if (ch==0) {
           qDebug()<<"Instrunction longer than unparsed block";
+          //m_Chunks.removeChunk(addr);
+          m_Chunks.addChunk(addr, old_chunk);
           return -4;
         }
         if (ch->type()!=CChunk::Type::UNPARSED) {
           qDebug()<<"Instrunction longer than unparsed block2";
+          //m_Chunks.removeChunk(addr);
+          m_Chunks.addChunk(addr, old_chunk);
           return -4;
         }
       }
@@ -206,40 +212,44 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
     CByte b;
     CCommand c;
     int args_cnt;
-    while ((b=_memory->getByte(a))!=0x38) {
-      c.addr=a;
-      c.command="DB";
-      c.arg1=b.toString();
-      c.auto_comment = getRST28AutoComment(b, args_cnt);
-      c.len=1;
-
-      m_Chunks.removeChunk(a);
-      chunk->appendCommand(c);
-      len++;
-      ++a;
-      if (args_cnt) {
+    try {
+      while ((b=_memory->getByte(a))!=0x38) {
         c.addr=a;
         c.command="DB";
-        b=_memory->getByte(a);
         c.arg1=b.toString();
-        c.auto_comment = "dest_addr: "+CAddr(a+int{(signed char)b}).toString();
+        c.auto_comment = getRST28AutoComment(b, args_cnt);
         c.len=1;
 
         m_Chunks.removeChunk(a);
         chunk->appendCommand(c);
         len++;
         ++a;
-      }
-    }
-    c.addr=a;
-    c.command="DB";
-    c.arg1=b.toString();
-    c.len=1;
-    c.auto_comment = getRST28AutoComment(b, args_cnt);
+        if (args_cnt) {
+          c.addr=a;
+          c.command="DB";
+          b=_memory->getByte(a);
+          c.arg1=b.toString();
+          c.auto_comment = "dest_addr: "+CAddr(a+int{(signed char)b}).toString();
+          c.len=1;
 
-    m_Chunks.removeChunk(a);
-    chunk->appendCommand(c);
-    len++;
+          m_Chunks.removeChunk(a);
+          chunk->appendCommand(c);
+          len++;
+          ++a;
+        }
+      }
+      c.addr=a;
+      c.command="DB";
+      c.arg1=b.toString();
+      c.len=1;
+      c.auto_comment = getRST28AutoComment(b, args_cnt);
+
+      m_Chunks.removeChunk(a);
+      chunk->appendCommand(c);
+      len++;
+    } catch (std::out_of_range &) {
+      qDebug()<<"finished due address exceeds";
+    }
   }
   return len;
 }

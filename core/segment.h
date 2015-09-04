@@ -2,6 +2,8 @@
 #define SEGMENT_H
 
 #include <vector>
+#include <stdexcept>
+#include <algorithm>
 
 #include "CByte.h"
 
@@ -26,7 +28,7 @@ public:
   inline IdType id() const {return _id;}
   inline unsigned long long dataSize() const {return _dataSize;}
 
-  inline CByte getByte(unsigned long long offset) const {if (offset<_dataSize) return _mem[offset]; else return 0;}
+  inline CByte getByte(unsigned long long offset) const {if (offset<_dataSize) return _mem[offset]; else throw std::out_of_range("offset:"+std::to_string(offset)+", max:"+std::to_string(_dataSize));}
 
 private:
   ///@brief размер сегмента в байтах
