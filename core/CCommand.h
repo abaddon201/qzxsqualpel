@@ -34,6 +34,8 @@ struct CCommand {
   //OpcodesList opcodes;
   ///@brief символьное представление команды
   std::string command;
+  ///@brief числовое представление команды (не обязательно опкод)
+  int command_code;
   ///@brief символьное представление первого аргумента
   std::string arg1;
   ///@brief символьное представление второго аргумента
@@ -48,11 +50,11 @@ struct CCommand {
   ///@brief Длина команды в байтах
   int len;
 
-  CCommand() : len{0} {}
+  CCommand() : command_code{0}, len{0} {}
   CCommand(const CCommand &c) {
     addr=c.addr;
     len=c.len;
-    //opcodes=c.opcodes;
+    command_code=c.command_code;
     command=c.command;
     arg1=c.arg1;
     arg2=c.arg2;
@@ -62,7 +64,7 @@ struct CCommand {
   CCommand &operator=(const CCommand &c) {
     addr=c.addr;
     len=c.len;
-    //opcodes=c.opcodes;
+    command_code=c.command_code;
     command=c.command;
     arg1=c.arg1;
     arg2=c.arg2;

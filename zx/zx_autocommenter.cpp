@@ -1,7 +1,7 @@
 #include "CDisassemblerCoreZX.h"
 
 void CDisassemblerCoreZX::autoCommentCommand(CCommand &out_command) {
-  if (out_command.command=="RST") {
+  if (out_command.command_code==CMD_RST) {
     //known RST's
     if (out_command.arg1=="10") {
       out_command.auto_comment="PRINT_A";
@@ -12,7 +12,7 @@ void CDisassemblerCoreZX::autoCommentCommand(CCommand &out_command) {
     } else if (out_command.arg1=="28") {
       out_command.auto_comment="FP_CALC";
     }
-  } else if (out_command.command=="CALL") {
+  } else if (out_command.command_code==CMD_CALL) {
     //known CALL's
   }
 }

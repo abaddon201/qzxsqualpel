@@ -23,14 +23,14 @@ public:
   CDisassemblerCoreZX(IGUIUpdater* updater);
 
   void init() override;
-  void loadGuessFile(const std::string& fname) override;
+  void loadGuessFile(const std::string &fname) override;
   virtual int disassembleInstruction(const CAddr &addr) override;
   void disassembleBlock(const CAddr &st_addr) override;
   void initialParse() override;
 
 
   CLabels &labels() override { return m_Labels;}
-  bool labelPresent(const CAddr& addr) const;
+  bool labelPresent(const CAddr &addr) const;
 
   std::shared_ptr<CChunk> createChunk(const CAddr &addr, CChunk::Type type=CChunk::Type::UNKNOWN) override;
   CChunkList &chunks() override {return m_Chunks;}
@@ -41,11 +41,22 @@ public:
 
   void setRawMemory(unsigned char* buf, size_t size) override;
 
+  enum {
+    CMD_NONE = 0,
+    CMD_CALL,
+    CMD_RST,
+    CMD_RET,
+    CMD_RETI,
+    CMD_RETN,
+    CMD_JP,
+    CMD_JR,
+  };
 private:
+  int command2code(const std::string &cmd) const;
   void parseCommand(std::string &src, CCommand &out_command);
   void autoCommentCommand(CCommand &out_command);
-  std::string getRST28AutoComment(unsigned char b, int& args_count);
-  std::string findKnownLabel(const CAddr& addr);
+  std::string getRST28AutoComment(unsigned char b, int &args_count);
+  std::string findKnownLabel(const CAddr &addr);
 
   int postProcessChunk(std::shared_ptr<CChunk> chunk, int len);
 

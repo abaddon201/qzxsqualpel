@@ -27,11 +27,11 @@ unsigned char readbyte_internal(unsigned short addr) {
 IDisassemblerCore::Type CDisassemblerCoreZX::getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr) {
   ///@bug rst 28 not last command in the chunk
   CCommand cmd=chunk->lastCommand();
-  if ((cmd.command=="CALL") || (cmd.command=="RST")) {
+  if ((cmd.command_code==CMD_CALL) || (cmd.command_code==CMD_RST)) {
     jump_addr=cmd.getJmpAddr();
     return Type::JT_CALL;
   }
-  if (((cmd.command=="JR") || (cmd.command=="JP")) && (cmd.arg2.empty())) {
+  if (((cmd.command_code==CMD_JR) || (cmd.command_code==CMD_JP)) && (cmd.arg2.empty())) {
     if (cmd.arg1[0]=='"' || contains(cmd.arg1, "IX") || contains(cmd.arg1, "IY") || contains(cmd.arg1, "HL")) {
       //jump to (HL) or (IX) or (IY)
       return Type::JT_RET;
@@ -39,20 +39,20 @@ IDisassemblerCore::Type CDisassemblerCoreZX::getLastCmdJumpType(std::shared_ptr<
     jump_addr=cmd.getJmpAddr();
     return Type::JT_JUMP;
   }
-  if (((cmd.command=="JR") || (cmd.command=="JP")) && (!cmd.arg2.empty())) {
+  if (((cmd.command_code==CMD_JR) || (cmd.command_code==CMD_JP)) && (!cmd.arg2.empty())) {
     jump_addr=cmd.getJmpAddr();
     return Type::JT_COND_JUMP;
   }
-  if ((cmd.command=="RET") && (!cmd.arg1.empty())) {
+  if ((cmd.command_code==CMD_RET) && (!cmd.arg1.empty())) {
     return Type::JT_COND_RET;
   }
-  if ((cmd.command=="RET") && (cmd.arg1.empty())) {
+  if ((cmd.command_code==CMD_RET) && (cmd.arg1.empty())) {
     return Type::JT_RET;
   }
-  if (cmd.command=="RETI") {
+  if (cmd.command_code==CMD_RETI) {
     return Type::JT_RET;
   }
-  if (cmd.command=="RETN") {
+  if (cmd.command_code==CMD_RETN) {
     return Type::JT_RET;
   }
   return Type::JT_NONE;
@@ -149,9 +149,30 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
   return len;
 }
 
+int CDisassemblerCoreZX::command2code(const std::string &cmd) const {
+  if (cmd == "CALL") {
+    return CMD_CALL;
+  } else if (cmd == "RST") {
+    return CMD_RST;
+  } else if (cmd == "RET") {
+    return CMD_RET;
+  } else if (cmd == "RETI") {
+    return CMD_RETI;
+  } else if (cmd == "RETN") {
+    return CMD_RETN;
+  } else if (cmd == "JP") {
+    return CMD_JP;
+  } else if (cmd == "JR") {
+    return CMD_JR;
+  } else {
+    return CMD_NONE;
+  }
+}
+
 void CDisassemblerCoreZX::parseCommand(std::string &src, CCommand &out_command) {
   std::vector<std::string> strlist=split(src,' ');
   out_command.command=strlist[0];
+  out_command.command_code = command2code(out_command.command);
   if (strlist.size()>1) {
     //has args
     std::vector<std::string> args=split(strlist[1], ',');
