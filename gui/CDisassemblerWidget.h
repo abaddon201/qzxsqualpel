@@ -40,7 +40,7 @@ private:
 
   void printReferences(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
   void printCommand(QTextCursor &cursor, const CCommand &cmd);
-  void  __attribute__ ((deprecated)) printChunkUnparsed(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
+  void __attribute__ ((deprecated)) printChunkUnparsed(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
   void printChunkCode(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
 
   void changeNameUnderCursor();

@@ -84,6 +84,10 @@ void CDisassemblerCoreZX::loadGuessFile(const std::string &fname) {
 int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
   char tbuff[128];
   size_t len;
+  if (addr>=_memory->getMaxAddr()) {
+    std::cerr<<"address out of range"<<addr.toString();
+    return 0;
+  }
   debugger_disassemble( tbuff, 128, &len, addr.offset() );
 
   if (len) {

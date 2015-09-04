@@ -20,15 +20,11 @@ std::shared_ptr<CChunk> CChunkList::createChunk(const CAddr &addr, CChunk::Type 
   auto ch = m_Chunks[addr.offset()];
   if (ch!=0) {
     if (ch->type()!=CChunk::Type::UNPARSED)
-      return 0;
+      return nullptr;
   }
   ch = std::make_shared<CChunk>(addr, type);
   m_Chunks[addr.offset()]=ch;
   return ch;
-}
-
-std::shared_ptr<CChunk> CChunkList::getChunk(const CAddr &addr) {
-  return m_Chunks[addr];
 }
 
 std::shared_ptr<CChunk> CChunkList::getChunkContains(const CAddr &addr) const {
@@ -58,7 +54,11 @@ void CChunkList::clear() {
 
 #include "debug_printers.h"
 void CChunkList::printDebug() {
-  for(auto ch: m_Chunks) {
-    qDebug()<<"chunk addr:"<<ch.second->addr().toString();
+  for (auto ch: m_Chunks) {
+    std::cout<<"chunk orig addr:"<<ch.first.toString()<<"::";
+    if (ch.second)
+      std::cout<<"chunk addr:"<<ch.second->addr().toString()<<std::endl;
+    else
+      std::cout<<"ERROR: chunk is NULL"<<std::endl;
   }
 }

@@ -27,19 +27,17 @@ public:
 
   CChunkList();
   std::shared_ptr<CChunk> createChunk(const CAddr &addr, CChunk::Type type=CChunk::Type::UNKNOWN);
-  std::shared_ptr<CChunk> getChunk(const CAddr &addr);
   std::shared_ptr<CChunk> getChunkContains(const CAddr &addr) const;
   void removeChunk(const CAddr &addr);
-  void addChunk(const CAddr &addr, std::shared_ptr<CChunk> chunk) {m_Chunks[addr]=chunk;}
+  void addChunk(const CAddr &addr, std::shared_ptr<CChunk> chunk) { m_Chunks[addr]=chunk;}
   List &chunks() {return m_Chunks;}
   int count() const;
   void clear();
 
   void printDebug();
 
-  std::shared_ptr<CChunk> operator[] (const CAddr &idx) {
-    return m_Chunks[idx];
-  }
+  std::shared_ptr<CChunk> operator[] (const CAddr &idx) { return m_Chunks[idx]; }
+  std::shared_ptr<CChunk> __attribute__ ((deprecated)) getChunk(const CAddr &addr) { return m_Chunks[addr]; }
 private:
   List m_Chunks;
 };
