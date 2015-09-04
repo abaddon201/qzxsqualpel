@@ -119,7 +119,7 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
     }
     qDebug()<<"addr="<<addr.toString()<<"command=" << buff <<"len=" << len;
     ///@bug must be in segment range check... think about it
-    if (addr+len>=m_Chunks.getMaxAddr()) {
+    if (addr+len>=_memory->getMaxAddr()) {
       qDebug()<<"instruction out of mem block";
       m_Chunks.addChunk(addr, old_chunk);
       return -3;

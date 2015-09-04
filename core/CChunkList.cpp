@@ -16,7 +16,7 @@
 CChunkList::CChunkList() {
 }
 
-std::shared_ptr<CChunk> CChunkList::createChunk(const CAddr& addr, CChunk::Type type) {
+std::shared_ptr<CChunk> CChunkList::createChunk(const CAddr &addr, CChunk::Type type) {
   auto ch = m_Chunks[addr.offset()];
   if (ch!=0) {
     if (ch->type()!=CChunk::Type::UNPARSED)
@@ -27,15 +27,11 @@ std::shared_ptr<CChunk> CChunkList::createChunk(const CAddr& addr, CChunk::Type 
   return ch;
 }
 
-std::shared_ptr<CChunk> CChunkList::getChunk(const CAddr& addr) {
-  /*auto c=std::find_if(m_Chunks.begin(), m_Chunks.end(), [addr](auto c) {return (c.second!=nullptr) && (c.second->addr() == addr);});
-  if (c == m_Chunks.end())
-    return nullptr;
-  return c->second;*/
+std::shared_ptr<CChunk> CChunkList::getChunk(const CAddr &addr) {
   return m_Chunks[addr];
 }
 
-std::shared_ptr<CChunk> CChunkList::getChunkContains(const CAddr& addr) const {
+std::shared_ptr<CChunk> CChunkList::getChunkContains(const CAddr &addr) const {
   ///@todo: Переместить арифметику в чанк, чтобы считалась один раз, при создании.
   /// при мелком дизассембле опреатор + вызывается 15 млн. раз... и несёт максимальную нагрузку
   auto res = std::find_if(m_Chunks.begin(), m_Chunks.end(), [&addr](auto& p) {return p.second && (p.second->addr()<=addr) && (p.second->addr()+p.second->length()>addr); });
@@ -45,7 +41,7 @@ std::shared_ptr<CChunk> CChunkList::getChunkContains(const CAddr& addr) const {
     return res->second;
 }
 
-void CChunkList::removeChunk(const CAddr& addr) {
+void CChunkList::removeChunk(const CAddr &addr) {
   auto it = find_if(m_Chunks.begin(), m_Chunks.end(), [addr](auto& ptr) {return ptr.second && (ptr.second->addr()==addr);});
   if (it!=m_Chunks.end())
     m_Chunks.erase(it);
@@ -61,13 +57,8 @@ void CChunkList::clear() {
 }
 
 #include "debug_printers.h"
-void CChunkList::printDebug() const {
-  CAddr addr;
-  do {
-    const std::shared_ptr<CChunk> chunk=(*this)[addr];
-    if (chunk) {
-      qDebug()<<"chunk addr:"<<chunk->addr().toString()<<"addr:"<<addr.toString();
-    }
-    ++addr;
-  } while (addr<=getMaxAddr());
+void CChunkList::printDebug() {
+  for(auto ch: m_Chunks) {
+    qDebug()<<"chunk addr:"<<ch.second->addr().toString();
+  }
 }

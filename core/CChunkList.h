@@ -32,19 +32,13 @@ public:
   void removeChunk(const CAddr &addr);
   void addChunk(const CAddr &addr, std::shared_ptr<CChunk> chunk) {m_Chunks[addr]=chunk;}
   List &chunks() {return m_Chunks;}
-  /// @bug must be setted from memory image size
-  CAddr getMaxAddr() const { return CAddr(0x0FFFF); }
   int count() const;
   void clear();
 
-  void printDebug() const;
+  void printDebug();
 
-  std::shared_ptr<CChunk> operator[] (const CAddr &idx) const {
-    auto res = m_Chunks.find(idx);
-
-    if (res == m_Chunks.end())
-      return nullptr;
-    return res->second;
+  std::shared_ptr<CChunk> operator[] (const CAddr &idx) {
+    return m_Chunks[idx];
   }
 private:
   List m_Chunks;
