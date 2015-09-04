@@ -3,7 +3,9 @@
 void CDisassemblerCoreZX::autoCommentCommand(CCommand &out_command) {
   if (out_command.command=="RST") {
     //known RST's
-    if (out_command.arg1=="18") {
+    if (out_command.arg1=="10") {
+      out_command.auto_comment="PRINT_A";
+    } else if (out_command.arg1=="18") {
       out_command.auto_comment="NEXT_CHAR";
     } else if (out_command.arg1=="20") {
       out_command.auto_comment="GET_CHAR";
@@ -15,9 +17,11 @@ void CDisassemblerCoreZX::autoCommentCommand(CCommand &out_command) {
   }
 }
 
-std::string CDisassemblerCoreZX::getRST28AutoComment(unsigned char b) {
+std::string CDisassemblerCoreZX::getRST28AutoComment(unsigned char b, int &args_count) {
+  args_count=0;
   switch (b) {
   case 0x00:
+    args_count=1;
     return "jump-true";
   case 0x01:
     return "exchange";
@@ -120,10 +124,12 @@ std::string CDisassemblerCoreZX::getRST28AutoComment(unsigned char b) {
   case 0x32:
     return "n-mod-m";
   case 0x33:
+    args_count=1;
     return "jump";
   case 0x34:
     return "stk-data";
   case 0x35:
+    args_count=1;
     return "dec-jr-nz";
   case 0x36:
     return "less-0";
@@ -149,34 +155,188 @@ std::string CDisassemblerCoreZX::getRST28AutoComment(unsigned char b) {
     return "st-mem-0";
   case 0x41:
     return "get-mem-0";
+  case 0x80:
+    return "cheb-00";
+  case 0x81:
+    return "cheb-01";
+  case 0x82:
+    return "cheb-02";
+  case 0x83:
+    return "cheb-03";
+  case 0x84:
+    return "cheb-04";
+  case 0x85:
+    return "cheb-05";
+  case 0x86:
+    return "cheb-06";
+  case 0x87:
+    return "cheb-07";
+  case 0x88:
+    return "cheb-08";
+  case 0x89:
+    return "cheb-09";
+  case 0x90:
+    return "cheb-10";
+  case 0x91:
+    return "cheb-11";
   case 0x92:
-    return "delete";
+    return "cheb-12";
+  case 0x93:
+    return "cheb-13";
+  case 0x94:
+    return "cheb-14";
+  case 0x95:
+    return "cheb-15";
+  case 0x96:
+    return "cheb-16";
+  case 0x97:
+    return "cheb-17";
+  case 0x98:
+    return "cheb-18";
+  case 0x99:
+    return "cheb-19";
   case 0xA0:
     return "stk-zero";
   case 0xA1:
     return "stk-one";
   case 0xA2:
     return "stk-half";
+  case 0xA3:
+    return "stk-pi/2";
   case 0xA4:
     return "stk-ten";
   case 0xC0:
-    return "st-mem-0";
+    return "st-mem-00";
   case 0xC1:
-    return "st-mem-1";
+    return "st-mem-01";
+  case 0xC2:
+    return "st-mem-02";
   case 0xC3:
-    return "st-mem-3";
+    return "st-mem-03";
   case 0xC4:
-    return "st-mem-4";
+    return "st-mem-04";
   case 0xC5:
-    return "st-mem-5";
+    return "st-mem-05";
+  case 0xC6:
+    return "st-mem-06";
+  case 0xC7:
+    return "st-mem-07";
+  case 0xC8:
+    return "st-mem-08";
+  case 0xC9:
+    return "st-mem-09";
+  case 0xCA:
+    return "st-mem-0A";
+  case 0xCB:
+    return "st-mem-0B";
+  case 0xCC:
+    return "st-mem-0C";
+  case 0xCD:
+    return "st-mem-0D";
+  case 0xCE:
+    return "st-mem-0E";
+  case 0xCF:
+    return "st-mem-0F";
+  case 0xD0:
+    return "st-mem-10";
+  case 0xD1:
+    return "st-mem-11";
+  case 0xD2:
+    return "st-mem-12";
+  case 0xD3:
+    return "st-mem-13";
+  case 0xD4:
+    return "st-mem-14";
+  case 0xD5:
+    return "st-mem-15";
+  case 0xD6:
+    return "st-mem-16";
+  case 0xD7:
+    return "st-mem-17";
+  case 0xD8:
+    return "st-mem-18";
+  case 0xD9:
+    return "st-mem-19";
+  case 0xDA:
+    return "st-mem-1A";
+  case 0xDB:
+    return "st-mem-1B";
+  case 0xDC:
+    return "st-mem-1C";
+  case 0xDD:
+    return "st-mem-1D";
+  case 0xDE:
+    return "st-mem-1E";
+  case 0xDF:
+    return "st-mem-1F";
   case 0xE0:
-    return "get-mem-0";
+    return "get-mem-00";
   case 0xE1:
-    return "get-mem-1";
+    return "get-mem-01";
   case 0xE2:
-    return "get-mem-2";
+    return "get-mem-02";
+  case 0xE3:
+    return "get-mem-03";
+  case 0xE4:
+    return "get-mem-04";
+  case 0xE5:
+    return "get-mem-05";
+  case 0xE6:
+    return "get-mem-06";
+  case 0xE7:
+    return "get-mem-07";
+  case 0xE8:
+    return "get-mem-08";
+  case 0xE9:
+    return "get-mem-09";
+  case 0xEA:
+    return "get-mem-0A";
+  case 0xEB:
+    return "get-mem-0B";
+  case 0xEC:
+    return "get-mem-0C";
+  case 0xED:
+    return "get-mem-0D";
+  case 0xEE:
+    return "get-mem-0E";
   case 0xEF:
-    return "exponent +7F"; //4 bytes arg
+    return "get-mem-0F";
+  case 0xF0:
+    return "get-mem-00";
+  case 0xF1:
+    return "get-mem-11";
+  case 0xF2:
+    return "get-mem-12";
+  case 0xF3:
+    return "get-mem-13";
+  case 0xF4:
+    return "get-mem-14";
+  case 0xF5:
+    return "get-mem-15";
+  case 0xF6:
+    return "get-mem-16";
+  case 0xF7:
+    return "get-mem-17";
+  case 0xF8:
+    return "get-mem-18";
+  case 0xF9:
+    return "get-mem-19";
+  case 0xFA:
+    return "get-mem-1A";
+  case 0xFB:
+    return "get-mem-1B";
+  case 0xFC:
+    return "get-mem-1C";
+  case 0xFD:
+    return "get-mem-1D";
+  case 0xFE:
+    return "get-mem-1E";
+  case 0xFF:
+    return "get-mem-1F";
+  /** @bug в книге дизасм пзу так:  case 0xEF:
+      args_count=4;
+      return "exponent +7F"; //4 bytes arg
+      */
   default:
     return "unkn_fp_command";
   }

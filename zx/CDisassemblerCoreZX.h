@@ -44,7 +44,7 @@ public:
 private:
   void parseCommand(std::string &src, CCommand &out_command);
   void autoCommentCommand(CCommand &out_command);
-  std::string getRST28AutoComment(unsigned char b);
+  std::string getRST28AutoComment(unsigned char b, int& args_count);
   std::string findKnownLabel(const CAddr& addr);
 
   int postProcessChunk(std::shared_ptr<CChunk> chunk, int len);

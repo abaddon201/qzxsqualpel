@@ -171,29 +171,50 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
   ///               DEFB +38,end-calc
   /// Собственно, стоит сделать умный анализ этого RST
   /// В помощь книга: http://dac.escet.urjc.es/~csanchez/pfcs/zxspectrum/CompleteSpectrumROMDisassemblyThe.pdf
+  /// (есть опечатки, например, 2dae, написано, что там 92, а на самом деле - 02
+  /// http://zxpress.ru/book_articles.php?id=1099
+  /// http://zxpress.ru/book_articles.php?id=1150
+  /// http://zxpress.ru/book_articles.php?id=1051
+  ///
+  /// @bug: Переходы могут осуществляться через куски нормального года, что приводит к возникновению "рваных" цепей
+  /// пример такого бага: 2DE3. Там осуществяется серия переходов, цели которых находятся после блока нормального ассемблера
   auto cmd = chunk->lastCommand();
   if ((cmd.command=="RST") && (cmd.arg1=="28")) {
     CAddr a=cmd.addr+1;
 
     CByte b;
     CCommand c;
+    int args_cnt;
     while ((b=_memory->getByte(a))!=0x38) {
       c.addr=a;
       c.command="DB";
       c.arg1=b.toString();
+      c.auto_comment = getRST28AutoComment(b, args_cnt);
       c.len=1;
-      c.auto_comment = getRST28AutoComment(b);
 
       m_Chunks.removeChunk(a);
       chunk->appendCommand(c);
       len++;
       ++a;
+      if (args_cnt) {
+        c.addr=a;
+        c.command="DB";
+        b=_memory->getByte(a);
+        c.arg1=b.toString();
+        c.auto_comment = "dest_addr: "+CAddr(a+int{(signed char)b}).toString();
+        c.len=1;
+
+        m_Chunks.removeChunk(a);
+        chunk->appendCommand(c);
+        len++;
+        ++a;
+      }
     }
     c.addr=a;
     c.command="DB";
     c.arg1=b.toString();
     c.len=1;
-    c.auto_comment = getRST28AutoComment(b);
+    c.auto_comment = getRST28AutoComment(b, args_cnt);
 
     m_Chunks.removeChunk(a);
     chunk->appendCommand(c);
