@@ -26,10 +26,10 @@ std::shared_ptr<GUIChunk> GUIChunkList::getChunkContains(const CAddr &addr) cons
 void GUIChunkList::update(CChunkList &chunks) {
   _chunks.clear();
   for (auto ch: chunks.chunks()) {
-    if (ch.second!=nullptr) {
-      _chunks.push_back(std::make_shared<GUIChunk>(ch.second));
-    } else {
-      qDebug()<<"ERROR: null chunk";
-    }
+// for debug only    if (ch.second!=nullptr) {
+    _chunks.push_back(std::make_shared<GUIChunk>(ch.second));
+    /*    } else {
+          qDebug()<<"ERROR: null chunk";
+        }*/
   }
 }

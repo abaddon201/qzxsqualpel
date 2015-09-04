@@ -214,14 +214,7 @@ void CDisassemblerWidget::printReferences(QTextCursor &cursor, std::shared_ptr<G
     } else {
       printCell(cursor, std::string(), skip_len2);
     }
-    /*    for (int i=0; i<m_ReferencesOnLine; i++) {
-          CReference ref=it;*/
     printCell(cursor, ref.toString(), m_CellLengthReference, m_CellFormatReference);
-    /*      ++it;
-          if (it==chunk->core()->references().end()) {
-            return;
-          }
-        }*/
     cursor.insertText("\n");
   }
 }
@@ -286,6 +279,5 @@ void CDisassemblerWidget::refreshView() {
     i++;
   }
   cursor.endEditBlock();
-//    m_Chunks.printDebug();
   m_MainWindow->labelsWidget()->refresh();
 }
