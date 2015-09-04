@@ -29,19 +29,19 @@
  */
 std::string CLabels::offsetInLabel(const CAddr &addr) const {
   if (size()==0) {
-    Debug()<<"no labels";
+    std::cout<<"no labels"<<std::endl;
     return addr.toString();
   }
   std::shared_ptr<CChunk> chunk=IDisassemblerCore::inst()->chunks().getChunkContains(addr);
   if (chunk==nullptr) {
-    Debug()<<"no label for addr";
+    std::cout<<"no label for addr"<<std::endl;
     return addr.toString();
   }
   CAddr ch_addr=chunk->addr();
-  Debug()<<"addr:"<<ch_addr.toString();
+  std::cout<<"addr:"<<ch_addr.toString()<<std::endl;
   std::string lbl=chunk->label();
   if (lbl.empty()) {
-    Debug()<<"no label for chunk";
+    std::cout<<"no label for chunk"<<std::endl;
     return addr.toString();
   }
   CAddr delta=addr-ch_addr;

@@ -32,7 +32,8 @@ HEADERS += core/CAddr.h \
     gui/guichunklist.h \
     core/segment.h \
     core/memory.h \
-    gui/helper_widgets.h
+    gui/helper_widgets.h \
+    gui/qt_debug_printers.h
 SOURCES += core/CAddr.cpp \
            core/CByte.cpp \
            core/CChunk.cpp \

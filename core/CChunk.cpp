@@ -26,7 +26,7 @@ void CChunk::appendCommand(CCommand cmd) {
 
 CCommand &CChunk::getCommand(int idx) {
   if (m_Commands.size()==0) {
-    qDebug()<<"No commands here";
+    std::cerr<<"No commands here"<<std::endl;
     throw int(666);
   }
   return m_Commands[idx];
@@ -59,7 +59,7 @@ std::string CChunk::setLabel(std::string label, CReference::Type ref_type) {
 }
 
 std::shared_ptr<CChunk> CChunk::splitAt(CAddr addr) {
-  qDebug()<<"splitAt: commans.count="<<m_Commands.size();
+  std::cout<<"splitAt: commans.count="<<m_Commands.size()<<std::endl;
   if (m_Commands.size()<2) {
     //split impossible, too short chunk
     return 0;
@@ -68,7 +68,7 @@ std::shared_ptr<CChunk> CChunk::splitAt(CAddr addr) {
   CAddr cur_addr=m_StartingAddr;
   int len=0;
   for (it=m_Commands.begin(); it!=m_Commands.end(); ++it) {
-    qDebug()<<"caddr"<<cur_addr.toString();
+    std::cout<<"caddr"<<cur_addr.toString()<<std::endl;
     if (cur_addr==addr) {
       //start splitting
       break;
@@ -80,21 +80,21 @@ std::shared_ptr<CChunk> CChunk::splitAt(CAddr addr) {
     len+=(*it).len;
   }
   m_Length = len;
-  qDebug()<<"moving commands";
+  std::cout<<"moving commands"<<std::endl;
   std::shared_ptr<CChunk> new_chunk=IDisassemblerCore::inst()->createChunk(addr, m_Type);
   if (new_chunk==0) {
-    qDebug()<<"can't create chunk";
+    std::cerr<<"ERROR: Can't create chunk"<<std::endl;
     return 0;
   }
   int cnt=0;
   len = 0;
   for (; it!=m_Commands.end();) {
-    qDebug()<<"count"<<cnt;
+    std::cout<<"count"<<cnt<<std::endl;
     cnt++;
     new_chunk->appendCommand(*it);
     it=m_Commands.erase(it);
     //if (it==m_Commands.end()) break;
   }
-  qDebug()<<"splitAt: commans.count="<<m_Commands.size()<<"new count"<<new_chunk->m_Commands.size();
+  std::cout<<"splitAt: commans.count="<<m_Commands.size()<<"new count"<<new_chunk->m_Commands.size()<<std::endl;
   return new_chunk;
 }

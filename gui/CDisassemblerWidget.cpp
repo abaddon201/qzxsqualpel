@@ -1,4 +1,5 @@
 #include <QDebug>
+#include "qt_debug_printers.h"
 
 #include "helper_widgets.h"
 
@@ -63,7 +64,7 @@ void CDisassemblerWidget::navigateToAddress(const CAddr &addr) {
   std::shared_ptr<GUIChunk> chunk = _chunks.getChunkContains(addr);
   if (nullptr!=chunk) {
     QTextCursor cursor(textCursor());
-    cursor.setPosition(chunk->cursorStartPosition());
+    cursor.setPosition(chunk->cursorStartPosition()+1);
     setTextCursor(cursor);
   }
   centerCursor();
@@ -85,6 +86,9 @@ void CDisassemblerWidget::keyPressEvent(QKeyEvent* event) {
     return;
   case Qt::Key_D:
     // must datefi under cursor
+    return;
+  case Qt::Key_U:
+    // must uncode and undatefy under cursor
     return;
   case Qt::Key_N:
     // must set name under cursor
@@ -134,6 +138,7 @@ void CDisassemblerWidget::changeNameUnderCursor() {
     if (dlg.exec()) {
       m_DisassemblerCore->labels().changeLabel(chunk->core(), dlg.label().toStdString());
       refreshView();
+      navigateToAddress(chunk->core()->addr());
     }
   }
 }
@@ -266,7 +271,7 @@ void CDisassemblerWidget::refreshView() {
   cursor.beginEditBlock();
   int i=0;
   for (auto chunk: _chunks.chunks()) {
-    chunk->setCursorStartPosition(cursor.position()+1);
+    chunk->setCursorStartPosition(cursor.position());
     switch (chunk->core()->type()) {
     case CChunk::Type::UNPARSED:
       printChunkUnparsed(cursor, chunk);

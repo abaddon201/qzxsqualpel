@@ -10,7 +10,6 @@
 //
 //
 
-#include <QDebug>
 #include "CChunkList.h"
 
 CChunkList::CChunkList() {

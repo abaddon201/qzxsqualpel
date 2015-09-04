@@ -95,11 +95,11 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
     //initialize chunk
     std::shared_ptr<CChunk> chunk_i = m_Chunks.getChunk(addr);
     if (chunk_i==0) {
-      qDebug()<<"no instruction here: "<<QString::fromStdString(addr.toString());
+      std::cout<<"no instruction here: "<<addr.toString()<<std::endl;
       return 0;
     }
     if (!chunk_i->isEmpty())  {
-      qDebug()<<"allready parsed: "<<QString::fromStdString(addr.toString());
+      std::cout<<"allready parsed: "<< addr.toString() <<std::endl;
       return 0;
     }
     std::shared_ptr<CChunk> old_chunk = m_Chunks.getChunk(addr);
@@ -111,20 +111,20 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
     } else {
       target_chunk=m_Chunks.getChunkContains(addr-1);
       if (target_chunk==0) {
-        qDebug()<<"No target for disassemble";
+        std::cout<<"No target for disassemble"<<std::endl;
         target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
       }
       //appending to prev. parsed block
       if (target_chunk->type()!=CChunk::Type::CODE) {
-        qDebug()<<"Not code previous chunk";
+        std::cout<<"Not code previous chunk"<<std::endl;
         //parsing current addr
         target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
       }
     }
-    qDebug()<<"addr="<<addr.toString()<<"command=" << buff <<"len=" << len;
+    std::cout<<"addr="<<addr.toString()<<"command=" << buff <<"len=" << len<<std::endl;
     ///@bug must be in segment range check... think about it
     if (addr+len>=_memory->getMaxAddr()) {
-      qDebug()<<"instruction out of mem block";
+      std::cout<<"instruction out of mem block"<<std::endl;
       m_Chunks.addChunk(addr, old_chunk);
       return -3;
     }
@@ -132,13 +132,13 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
       for (size_t i=1; i<len; i++) {
         std::shared_ptr<CChunk> ch=m_Chunks[addr+i];
         if (ch==0) {
-          qDebug()<<"Instrunction longer than unparsed block";
+          std::cout<<"Instrunction longer than unparsed block"<<std::endl;
           //m_Chunks.removeChunk(addr);
           m_Chunks.addChunk(addr, old_chunk);
           return -4;
         }
         if (ch->type()!=CChunk::Type::UNPARSED) {
-          qDebug()<<"Instrunction longer than unparsed block2";
+          std::cout<<"Instrunction longer than unparsed block2"<<std::endl;
           //m_Chunks.removeChunk(addr);
           m_Chunks.addChunk(addr, old_chunk);
           return -4;
@@ -153,7 +153,7 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
     cmd.len+=len;
     parseCommand(buff, cmd);
     target_chunk->appendCommand(cmd);
-    qDebug()<<"cmd appended";
+    std::cout<<"cmd appended"<<std::endl;
     len = postProcessChunk(target_chunk, len);
   }
   return len;
@@ -252,7 +252,7 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
       chunk->appendCommand(c);
       len++;
     } catch (std::out_of_range &) {
-      qDebug()<<"finished due address exceeds";
+      std::cout<<"finished due address exceeds"<<std::endl;
     }
   }
   return len;
@@ -261,7 +261,7 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
 void CDisassemblerCoreZX::disassembleBlock(const CAddr &st_addr) {
   int res=0;
   CAddr addr = st_addr;
-  qDebug()<<"disassembleBlock(): addr"<< addr.toString();
+  std::cout<<"disassembleBlock(): addr"<< addr.toString()<<std::endl;
   do {
     res=disassembleInstruction(addr);
     if (res==0) {
@@ -275,35 +275,35 @@ void CDisassemblerCoreZX::disassembleBlock(const CAddr &st_addr) {
     CAddr jump_addr;
     std::shared_ptr<CChunk> chunk=m_Chunks.getChunkContains(addr);
     if (chunk==0) {
-      qDebug()<<"No chunk after disassemble instruction, addr:"<<addr.toString();
+      std::cout<<"No chunk after disassemble instruction, addr:"<<addr.toString()<<std::endl;
       return;
     }
     switch (getLastCmdJumpType(chunk, jump_addr)) {
     case IDisassemblerCore::Type::JT_CALL:
       //call
-      qDebug()<<"call: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
-      qDebug()<<"st_addr="<<st_addr.toString();
+      std::cout<<"call: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString()<<std::endl;
+      std::cout<<"st_addr="<<st_addr.toString()<<std::endl;
       chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, CReference::Type::CALL));
       addr+=res;
       break;
     case IDisassemblerCore::Type::JT_COND_JUMP:
       //conditional jump
-      qDebug()<<"cond jump: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
+      std::cout<<"cond jump: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString()<<std::endl;
       chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, CReference::Type::JUMP));
       addr+=res;
       break;
     case IDisassemblerCore::Type::JT_JUMP:
-      qDebug()<<"jump: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString();
+      std::cout<<"jump: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString()<<std::endl;
       chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, CReference::Type::JUMP));
       res=0;
       break;
     case IDisassemblerCore::Type::JT_COND_RET:
       //conditional ret
-      qDebug()<<"cond_ret: addr=" <<addr.toString();
+      std::cout<<"cond_ret: addr=" <<addr.toString()<<std::endl;
       addr+=res;
       break;
     case IDisassemblerCore::Type::JT_RET:
-      qDebug()<<"ret: addr=" <<addr.toString();
+      std::cout<<"ret: addr=" <<addr.toString()<<std::endl;
       res=0;
       break;
     case IDisassemblerCore::Type::JT_NONE:
@@ -311,12 +311,12 @@ void CDisassemblerCoreZX::disassembleBlock(const CAddr &st_addr) {
       break;
     }
   } while (res);
-  qDebug()<<"finished chunk:st_addr="<<st_addr.toString()/*<<"commands count="<<chunk->commandsCount()*/<<"m_chunks.count="<<m_Chunks.count();
+  std::cout<<"finished chunk:st_addr="<<st_addr.toString()<<" m_chunks.count="<<m_Chunks.count()<<std::endl;
 }
 
 bool CDisassemblerCoreZX::labelPresent(const CAddr &addr) const {
   if (m_Labels.size()) {
-    foreach (CLabel lbl, m_Labels) {
+    for (CLabel lbl: m_Labels) {
       if (lbl.addr==addr) {
         return true;
       }
@@ -342,17 +342,17 @@ std::string CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &j
   disassembleBlock(jump_addr);
   std::shared_ptr<CChunk> jmp_chunk=m_Chunks.getChunk(jump_addr);
   if (jmp_chunk == nullptr) {
-    qDebug()<<"Split chunk at jump";
+    std::cout<<"Split chunk at jump"<<std::endl;
     // split target chunk
     std::shared_ptr<CChunk> near_chunk=m_Chunks.getChunkContains(jump_addr);
     if (near_chunk==0) {
-      qDebug()<<"Fatal error on split: No target chunk";
+      std::cout<<"Fatal error on split: No target chunk"<<std::endl;
       return std::string();
     }
-    qDebug()<<"near_chunk:addr"<<near_chunk->addr().toString();
+    std::cout<<"near_chunk:addr"<<near_chunk->addr().toString()<<std::endl;
     jmp_chunk=near_chunk->splitAt(jump_addr);
     if (jmp_chunk==0) {
-      qDebug()<<"Split impossible";
+      std::cout<<"Split impossible"<<std::endl;
       return std::string();
     }
   }

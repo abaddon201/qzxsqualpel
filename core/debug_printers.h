@@ -4,27 +4,12 @@
 #include "CLabel.h"
 #include "CChunk.h"
 
-///@todo Debug shit must thing about cut this qt from here
-#include <QDebug>
-inline QDebug operator<<(QDebug out, std::string str) {
-  out<<QString::fromStdString(str);
-  return out;
-}
-
-template<typename T>
-inline QDebug operator<<(QDebug out, std::vector<T> v) {
-  for(auto val:v) {
-    ///@bug recursion
-    //out<<val<<", ";
-  }
-  return out;
-}
-
-inline void operator<<(QDebug out, CLabel lab) {
+inline std::ostream &operator<<(std::ostream &out, CLabel &lab) {
   out<<"Label: Name='"<<lab.name<<"', addr="<<lab.addr.toString();
+  return out;
 }
 
-inline QDebug operator<<(QDebug out, CChunk::Type t) {
+inline std::ostream &operator<<(std::ostream &out, CChunk::Type t) {
   switch (t) {
   case CChunk::Type::UNKNOWN:
     out<<"UNKNOWN";
@@ -49,7 +34,7 @@ inline QDebug operator<<(QDebug out, CChunk::Type t) {
 }
 
 ///@bug total shit
-#define Debug QMessageLogger(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE, QT_MESSAGELOG_FUNC).debug
+//#define Debug QMessageLogger(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE, QT_MESSAGELOG_FUNC).debug
 
 #endif // DEBUG_PRINTERS_H
 
