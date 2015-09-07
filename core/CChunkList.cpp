@@ -16,31 +16,37 @@ CChunkList::CChunkList() {
 }
 
 std::shared_ptr<CChunk> CChunkList::createChunk(const CAddr &addr, CChunk::Type type) {
-  auto ch = m_Chunks[addr.offset()];
-  if (ch!=0) {
-    if (ch->type()!=CChunk::Type::UNPARSED)
+
+  auto ch1 = m_Chunks.find(addr.offset());
+  if (ch1 != m_Chunks.end()) {
+    if (ch1->second->type()!=CChunk::Type::UNPARSED)
       return nullptr;
   }
+
+  std::shared_ptr<CChunk> ch;
   ch = std::make_shared<CChunk>(addr, type);
   m_Chunks[addr.offset()]=ch;
   return ch;
 }
 
 std::shared_ptr<CChunk> CChunkList::getChunkContains(const CAddr &addr) const {
-  ///@todo: Переместить арифметику в чанк, чтобы считалась один раз, при создании.
-  /// при мелком дизассембле опреатор + вызывается 15 млн. раз... и несёт максимальную нагрузку
-  auto res = std::find_if(m_Chunks.begin(), m_Chunks.end(), [&addr](auto& p) {return p.second && (p.second->addr()<=addr) && (p.second->addr()+p.second->length()>addr); });
-  if (res == m_Chunks.end())
-    return nullptr;
-  else
-    return res->second;
+  ///@todo подумать что с этой х-ней сделать... 70% нагрузки на ней...
+  CAddr a = addr;
+  do {
+    List::const_iterator it;
+    if ((it = m_Chunks.find(a)) != m_Chunks.end()) {
+      return it->second;
+    }
+    --a;
+    ///@bug вообще, тут должна быть ловля исключения, а не проверка. ибо аддр может вполне себе переходить по сегментам (не сейчас)s
+  } while (a>=0);
+  return nullptr;
 }
 
 void CChunkList::removeChunk(const CAddr &addr) {
-  auto it = find_if(m_Chunks.begin(), m_Chunks.end(), [addr](auto& ptr) {return ptr.second && (ptr.second->addr()==addr);});
+  auto it = m_Chunks.find(addr);
   if (it!=m_Chunks.end())
     m_Chunks.erase(it);
-  ///@bug нужно разобраться с этой хренью:std::remove_if(m_Chunks.begin(), m_Chunks.end(), [addr](auto ptr) {return false;/*return ptr.second && (ptr.second->addr()==addr);*/});
 }
 
 int CChunkList::count() const {

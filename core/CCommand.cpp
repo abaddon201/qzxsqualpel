@@ -35,10 +35,13 @@ CAddr CCommand::getJmpAddr() const {
 }
 
 void CCommand::setJmpAddr(const std::shared_ptr<CLabel> label) {
-  if (arg2==nullptr) {
-    arg1 = std::make_shared<ArgLabel>(label);
-  } else {
-    arg2 = std::make_shared<ArgLabel>(label);
+  // if label is nullptr, we can't change default type arg to the label (we don't know about it)
+  if (label != nullptr) {
+    if (arg2==nullptr) {
+      arg1 = std::make_shared<ArgLabel>(label);
+    } else {
+      arg2 = std::make_shared<ArgLabel>(label);
+    }
   }
 }
 

@@ -24,7 +24,8 @@ public:
 
   void init() override;
   void loadGuessFile(const std::string &fname) override;
-  virtual int disassembleInstruction(const CAddr &addr) override;
+  ///@bug поменять местами возвращаемые значения, чтобы не было такой вырви-глаз конструкции
+  virtual int disassembleInstruction(const CAddr &addr, std::shared_ptr<CChunk>& out_chunk) override;
   void disassembleBlock(const CAddr &st_addr) override;
   void initialParse() override;
 

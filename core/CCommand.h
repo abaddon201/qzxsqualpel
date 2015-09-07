@@ -77,6 +77,18 @@ struct CCommand {
     return *this;
   }
 
+  CCommand &operator=(const CCommand &&c) {
+    addr=c.addr;
+    len=c.len;
+    command_code=c.command_code;
+    command=c.command;
+    arg1=c.arg1;
+    arg2=c.arg2;
+    comment=c.comment;
+    auto_comment=c.auto_comment;
+    return *this;
+  }
+
   ///@brief Возвращает аргументы команды в виде строки
   std::string getArgsString() const;
   ///@brief Возвращает опкоды команды в виде строки

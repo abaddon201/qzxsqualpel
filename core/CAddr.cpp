@@ -13,9 +13,11 @@
 #include "CAddr.h"
 #include "utils.h"
 
-std::string CAddr::toString() const {
-  if (_hex_cache.empty())
+const std::string& CAddr::toString() const {
+  if (_dirty) {
     _hex_cache = hexify(m_Segment, 4) + ":" + hexify(m_Offset, 4);
+    _dirty = false;
+  }
   return _hex_cache;
 }
 

@@ -48,11 +48,11 @@ public:
   inline CommandsList &commands() {return m_Commands;}
 
   inline const CAddr& addr() const {return m_StartingAddr;}
-  bool containsAddr(const CAddr& addr) const {return (addr>=m_StartingAddr) && (addr<m_StartingAddr+m_Length);}
+  inline bool containsAddr(const CAddr& addr) const {return (addr>=m_StartingAddr) && (addr<_last_addr);}
 
-  unsigned long long length() const {return m_Length;}
+  inline unsigned long long length() const {return m_Length;}
 
-  Type type() const {return m_Type;}
+  inline Type type() const {return m_Type;}
 
   std::shared_ptr<CLabel> label() const {return m_Label;}
   std::shared_ptr<CLabel> setLabel(std::shared_ptr<CLabel> label = nullptr, CReference::Type=CReference::Type::JUMP);
@@ -73,6 +73,7 @@ private:
 
   virtual void makeCopy(const CChunk &ch) {
     m_StartingAddr=ch.m_StartingAddr;
+    _last_addr=ch._last_addr;
     m_Length=ch.m_Length;
     _comment=ch._comment;
     m_Commands=ch.m_Commands;
@@ -93,6 +94,7 @@ private:
   Type m_Type;
   ///@brief Адрес начала блока
   CAddr m_StartingAddr;
+  CAddr _last_addr;
   ///@brief Длина блока
   unsigned long long m_Length;
 };

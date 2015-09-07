@@ -17,7 +17,7 @@
 
 class CAddr {
 public:
-  CAddr(unsigned long long offs=0, unsigned long long seg=0) : m_Offset{offs}, m_Segment{seg} {}
+  CAddr(unsigned long long offs=0, unsigned long long seg=0) : m_Offset{offs}, m_Segment{seg}, _dirty{true} {}
 
   unsigned long long offset() const { return m_Offset; }
   unsigned long long segment() const { return m_Segment; }
@@ -31,18 +31,18 @@ public:
   bool operator>(const CAddr &s) const { return ((m_Offset>s.m_Offset) && (m_Segment==s.m_Segment)); }
   bool operator<(const CAddr &s) const { return ((m_Offset<s.m_Offset) && (m_Segment==s.m_Segment)); }
 
-  CAddr &operator++() { m_Offset++; _hex_cache.clear();return*this;}
-  CAddr &operator--() { m_Offset--; _hex_cache.clear();return*this;}
+  CAddr &operator++() { m_Offset++; _dirty = true; return*this;}
+  CAddr &operator--() { m_Offset--; _dirty = true; return*this;}
 
   CAddr operator+(unsigned long long offs) const {return m_Offset+offs;}
   CAddr operator-(unsigned long long offs) const {return m_Offset-offs;}
   CAddr operator-(const CAddr &raddr) const { return m_Offset-raddr.m_Offset; }
   CAddr operator+(const CAddr &raddr) const { return m_Offset+raddr.m_Offset; }
 
-  CAddr &operator+=(unsigned long long offs) { m_Offset+=offs; _hex_cache.clear(); return *this; }
-  CAddr &operator-=(unsigned long long offs) { m_Offset-=offs; _hex_cache.clear(); return *this; }
+  CAddr &operator+=(unsigned long long offs) { m_Offset+=offs; _dirty = true; return *this; }
+  CAddr &operator-=(unsigned long long offs) { m_Offset-=offs; _dirty = true; return *this; }
 
-  std::string toString() const;
+  const std::string& toString() const;
   std::string offsetString() const;
 
 private:
@@ -50,6 +50,7 @@ private:
   unsigned long long m_Segment;
 ///@todo не всегда нужен кэш строки... Может стоит разбить на 2 класса
   mutable std::string _hex_cache;
+  mutable bool _dirty;
 };
 
 #endif

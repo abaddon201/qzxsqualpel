@@ -45,7 +45,7 @@ public:
 
   virtual void init() = 0;
 
-  virtual int disassembleInstruction(const CAddr& addr)=0;
+  virtual int disassembleInstruction(const CAddr &addr, std::shared_ptr<CChunk>& out_chunk)=0;
   virtual void disassembleBlock(const CAddr& addr) = 0;
   virtual void setRawMemory(unsigned char* buf, size_t size) = 0;
   virtual void initialParse() = 0;

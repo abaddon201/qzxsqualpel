@@ -28,7 +28,7 @@ unsigned char readbyte_internal(unsigned short addr) {
 
 IDisassemblerCore::Type CDisassemblerCoreZX::getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr) {
   ///@bug rst 28 not last command in the chunk
-  CCommand& cmd=chunk->lastCommand();
+  CCommand &cmd=chunk->lastCommand();
   if ((cmd.command_code==CMD_CALL) || (cmd.command_code==CMD_RST)) {
     jump_addr=cmd.getJmpAddrFromString();
     return Type::JT_CALL;
@@ -86,7 +86,7 @@ void CDisassemblerCoreZX::loadGuessFile(const std::string &fname) {
   }
 }
 
-int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
+int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr, std::shared_ptr<CChunk> &out_chunk) {
   char tbuff[128];
   size_t len;
   if (addr>=_memory->getMaxAddr()) {
@@ -99,7 +99,7 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
     std::string buff{tbuff};
     //initialize chunk
     std::shared_ptr<CChunk> chunk_i = m_Chunks.getChunk(addr);
-    if (chunk_i==0) {
+    if (chunk_i == nullptr) {
       std::cout<<"no instruction here: "<<addr.toString()<<std::endl;
       return 0;
     }
@@ -115,7 +115,7 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
       target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
     } else {
       target_chunk=m_Chunks.getChunkContains(addr-1);
-      if (target_chunk==0) {
+      if (target_chunk==nullptr) {
         std::cout<<"No target for disassemble"<<std::endl;
         target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
       }
@@ -135,7 +135,7 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
     }
     if (len>1) {
       for (size_t i=1; i<len; i++) {
-        std::shared_ptr<CChunk> ch=m_Chunks[addr+i];
+        std::shared_ptr<CChunk> ch=m_Chunks.getChunk(addr+i);
         if (ch==0) {
           std::cout<<"Instrunction longer than unparsed block"<<std::endl;
           //m_Chunks.removeChunk(addr);
@@ -160,6 +160,7 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr) {
     target_chunk->appendCommand(cmd);
     std::cout<<"cmd appended"<<std::endl;
     len = postProcessChunk(target_chunk, len);
+    out_chunk = target_chunk;
   }
   return len;
 }
@@ -268,7 +269,8 @@ void CDisassemblerCoreZX::disassembleBlock(const CAddr &st_addr) {
   CAddr addr = st_addr;
   std::cout<<"disassembleBlock(): addr"<< addr.toString()<<std::endl;
   do {
-    res=disassembleInstruction(addr);
+    std::shared_ptr<CChunk> chunk;
+    res=disassembleInstruction(addr, chunk);
     if (res==0) {
       //end of block
       break;
@@ -278,8 +280,8 @@ void CDisassemblerCoreZX::disassembleBlock(const CAddr &st_addr) {
       return;
     }
     CAddr jump_addr;
-    std::shared_ptr<CChunk> chunk=m_Chunks.getChunkContains(addr);
-    if (chunk==0) {
+    //std::shared_ptr<CChunk> chunk=m_Chunks.getChunkContains(addr);
+    if (chunk==nullptr) {
       std::cout<<"No chunk after disassemble instruction, addr:"<<addr.toString()<<std::endl;
       return;
     }
@@ -320,12 +322,7 @@ void CDisassemblerCoreZX::disassembleBlock(const CAddr &st_addr) {
 }
 
 bool CDisassemblerCoreZX::labelPresent(const CAddr &addr) const {
-  try {
-    m_Labels.at(addr);
-    return true;
-  } catch (...) {
-    return false;
-  }
+  return m_Labels.find(addr)!=m_Labels.end();
 }
 
 std::shared_ptr<CChunk> CDisassemblerCoreZX::createChunk(const CAddr &addr, CChunk::Type type) {
@@ -333,11 +330,11 @@ std::shared_ptr<CChunk> CDisassemblerCoreZX::createChunk(const CAddr &addr, CChu
 }
 
 std::shared_ptr<CLabel> CDisassemblerCoreZX::findKnownLabel(const CAddr &addr) {
-  try {
-    return _known_labels.at(addr);
-  } catch (...) {
-    return nullptr;
+  auto it = _known_labels.find(addr);
+  if (it != _known_labels.end()) {
+    return it->second;
   }
+  return nullptr;
 }
 
 std::shared_ptr<CLabel> CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &jump_addr, CReference::Type ref_type) {

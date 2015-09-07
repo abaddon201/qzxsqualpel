@@ -22,6 +22,7 @@ void CChunk::addCrossRef(CAddr addr, CReference::Type type) {
 void CChunk::appendCommand(CCommand cmd) {
   m_Commands.push_back(cmd);
   m_Length+=cmd.len;
+  _last_addr = m_StartingAddr + m_Length;
 }
 
 CCommand &CChunk::getCommand(int idx) {
@@ -79,17 +80,18 @@ std::shared_ptr<CChunk> CChunk::splitAt(CAddr addr) {
       break;
     } else if (cur_addr>addr) {
       //split impossible, allready busy
-      return 0;
+      return nullptr;
     }
     cur_addr+=(*it).len;
     len+=(*it).len;
   }
   m_Length = len;
+  _last_addr = m_StartingAddr + m_Length;
   std::cout<<"moving commands"<<std::endl;
   std::shared_ptr<CChunk> new_chunk=IDisassemblerCore::inst()->createChunk(addr, m_Type);
-  if (new_chunk==0) {
+  if (new_chunk==nullptr) {
     std::cerr<<"ERROR: Can't create chunk"<<std::endl;
-    return 0;
+    return nullptr;
   }
   int cnt=0;
   len = 0;

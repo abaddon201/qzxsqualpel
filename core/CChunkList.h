@@ -36,8 +36,7 @@ public:
 
   void printDebug();
 
-  std::shared_ptr<CChunk> operator[] (const CAddr &idx) { return m_Chunks[idx]; }
-  std::shared_ptr<CChunk> __attribute__ ((deprecated)) getChunk(const CAddr &addr) { return m_Chunks[addr]; }
+  std::shared_ptr<CChunk> getChunk(const CAddr &addr) { auto it=m_Chunks.find(addr); if (it == m_Chunks.end()) {return nullptr;} else return it->second;}
 private:
   List m_Chunks;
 };
