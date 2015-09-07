@@ -16,7 +16,7 @@
 #include "CAddr.h"
 
 struct CLabel {
-  CLabel() = delete;
+  CLabel() {};
   CLabel(CAddr addr, std::string name) : name(name), addr(addr) {}
 
   CLabel(const CLabel &s) {

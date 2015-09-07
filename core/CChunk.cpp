@@ -32,29 +32,34 @@ CCommand &CChunk::getCommand(int idx) {
   return m_Commands[idx];
 }
 
-std::string CChunk::setLabel(std::string label, CReference::Type ref_type) {
-  if (label.empty()) {
+std::shared_ptr<CLabel> CChunk::setLabel(std::shared_ptr<CLabel> label, CReference::Type ref_type) {
+  if (label==nullptr) {
     //generate from name
     std::string t1{m_StartingAddr.offsetString()};
     switch (ref_type) {
     case CReference::Type::JUMP:
-      m_Label=std::string("jmp_")+t1;
+      m_Label=std::make_shared<CLabel>(m_StartingAddr, std::string("jmp_")+t1);
       break;
     case CReference::Type::CALL:
-      m_Label=std::string("sub_")+t1;
+      m_Label=std::make_shared<CLabel>(m_StartingAddr, std::string("sub_")+t1);
       break;
     case CReference::Type::READ_BYTE:
     case CReference::Type::WRITE_BYTE:
-      m_Label=std::string("byte_")+t1;
+      m_Label=std::make_shared<CLabel>(m_StartingAddr, std::string("byte_")+t1);
       break;
     case CReference::Type::READ_WORD:
     case CReference::Type::WRITE_WORD:
-      m_Label=std::string("word_")+t1;
+      m_Label=std::make_shared<CLabel>(m_StartingAddr, std::string("word_")+t1);
       break;
     }
   } else {
     m_Label = label;
   }
+  return m_Label;
+}
+
+std::shared_ptr<CLabel> CChunk::setLabel(std::string label, CReference::Type ref_type) {
+  m_Label = std::make_shared<CLabel>(m_StartingAddr, label);
   return m_Label;
 }
 

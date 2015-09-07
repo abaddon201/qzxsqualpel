@@ -3,13 +3,13 @@
 void CDisassemblerCoreZX::autoCommentCommand(CCommand &out_command) {
   if (out_command.command_code==CMD_RST) {
     //known RST's
-    if (out_command.arg1=="10") {
+    if (out_command.arg1->toString()=="10") {
       out_command.auto_comment="PRINT_A";
-    } else if (out_command.arg1=="18") {
+    } else if (out_command.arg1->toString()=="18") {
       out_command.auto_comment="NEXT_CHAR";
-    } else if (out_command.arg1=="20") {
+    } else if (out_command.arg1->toString()=="20") {
       out_command.auto_comment="GET_CHAR";
-    } else if (out_command.arg1=="28") {
+    } else if (out_command.arg1->toString()=="28") {
       out_command.auto_comment="FP_CALC";
     }
   } else if (out_command.command_code==CMD_CALL) {

@@ -39,27 +39,18 @@ std::string CLabels::offsetInLabel(const CAddr &addr) const {
   }
   CAddr ch_addr=chunk->addr();
   std::cout<<"addr:"<<ch_addr.toString()<<std::endl;
-  std::string lbl=chunk->label();
-  if (lbl.empty()) {
+  std::shared_ptr<CLabel> lbl=chunk->label();
+  if (lbl == nullptr) {
     std::cout<<"no label for chunk"<<std::endl;
     return addr.toString();
   }
   CAddr delta=addr-ch_addr;
   if (delta == 0) {
-    return lbl;
+    return lbl->name;
   }
-  return lbl+"+"+std::to_string(delta.offset());
+  return lbl->name + "+" + std::to_string(delta.offset());
 }
 
-void CLabels::changeLabel(std::shared_ptr<CChunk> chunk, const std::string new_label) {
-  chunk->changeLabel(new_label);
-  for (auto lbl: *this) {
-    if (lbl.addr == chunk->addr()) {
-      //change and return;
-      lbl.name = new_label;
-      return;
-    }
-  }
-  CLabel lbl(chunk->addr(), new_label);
-  push_back(lbl);
+void CLabels::changeLabel(const CAddr &addr, const std::string new_label) {
+  this->at(addr)->name = new_label;
 }

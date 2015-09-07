@@ -17,6 +17,10 @@
 #include "CAddr.h"
 
 #include <vector>
+#include <memory>
+
+#include "arg.h"
+#include "CLabel.h"
 
 ///@brief Структура описывающая одну команду ассемблера
 struct CCommand {
@@ -37,9 +41,9 @@ struct CCommand {
   ///@brief числовое представление команды (не обязательно опкод)
   int command_code;
   ///@brief символьное представление первого аргумента
-  std::string arg1;
+  std::shared_ptr<Arg> arg1;
   ///@brief символьное представление второго аргумента
-  std::string arg2;
+  std::shared_ptr<Arg> arg2;
   ///@brief комментарий к команде
   std::string comment;
   ///@brief комментарий к команде
@@ -81,8 +85,9 @@ struct CCommand {
   CByte opcodes(unsigned long long offs) const;
   ///@brief Возвращает адрес перехода команды (первый либо второй аргумент)
   CAddr getJmpAddr() const;
+  CAddr getJmpAddrFromString() const;
   ///@brief Устанавливает метку перехода команды (первый либо второй аргумент)
-  void setJmpAddr(const std::string label);
+  void setJmpAddr(const std::shared_ptr<CLabel> label);
 };
 
 #endif

@@ -35,12 +35,12 @@ void CLabelsWidget::refresh() {
   CLabels& my_labels=IDisassemblerCore::inst()->labels();
   setRowCount(my_labels.size());
   for(auto lbl: my_labels) {
-      QTableWidgetItem* nameItem = new QTableWidgetItem(QString::fromStdString(lbl.name));
+      QTableWidgetItem* nameItem = new QTableWidgetItem(QString::fromStdString(lbl.second->name));
       setItem(i, 0, nameItem);
-      QTableWidgetItem* addrItem = new QTableWidgetItem(QString::fromStdString(lbl.addr.toString()));
+      QTableWidgetItem* addrItem = new QTableWidgetItem(QString::fromStdString(lbl.second->addr.toString()));
       setItem(i, 1, addrItem);
       QVariant var;
-      var.setValue<CAddr>(lbl.addr);
+      var.setValue<CAddr>(lbl.second->addr);
       nameItem->setData(Qt::UserRole, var);
       i++;
   }

@@ -17,6 +17,7 @@
 
 #include "CReference.h"
 #include "CCommand.h"
+#include "CLabel.h"
 
 class CChunk {
 public:
@@ -53,9 +54,10 @@ public:
 
   Type type() const {return m_Type;}
 
-  std::string label() const {return m_Label;}
-  std::string setLabel(std::string label=std::string(), CReference::Type=CReference::Type::JUMP);
-  void changeLabel(std::string label) {m_Label=label;}
+  std::shared_ptr<CLabel> label() const {return m_Label;}
+  std::shared_ptr<CLabel> setLabel(std::shared_ptr<CLabel> label = nullptr, CReference::Type=CReference::Type::JUMP);
+  std::shared_ptr<CLabel> setLabel(std::string label, CReference::Type=CReference::Type::JUMP);
+//  void changeLabel(std::string label) {m_Label=label;}
 
   ReferencesList& references() {return _references;}
   std::string comment() const {return _comment;}
@@ -84,7 +86,7 @@ private:
   ///@brief Ссылки на блок
   ReferencesList _references;
   ///@brief Метка блока
-  std::string m_Label;
+  std::shared_ptr<CLabel> m_Label;
   ///@brief Команды блока
   CommandsList m_Commands;
   ///@brief Тип блока

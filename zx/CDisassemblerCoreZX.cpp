@@ -14,6 +14,8 @@
 #include "disassemble.h"
 #include "memory.h"
 #include "CDisassemblerCoreZX.h"
+#include "core/arg_default.h"
+#include "core/arg_label.h"
 
 #include <vector>
 #include <string>
@@ -26,27 +28,28 @@ unsigned char readbyte_internal(unsigned short addr) {
 
 IDisassemblerCore::Type CDisassemblerCoreZX::getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr) {
   ///@bug rst 28 not last command in the chunk
-  CCommand cmd=chunk->lastCommand();
+  CCommand& cmd=chunk->lastCommand();
   if ((cmd.command_code==CMD_CALL) || (cmd.command_code==CMD_RST)) {
-    jump_addr=cmd.getJmpAddr();
+    jump_addr=cmd.getJmpAddrFromString();
     return Type::JT_CALL;
   }
-  if (((cmd.command_code==CMD_JR) || (cmd.command_code==CMD_JP)) && (cmd.arg2.empty())) {
-    if (cmd.arg1[0]=='"' || contains(cmd.arg1, "IX") || contains(cmd.arg1, "IY") || contains(cmd.arg1, "HL")) {
+  if (((cmd.command_code==CMD_JR) || (cmd.command_code==CMD_JP)) && (cmd.arg2==nullptr)) {
+    const std::string &arg1 = cmd.arg1->toString();
+    if (arg1[0]=='"' || contains(arg1, "IX") || contains(arg1, "IY") || contains(arg1, "HL")) {
       //jump to (HL) or (IX) or (IY)
       return Type::JT_RET;
     }
-    jump_addr=cmd.getJmpAddr();
+    jump_addr=cmd.getJmpAddrFromString();
     return Type::JT_JUMP;
   }
-  if (((cmd.command_code==CMD_JR) || (cmd.command_code==CMD_JP)) && (!cmd.arg2.empty())) {
-    jump_addr=cmd.getJmpAddr();
+  if (((cmd.command_code==CMD_JR) || (cmd.command_code==CMD_JP)) && (cmd.arg2!=nullptr)) {
+    jump_addr=cmd.getJmpAddrFromString();
     return Type::JT_COND_JUMP;
   }
-  if ((cmd.command_code==CMD_RET) && (!cmd.arg1.empty())) {
+  if ((cmd.command_code==CMD_RET) && (cmd.arg1 != nullptr)) {
     return Type::JT_COND_RET;
   }
-  if ((cmd.command_code==CMD_RET) && (cmd.arg1.empty())) {
+  if ((cmd.command_code==CMD_RET) && (cmd.arg1 == nullptr)) {
     return Type::JT_RET;
   }
   if (cmd.command_code==CMD_RETI) {
@@ -76,8 +79,10 @@ void CDisassemblerCoreZX::loadGuessFile(const std::string &fname) {
     f.ignore(1);
     f >> std::hex >> off;
     f >> nm;
-    if (!nm.empty())
-      _known_labels.push_back(CLabel(CAddr(off, seg), nm));
+    if (!nm.empty()) {
+      CAddr a(off, seg);
+      _known_labels[a]=std::make_shared<CLabel>(a, nm);
+    }
   }
 }
 
@@ -186,9 +191,9 @@ void CDisassemblerCoreZX::parseCommand(std::string &src, CCommand &out_command) 
   if (strlist.size()>1) {
     //has args
     std::vector<std::string> args=split(strlist[1], ',');
-    out_command.arg1=args[0];
+    out_command.arg1=std::make_shared<ArgDefault>(args[0]);
     if (args.size()==2) {
-      out_command.arg2=args[1];
+      out_command.arg2=std::make_shared<ArgDefault>(args[1]);
     }
     autoCommentCommand(out_command);
   }
@@ -210,7 +215,7 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
   /// @bug: Переходы могут осуществляться через куски нормального года, что приводит к возникновению "рваных" цепей
   /// пример такого бага: 2DE3. Там осуществяется серия переходов, цели которых находятся после блока нормального ассемблера
   auto cmd = chunk->lastCommand();
-  if ((cmd.command=="RST") && (cmd.arg1=="28")) {
+  if ((cmd.command=="RST") && (cmd.arg1->toString()=="28")) {
     CAddr a=cmd.addr+1;
 
     CByte b;
@@ -220,7 +225,7 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
       while ((b=_memory->getByte(a))!=0x38) {
         c.addr=a;
         c.command="DB";
-        c.arg1=b.toString();
+        c.arg1=std::make_shared<ArgDefault>(b.toString());
         c.auto_comment = getRST28AutoComment(b, args_cnt);
         c.len=1;
 
@@ -232,7 +237,7 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
           c.addr=a;
           c.command="DB";
           b=_memory->getByte(a);
-          c.arg1=b.toString();
+          c.arg1=std::make_shared<ArgDefault>(b.toString());
           c.auto_comment = "dest_addr: "+CAddr(a+int{(signed char)b}).toString();
           c.len=1;
 
@@ -244,7 +249,7 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
       }
       c.addr=a;
       c.command="DB";
-      c.arg1=b.toString();
+      c.arg1=std::make_shared<ArgDefault>(b.toString());
       c.len=1;
       c.auto_comment = getRST28AutoComment(b, args_cnt);
 
@@ -315,30 +320,27 @@ void CDisassemblerCoreZX::disassembleBlock(const CAddr &st_addr) {
 }
 
 bool CDisassemblerCoreZX::labelPresent(const CAddr &addr) const {
-  if (m_Labels.size()) {
-    for (CLabel lbl: m_Labels) {
-      if (lbl.addr==addr) {
-        return true;
-      }
-    }
+  try {
+    m_Labels.at(addr);
+    return true;
+  } catch (...) {
+    return false;
   }
-  return false;
 }
 
 std::shared_ptr<CChunk> CDisassemblerCoreZX::createChunk(const CAddr &addr, CChunk::Type type) {
   return m_Chunks.createChunk(addr, type);
 }
 
-std::string CDisassemblerCoreZX::findKnownLabel(const CAddr &addr) {
-  for (auto lbl: _known_labels) {
-    if (lbl.addr==addr) {
-      return lbl.name;
-    }
+std::shared_ptr<CLabel> CDisassemblerCoreZX::findKnownLabel(const CAddr &addr) {
+  try {
+    return _known_labels.at(addr);
+  } catch (...) {
+    return nullptr;
   }
-  return std::string();
 }
 
-std::string CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &jump_addr, CReference::Type ref_type) {
+std::shared_ptr<CLabel> CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &jump_addr, CReference::Type ref_type) {
   disassembleBlock(jump_addr);
   std::shared_ptr<CChunk> jmp_chunk=m_Chunks.getChunk(jump_addr);
   if (jmp_chunk == nullptr) {
@@ -347,25 +349,25 @@ std::string CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &j
     std::shared_ptr<CChunk> near_chunk=m_Chunks.getChunkContains(jump_addr);
     if (near_chunk==0) {
       std::cout<<"Fatal error on split: No target chunk"<<std::endl;
-      return std::string();
+      return nullptr;
     }
     std::cout<<"near_chunk:addr"<<near_chunk->addr().toString()<<std::endl;
     jmp_chunk=near_chunk->splitAt(jump_addr);
     if (jmp_chunk==0) {
       std::cout<<"Split impossible"<<std::endl;
-      return std::string();
+      return nullptr;
     }
   }
   jmp_chunk->addCrossRef(from_addr, ref_type);
-  std::string lbl = findKnownLabel(jump_addr);
-  if (jmp_chunk->label().empty()) {
+  std::shared_ptr<CLabel> lbl = findKnownLabel(jump_addr);
+  if (jmp_chunk->label() == nullptr) {
     lbl=jmp_chunk->setLabel(lbl, ref_type);
   } else {
     lbl=jmp_chunk->label();
   }
   if (!labelPresent(jump_addr)) {
-    CLabel label(jump_addr, lbl);
-    m_Labels.push_back(label);
+    //CLabel label(jump_addr, lbl);
+    m_Labels[jump_addr]=lbl;
   }
   return lbl;
 }
@@ -383,7 +385,7 @@ void CDisassemblerCoreZX::initialParse() {
     cmd.command="db";
     cmd.addr = i;
     cmd.len=1;
-    cmd.arg1=byte.toString();
+    cmd.arg1=std::make_shared<ArgDefault>(byte.toString());
     chunk->appendCommand(cmd);
   }
   updater->updateWidgets();
