@@ -13,7 +13,7 @@
 
 #include <memory>
 
-#include "CMainWindow.h"
+#include "main_window.h"
 #include "CWidgetChangeLabel.h"
 #include "guichunk.h"
 #include "core/debug_printers.h"

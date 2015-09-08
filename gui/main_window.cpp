@@ -1,4 +1,4 @@
-#include "CMainWindow.h"
+#include "main_window.h"
 
 #include <QDockWidget>
 #include <QFileDialog>
