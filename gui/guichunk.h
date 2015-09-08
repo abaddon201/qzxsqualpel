@@ -1,7 +1,7 @@
 #ifndef GUICHUNK_H
 #define GUICHUNK_H
 
-#include "core/CChunk.h"
+#include "core/chunk.h"
 
 class GUIChunk {
 public:

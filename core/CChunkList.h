@@ -16,7 +16,7 @@
 #include <memory>
 #include <map>
 
-#include "CChunk.h"
+#include "chunk.h"
 
 /**
  * @todo split address space to segment based model. ie change any indices to form like m_Segments[addr.segemnt()].m_Offsets[addr.offset()]

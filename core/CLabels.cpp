@@ -11,7 +11,7 @@
 //
 
 #include "CLabels.h"
-#include "CChunk.h"
+#include "chunk.h"
 #include "CChunkList.h"
 #include "IDisassemblerCore.h"
 

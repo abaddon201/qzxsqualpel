@@ -10,7 +10,7 @@
 //
 //
 
-#include "CChunk.h"
+#include "chunk.h"
 #include "IDisassemblerCore.h"
 #include "debug_printers.h"
 
