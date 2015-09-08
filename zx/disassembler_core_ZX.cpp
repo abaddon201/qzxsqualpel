@@ -13,7 +13,7 @@
 #include "core/utils.h"
 #include "disassemble.h"
 #include "memory.h"
-#include "CDisassemblerCoreZX.h"
+#include "disassembler_core_ZX.h"
 
 #include <vector>
 #include <string>

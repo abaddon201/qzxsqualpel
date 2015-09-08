@@ -1,4 +1,4 @@
-#include "CDisassemblerCoreZX.h"
+#include "disassembler_core_ZX.h"
 
 void DisassemblerCoreZX::autoCommentCommand(Command &out_command) {
   if (out_command.command_code==CMD_RST) {
