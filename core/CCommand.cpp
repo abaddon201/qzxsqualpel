@@ -12,7 +12,6 @@
 
 #include "CCommand.h"
 #include "IDisassemblerCore.h"
-#include "arg_label.h"
 
 Addr Command::getJmpAddrFromString() const {
   if (arg2==nullptr) {

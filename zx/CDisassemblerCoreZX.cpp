@@ -14,8 +14,6 @@
 #include "disassemble.h"
 #include "memory.h"
 #include "CDisassemblerCoreZX.h"
-#include "core/arg_default.h"
-#include "core/arg_label.h"
 
 #include <vector>
 #include <string>
