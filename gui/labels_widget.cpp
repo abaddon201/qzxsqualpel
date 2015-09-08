@@ -10,7 +10,7 @@
 //
 //
 
-#include "CLabelsWidget.h"
+#include "labels_widget.h"
 
 #include "core/label.h"
 #include "disassembler_widget.h"

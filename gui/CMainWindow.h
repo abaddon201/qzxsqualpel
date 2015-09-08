@@ -5,7 +5,7 @@
 #include <QListWidget>
 
 #include "disassembler_widget.h"
-#include "CLabelsWidget.h"
+#include "labels_widget.h"
 
 
 class MainWindow : public QMainWindow, public IGUIUpdater {
