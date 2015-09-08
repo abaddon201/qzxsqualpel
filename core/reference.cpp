@@ -10,7 +10,7 @@
 //
 //
 
-#include "CReference.h"
+#include "reference.h"
 #include "labels.h"
 #include "IDisassemblerCore.h"
 

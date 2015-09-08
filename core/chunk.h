@@ -15,7 +15,7 @@
 
 #include <memory>
 
-#include "CReference.h"
+#include "reference.h"
 #include "command.h"
 #include "label.h"
 
