@@ -69,7 +69,7 @@ IDisassemblerCore::Type DisassemblerCoreZX::getLastCmdJumpType(std::shared_ptr<C
   if (((cmd.command_code==CMD_JR) || (cmd.command_code==CMD_JP)) && (cmd.arg2==nullptr)) {
     const std::string &arg1 = cmd.arg1->toString();
     if (arg1[0]=='"' || contains(arg1, "IX") || contains(arg1, "IY") || contains(arg1, "HL")) {
-      //jump to (HL) or (IX) or (IY)
+      //jump to (HL) or (IX) or (IY). address unknown, so we just break disassembling here
       return Type::JT_RET;
     }
     jump_addr=cmd.getJmpAddrFromString();

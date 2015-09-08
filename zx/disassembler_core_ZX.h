@@ -37,6 +37,7 @@ public:
     CMD_JP,
     CMD_JR,
   };
+
 private:
   int command2code(const std::string &cmd) const;
   void autoCommentCommand(Command &out_command);
