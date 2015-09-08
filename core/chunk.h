@@ -16,7 +16,7 @@
 #include <memory>
 
 #include "CReference.h"
-#include "CCommand.h"
+#include "command.h"
 #include "CLabel.h"
 
 class Chunk {

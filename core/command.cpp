@@ -10,7 +10,7 @@
 //
 //
 
-#include "CCommand.h"
+#include "command.h"
 #include "IDisassemblerCore.h"
 
 Addr Command::getJmpAddrFromString() const {
