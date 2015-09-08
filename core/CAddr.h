@@ -15,39 +15,39 @@
 
 #include <string>
 
-class CAddr {
+class Addr {
 public:
-  CAddr(unsigned long long offs=0, unsigned long long seg=0) : m_Offset{offs}, m_Segment{seg}, _dirty{true} {}
+  Addr(unsigned long long offs=0, unsigned long long seg=0) : _offset{offs}, _segment{seg}, _dirty{true} {}
 
-  unsigned long long offset() const { return m_Offset; }
-  unsigned long long segment() const { return m_Segment; }
+  unsigned long long offset() const { return _offset; }
+  unsigned long long segment() const { return _segment; }
 
-  bool compare(unsigned long long s) const { return m_Offset==s; }
-  bool operator==(const CAddr &s) const { return ((m_Offset==s.m_Offset) && (m_Segment==s.m_Segment)); }
-  bool operator!=(const CAddr &s) const { return ((m_Offset!=s.m_Offset) || (m_Segment!=s.m_Segment)); }
+  bool compare(unsigned long long s) const { return _offset==s; }
+  bool operator==(const Addr &s) const { return ((_offset==s._offset) && (_segment==s._segment)); }
+  bool operator!=(const Addr &s) const { return ((_offset!=s._offset) || (_segment!=s._segment)); }
   ///@bug не учитывается сегмент в сравнениях больше/меньше
-  bool operator>=(const CAddr &s) const { return ((m_Offset>=s.m_Offset) && (m_Segment==s.m_Segment)); }
-  bool operator<=(const CAddr &s) const { return ((m_Offset<=s.m_Offset) && (m_Segment==s.m_Segment)); }
-  bool operator>(const CAddr &s) const { return ((m_Offset>s.m_Offset) && (m_Segment==s.m_Segment)); }
-  bool operator<(const CAddr &s) const { return ((m_Offset<s.m_Offset) && (m_Segment==s.m_Segment)); }
+  bool operator>=(const Addr &s) const { return ((_offset>=s._offset) && (_segment==s._segment)); }
+  bool operator<=(const Addr &s) const { return ((_offset<=s._offset) && (_segment==s._segment)); }
+  bool operator>(const Addr &s) const { return ((_offset>s._offset) && (_segment==s._segment)); }
+  bool operator<(const Addr &s) const { return ((_offset<s._offset) && (_segment==s._segment)); }
 
-  CAddr &operator++() { m_Offset++; _dirty = true; return*this;}
-  CAddr &operator--() { m_Offset--; _dirty = true; return*this;}
+  Addr &operator++() { _offset++; _dirty = true; return*this;}
+  Addr &operator--() { _offset--; _dirty = true; return*this;}
 
-  CAddr operator+(unsigned long long offs) const {return m_Offset+offs;}
-  CAddr operator-(unsigned long long offs) const {return m_Offset-offs;}
-  CAddr operator-(const CAddr &raddr) const { return m_Offset-raddr.m_Offset; }
-  CAddr operator+(const CAddr &raddr) const { return m_Offset+raddr.m_Offset; }
+  Addr operator+(unsigned long long offs) const {return _offset+offs;}
+  Addr operator-(unsigned long long offs) const {return _offset-offs;}
+  Addr operator-(const Addr &raddr) const { return _offset-raddr._offset; }
+  Addr operator+(const Addr &raddr) const { return _offset+raddr._offset; }
 
-  CAddr &operator+=(unsigned long long offs) { m_Offset+=offs; _dirty = true; return *this; }
-  CAddr &operator-=(unsigned long long offs) { m_Offset-=offs; _dirty = true; return *this; }
+  Addr &operator+=(unsigned long long offs) { _offset+=offs; _dirty = true; return *this; }
+  Addr &operator-=(unsigned long long offs) { _offset-=offs; _dirty = true; return *this; }
 
   const std::string& toString() const;
   std::string offsetString() const;
 
 private:
-  unsigned long long m_Offset;
-  unsigned long long m_Segment;
+  unsigned long long _offset;
+  unsigned long long _segment;
 ///@todo не всегда нужен кэш строки... Может стоит разбить на 2 класса
   mutable std::string _hex_cache;
   mutable bool _dirty;

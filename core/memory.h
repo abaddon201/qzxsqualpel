@@ -17,9 +17,9 @@ public:
   void createSegment(Segment::IdType id, unsigned long long size);
   void switchSegment(Segment::IdType src, Segment::IdType dst);
   std::shared_ptr<Segment> getSegment(Segment::IdType id) {return _segments[id];}
-  const CAddr getMaxAddr() const {return _segments.rbegin()->second->dataSize();}
+  const Addr getMaxAddr() const {return _segments.rbegin()->second->dataSize();}
 
-  CByte getByte(const CAddr& addr);
+  Byte getByte(const Addr& addr);
 
   unsigned long long wholeSize();
 private:

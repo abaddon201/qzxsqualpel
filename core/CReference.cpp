@@ -14,11 +14,11 @@
 #include "CLabels.h"
 #include "IDisassemblerCore.h"
 
-CReference::CReference(CAddr addr_, Type type_)
+Reference::Reference(Addr addr_, Type type_)
   : addr(addr_), type(type_) {
 }
 
-std::string CReference::toString() {
+std::string Reference::toString() {
   std::string res="; XRef: ";
   res+=IDisassemblerCore::inst()->labels().offsetInLabel(addr);
   switch (type) {

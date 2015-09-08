@@ -8,37 +8,37 @@
 
 #include "zx/CDisassemblerCoreZX.h"
 
-void CMainWindow::updateWidgets() {
-  m_DisassemblerWidget->refreshView();
+void MainWindow::updateWidgets() {
+  _disassembler_widget->refreshView();
 }
 
-CMainWindow::CMainWindow() {
+MainWindow::MainWindow() {
   //ui.setupUi(this);
 
   setupFileMenu();
 
-  m_DisassemblerWidget=new CDisassemblerWidget(this);
+  _disassembler_widget=new DisassemblerWidget(this);
 
-  IDisassemblerCore* core=new CDisassemblerCoreZX(this);
+  IDisassemblerCore* core=new DisassemblerCoreZX(this);
   core->init();
-  m_DisassemblerWidget->setCore(core);
+  _disassembler_widget->setCore(core);
   QDockWidget* dock=new QDockWidget(tr("Navigation Stack"), this);
   dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-  navigationStack = new QListWidget(dock);
-  dock->setWidget(navigationStack);
+  _navigation_stack = new QListWidget(dock);
+  dock->setWidget(_navigation_stack);
   addDockWidget(Qt::RightDockWidgetArea, dock);
 
   dock=new QDockWidget(tr("Labels list"), this);
   dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-  m_LabelsWidget = new CLabelsWidget(dock, m_DisassemblerWidget);
-  dock->setWidget(m_LabelsWidget);
+  _labels_widget = new LabelsWidget(dock, _disassembler_widget);
+  dock->setWidget(_labels_widget);
   addDockWidget(Qt::RightDockWidgetArea, dock);
 
   //m_Highlighter=new Highlighter(m_Disassembler->document());
-  setCentralWidget(m_DisassemblerWidget);
+  setCentralWidget(_disassembler_widget);
 }
 
-void CMainWindow::setupFileMenu() {
+void MainWindow::setupFileMenu() {
   QMenu* fileMenu = new QMenu(tr("&File"), this);
   menuBar()->addMenu(fileMenu);
 
@@ -59,23 +59,23 @@ void CMainWindow::setupFileMenu() {
                                       "File|Load")));
 }
 
-void CMainWindow::openFile() {
+void MainWindow::openFile() {
   QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), "", "RAW ZX Files (*.raw)");
   if (!fileName.isEmpty()) {
-    m_DisassemblerWidget->openRAWFile(fileName);
+    _disassembler_widget->openRAWFile(fileName);
   }
 }
 
-void CMainWindow::loadGuesses() {
+void MainWindow::loadGuesses() {
   QString fileName = QFileDialog::getOpenFileName(this, tr("Load Guesses file"), "", "QSqualpel Guess Files (*.qzg)");
   if (!fileName.isEmpty()) {
     IDisassemblerCore::inst()->loadGuessFile(fileName.toStdString());
   }
 }
 
-void CMainWindow::saveFile() {
+void MainWindow::saveFile() {
   QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "", "ASM Files (*.asm)");
   if (!fileName.isEmpty()) {
-    m_DisassemblerWidget->saveASMFile(fileName);
+    _disassembler_widget->saveASMFile(fileName);
   }
 }

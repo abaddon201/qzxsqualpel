@@ -19,16 +19,16 @@
 #include "CLabel.h"
 #include "CChunk.h"
 
-class CLabels : public std::map<CAddr, std::shared_ptr<CLabel>> {
+class Labels : public std::map<Addr, std::shared_ptr<Label>> {
 public:
   ///@brief Вовращает сроку адреса относительно метки.
-  std::string offsetInLabel(const CAddr &addr) const;
+  std::string offsetInLabel(const Addr &addr) const;
   /**
    * @brief Изменяет метку. Создаёт если не найдена соотв. метка
    * @param chunk Указатель на блок, для которого меняется метка
    * @param new_label Новое название метки
    */
-  void changeLabel(const CAddr& addr, const std::string new_label);
+  void changeLabel(const Addr& addr, const std::string new_label);
 };
 
 #endif

@@ -13,33 +13,33 @@
 
 #include "guichunklist.h"
 
-class CMainWindow;
+class MainWindow;
 
-class CDisassemblerWidget : public QPlainTextEdit {
+class DisassemblerWidget : public QPlainTextEdit {
 public:
-  CDisassemblerWidget(CMainWindow* mwnd);
+  DisassemblerWidget(MainWindow* mwnd);
   void setCore(IDisassemblerCore* core) {
-    m_DisassemblerCore=core;
+    _disassembler_core=core;
   }
   void openRAWFile(QString fileName);
   void saveASMFile(QString fileName);
   void keyPressEvent ( QKeyEvent* );
 
   ///@brief Показать на экране код с меткой под номером
-  void navigateToAddress(const CAddr &addr);
+  void navigateToAddress(const Addr &addr);
 
   void paintEvent(QPaintEvent* event);
   void refreshView();
 
 private:
-  CDisassemblerWidget();
+  DisassemblerWidget();
   void init();
 
   void printCell(QTextCursor &cursor, std::string text, int length, QTextCharFormat fmt);
   void printCell(QTextCursor &cursor, std::string text, int length);
 
   void printReferences(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
-  void printCommand(QTextCursor &cursor, const CCommand &cmd);
+  void printCommand(QTextCursor &cursor, const Command &cmd);
   void __attribute__ ((deprecated)) printChunkUnparsed(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
   void printChunkCode(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
 
@@ -48,23 +48,23 @@ private:
 
   void navigateToAddrDlg();
 
-  QTextCharFormat m_CellFormatAddr;
-  QTextCharFormat m_CellFormatOpcodes;
-  QTextCharFormat m_CellFormatLabel;
-  QTextCharFormat m_CellFormatCommand;
-  QTextCharFormat m_CellFormatArgs;
-  QTextCharFormat m_CellFormatCmdComment;
-  QTextCharFormat m_CellFormatCmdAutoComment;
-  QTextCharFormat m_CellFormatChunkComment;
-  QTextCharFormat m_CellFormatReference;
+  QTextCharFormat _cell_format_addr;
+  QTextCharFormat _cell_format_opcodes;
+  QTextCharFormat _cell_format_label;
+  QTextCharFormat _cell_format_command;
+  QTextCharFormat _cell_format_args;
+  QTextCharFormat _cell_format_cmd_comment;
+  QTextCharFormat _cell_format_cmd_auto_comment;
+  QTextCharFormat _cell_format_chunk_comment;
+  QTextCharFormat _cell_format_reference;
 
-  int m_CellLengthAddr;
-  int m_CellLengthOpcodes;
-  int m_CellLengthLabel;
-  int m_CellLengthCommand;
-  int m_CellLengthArgs;
-  int m_CellLengthCmdComment;
-  int m_CellLengthReference;
+  int _cell_length_addr;
+  int _cell_length_opcodes;
+  int _cell_length_label;
+  int _cell_length_command;
+  int _cell_length_args;
+  int _cell_length_cmd_comment;
+  int _cell_length_reference;
 
   static const int CELL_LENGTH_ADDR = 7;
   static const int CELL_LENGTH_OPCODES = 13;
@@ -74,10 +74,10 @@ private:
   static const int CELL_LENGTH_CMD_COMMENT = 0;
   static const int CELL_LENGTH_REFERENCE = 0;
 
-  int m_ReferencesOnLine;
+  int _references_on_line;
 
-  CMainWindow* m_MainWindow;
-  IDisassemblerCore* m_DisassemblerCore;
+  MainWindow* _main_window;
+  IDisassemblerCore* _disassembler_core;
 
   GUIChunkList _chunks;
 };

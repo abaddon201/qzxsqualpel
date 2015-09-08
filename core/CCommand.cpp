@@ -14,7 +14,7 @@
 #include "IDisassemblerCore.h"
 #include "arg_label.h"
 
-CAddr CCommand::getJmpAddrFromString() const {
+Addr Command::getJmpAddrFromString() const {
   if (arg2==nullptr) {
     //get from arg1
     return std::stoi(arg1->toString(), nullptr, 16);
@@ -24,7 +24,7 @@ CAddr CCommand::getJmpAddrFromString() const {
   }
 }
 
-CAddr CCommand::getJmpAddr() const {
+Addr Command::getJmpAddr() const {
   if (arg2==nullptr) {
     //get from arg1
     return dynamic_cast<ArgLabel*>(arg1.get())->label->addr;
@@ -34,7 +34,7 @@ CAddr CCommand::getJmpAddr() const {
   }
 }
 
-void CCommand::setJmpAddr(const std::shared_ptr<CLabel> label) {
+void Command::setJmpAddr(const std::shared_ptr<Label> label) {
   // if label is nullptr, we can't change default type arg to the label (we don't know about it)
   if (label != nullptr) {
     if (arg2==nullptr) {
@@ -45,7 +45,7 @@ void CCommand::setJmpAddr(const std::shared_ptr<CLabel> label) {
   }
 }
 
-std::string CCommand::getArgsString() const {
+std::string Command::getArgsString() const {
   if (arg1==nullptr) {
     return std::string();
   }
@@ -56,16 +56,16 @@ std::string CCommand::getArgsString() const {
   return arg1->toString()+", "+arg2->toString();
 }
 
-std::string CCommand::getOpcodesString() const {
+std::string Command::getOpcodesString() const {
   std::string tmp;
   int l1=len;
-  CAddr a = addr;
+  Addr a = addr;
   for (; l1; --l1, ++a) {
     tmp += " " + IDisassemblerCore::inst()->getMemoryByte(a).toString();
   }
   return tmp;
 }
 
-CByte CCommand::opcodes(unsigned long long offs) const {
+Byte Command::opcodes(unsigned long long offs) const {
   return IDisassemblerCore::inst()->getMemoryByte(addr + offs);
 }

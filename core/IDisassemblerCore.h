@@ -20,8 +20,8 @@
 #include "CAddr.h"
 #include "memory.h"
 
-class CLabels;
-class CChunkList;
+class Labels;
+class ChunkList;
 
 class IGUIUpdater {
 public:
@@ -45,20 +45,20 @@ public:
 
   virtual void init() = 0;
 
-  virtual int disassembleInstruction(const CAddr &addr, std::shared_ptr<CChunk>& out_chunk)=0;
-  virtual void disassembleBlock(const CAddr& addr) = 0;
+  virtual int disassembleInstruction(const Addr &addr, std::shared_ptr<Chunk>& out_chunk)=0;
+  virtual void disassembleBlock(const Addr& addr) = 0;
   virtual void setRawMemory(unsigned char* buf, size_t size) = 0;
   virtual void initialParse() = 0;
 
-  virtual std::shared_ptr<CChunk> createChunk(const CAddr& addr, CChunk::Type type=CChunk::Type::UNKNOWN) = 0;
-  virtual CChunkList &chunks() = 0;
+  virtual std::shared_ptr<Chunk> createChunk(const Addr& addr, Chunk::Type type=Chunk::Type::UNKNOWN) = 0;
+  virtual ChunkList &chunks() = 0;
 
-  virtual CLabels& labels() = 0;
+  virtual Labels& labels() = 0;
 
-  virtual std::shared_ptr<CLabel> makeJump(const CAddr& from_addr, const CAddr& jump_addr, CReference::Type ref_type) = 0;
-  virtual Type getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr)=0;
+  virtual std::shared_ptr<Label> makeJump(const Addr& from_addr, const Addr& jump_addr, Reference::Type ref_type) = 0;
+  virtual Type getLastCmdJumpType(std::shared_ptr<Chunk> chunk, Addr &jump_addr)=0;
 
-  CByte getMemoryByte(const CAddr& addr) const {return _memory->getByte(addr);}
+  Byte getMemoryByte(const Addr& addr) const {return _memory->getByte(addr);}
 
   virtual void loadGuessFile(const std::string& fname) = 0;
 

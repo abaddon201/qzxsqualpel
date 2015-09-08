@@ -26,9 +26,9 @@ unsigned char readbyte_internal(unsigned short addr) {
   return IDisassemblerCore::inst()->getMemoryByte(addr);
 }
 
-IDisassemblerCore::Type CDisassemblerCoreZX::getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr) {
+IDisassemblerCore::Type DisassemblerCoreZX::getLastCmdJumpType(std::shared_ptr<Chunk> chunk, Addr &jump_addr) {
   ///@bug rst 28 not last command in the chunk
-  CCommand &cmd=chunk->lastCommand();
+  Command &cmd=chunk->lastCommand();
   if ((cmd.command_code==CMD_CALL) || (cmd.command_code==CMD_RST)) {
     jump_addr=cmd.getJmpAddrFromString();
     return Type::JT_CALL;
@@ -61,16 +61,16 @@ IDisassemblerCore::Type CDisassemblerCoreZX::getLastCmdJumpType(std::shared_ptr<
   return Type::JT_NONE;
 }
 
-CDisassemblerCoreZX::CDisassemblerCoreZX(IGUIUpdater* updater)
+DisassemblerCoreZX::DisassemblerCoreZX(IGUIUpdater* updater)
   : IDisassemblerCore{updater, this} {
   ///@bug zx 128 have multiple segments 8k size each
   _memory->createSegment(0, 0xFFFF);
 }
 
-void CDisassemblerCoreZX::init() {
+void DisassemblerCoreZX::init() {
 }
 
-void CDisassemblerCoreZX::loadGuessFile(const std::string &fname) {
+void DisassemblerCoreZX::loadGuessFile(const std::string &fname) {
   std::ifstream f(fname);
   while (!f.eof()) {
     unsigned long long seg, off;
@@ -80,13 +80,13 @@ void CDisassemblerCoreZX::loadGuessFile(const std::string &fname) {
     f >> std::hex >> off;
     f >> nm;
     if (!nm.empty()) {
-      CAddr a(off, seg);
-      _known_labels[a]=std::make_shared<CLabel>(a, nm);
+      Addr a(off, seg);
+      _known_labels[a]=std::make_shared<Label>(a, nm);
     }
   }
 }
 
-int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr, std::shared_ptr<CChunk> &out_chunk) {
+int DisassemblerCoreZX::disassembleInstruction(const Addr &addr, std::shared_ptr<Chunk> &out_chunk) {
   char tbuff[128];
   size_t len;
   if (addr>=_memory->getMaxAddr()) {
@@ -98,7 +98,7 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr, std::shared_p
   if (len) {
     std::string buff{tbuff};
     //initialize chunk
-    std::shared_ptr<CChunk> chunk_i = m_Chunks.getChunk(addr);
+    std::shared_ptr<Chunk> chunk_i = _chunks.getChunk(addr);
     if (chunk_i == nullptr) {
       std::cout<<"no instruction here: "<<addr.toString()<<std::endl;
       return 0;
@@ -107,53 +107,53 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr, std::shared_p
       std::cout<<"allready parsed: "<< addr.toString() <<std::endl;
       return 0;
     }
-    std::shared_ptr<CChunk> old_chunk = m_Chunks.getChunk(addr);
-    m_Chunks.removeChunk(addr);
-    std::shared_ptr<CChunk> target_chunk;
+    std::shared_ptr<Chunk> old_chunk = _chunks.getChunk(addr);
+    _chunks.removeChunk(addr);
+    std::shared_ptr<Chunk> target_chunk;
     if (addr.compare(0)) {
       //parsing current addr
-      target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
+      target_chunk=_chunks.createChunk(addr, Chunk::Type::CODE);
     } else {
-      target_chunk=m_Chunks.getChunkContains(addr-1);
+      target_chunk=_chunks.getChunkContains(addr-1);
       if (target_chunk==nullptr) {
         std::cout<<"No target for disassemble"<<std::endl;
-        target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
+        target_chunk=_chunks.createChunk(addr, Chunk::Type::CODE);
       }
       //appending to prev. parsed block
-      if (target_chunk->type()!=CChunk::Type::CODE) {
+      if (target_chunk->type()!=Chunk::Type::CODE) {
         std::cout<<"Not code previous chunk"<<std::endl;
         //parsing current addr
-        target_chunk=m_Chunks.createChunk(addr, CChunk::Type::CODE);
+        target_chunk=_chunks.createChunk(addr, Chunk::Type::CODE);
       }
     }
     std::cout<<"addr="<<addr.toString()<<"command=" << buff <<"len=" << len<<std::endl;
     ///@bug must be in segment range check... think about it
     if (addr+len>=_memory->getMaxAddr()) {
       std::cout<<"instruction out of mem block"<<std::endl;
-      m_Chunks.addChunk(addr, old_chunk);
+      _chunks.addChunk(addr, old_chunk);
       return -3;
     }
     if (len>1) {
       for (size_t i=1; i<len; i++) {
-        std::shared_ptr<CChunk> ch=m_Chunks.getChunk(addr+i);
+        std::shared_ptr<Chunk> ch=_chunks.getChunk(addr+i);
         if (ch==0) {
           std::cout<<"Instrunction longer than unparsed block"<<std::endl;
           //m_Chunks.removeChunk(addr);
-          m_Chunks.addChunk(addr, old_chunk);
+          _chunks.addChunk(addr, old_chunk);
           return -4;
         }
-        if (ch->type()!=CChunk::Type::UNPARSED) {
+        if (ch->type()!=Chunk::Type::UNPARSED) {
           std::cout<<"Instrunction longer than unparsed block2"<<std::endl;
           //m_Chunks.removeChunk(addr);
-          m_Chunks.addChunk(addr, old_chunk);
+          _chunks.addChunk(addr, old_chunk);
           return -4;
         }
       }
       for (size_t i=1; i<len; i++) {
-        m_Chunks.removeChunk(addr+i);
+        _chunks.removeChunk(addr+i);
       }
     }
-    CCommand cmd;
+    Command cmd;
     cmd.addr = addr;
     cmd.len+=len;
     parseCommand(buff, cmd);
@@ -165,7 +165,7 @@ int CDisassemblerCoreZX::disassembleInstruction(const CAddr &addr, std::shared_p
   return len;
 }
 
-int CDisassemblerCoreZX::command2code(const std::string &cmd) const {
+int DisassemblerCoreZX::command2code(const std::string &cmd) const {
   if (cmd == "CALL") {
     return CMD_CALL;
   } else if (cmd == "RST") {
@@ -185,7 +185,7 @@ int CDisassemblerCoreZX::command2code(const std::string &cmd) const {
   }
 }
 
-void CDisassemblerCoreZX::parseCommand(std::string &src, CCommand &out_command) {
+void DisassemblerCoreZX::parseCommand(std::string &src, Command &out_command) {
   std::vector<std::string> strlist=split(src,' ');
   out_command.command=strlist[0];
   out_command.command_code = command2code(out_command.command);
@@ -200,7 +200,7 @@ void CDisassemblerCoreZX::parseCommand(std::string &src, CCommand &out_command) 
   }
 }
 
-int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len) {
+int DisassemblerCoreZX::postProcessChunk(std::shared_ptr<Chunk> chunk, int len) {
   /// RST 28 Нужно анализировать особо... после RST располагается набор инструкций для вычислений (bcalc)
   /// Пример:
   /// 2E24 PF-SMALL RST 0028, FP-CALC
@@ -217,10 +217,10 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
   /// пример такого бага: 2DE3. Там осуществяется серия переходов, цели которых находятся после блока нормального ассемблера
   auto cmd = chunk->lastCommand();
   if ((cmd.command=="RST") && (cmd.arg1->toString()=="28")) {
-    CAddr a=cmd.addr+1;
+    Addr a=cmd.addr+1;
 
-    CByte b;
-    CCommand c;
+    Byte b;
+    Command c;
     int args_cnt;
     try {
       while ((b=_memory->getByte(a))!=0x38) {
@@ -230,7 +230,7 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
         c.auto_comment = getRST28AutoComment(b, args_cnt);
         c.len=1;
 
-        m_Chunks.removeChunk(a);
+        _chunks.removeChunk(a);
         chunk->appendCommand(c);
         len++;
         ++a;
@@ -239,10 +239,10 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
           c.command="DB";
           b=_memory->getByte(a);
           c.arg1=std::make_shared<ArgDefault>(b.toString());
-          c.auto_comment = "dest_addr: "+CAddr(a+int{(signed char)b}).toString();
+          c.auto_comment = "dest_addr: "+Addr(a+int{(signed char)b}).toString();
           c.len=1;
 
-          m_Chunks.removeChunk(a);
+          _chunks.removeChunk(a);
           chunk->appendCommand(c);
           len++;
           ++a;
@@ -254,7 +254,7 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
       c.len=1;
       c.auto_comment = getRST28AutoComment(b, args_cnt);
 
-      m_Chunks.removeChunk(a);
+      _chunks.removeChunk(a);
       chunk->appendCommand(c);
       len++;
     } catch (std::out_of_range &) {
@@ -264,12 +264,12 @@ int CDisassemblerCoreZX::postProcessChunk(std::shared_ptr<CChunk> chunk, int len
   return len;
 }
 
-void CDisassemblerCoreZX::disassembleBlock(const CAddr &st_addr) {
+void DisassemblerCoreZX::disassembleBlock(const Addr &st_addr) {
   int res=0;
-  CAddr addr = st_addr;
+  Addr addr = st_addr;
   std::cout<<"disassembleBlock(): addr"<< addr.toString()<<std::endl;
   do {
-    std::shared_ptr<CChunk> chunk;
+    std::shared_ptr<Chunk> chunk;
     res=disassembleInstruction(addr, chunk);
     if (res==0) {
       //end of block
@@ -279,7 +279,7 @@ void CDisassemblerCoreZX::disassembleBlock(const CAddr &st_addr) {
       //parse error
       return;
     }
-    CAddr jump_addr;
+    Addr jump_addr;
     //std::shared_ptr<CChunk> chunk=m_Chunks.getChunkContains(addr);
     if (chunk==nullptr) {
       std::cout<<"No chunk after disassemble instruction, addr:"<<addr.toString()<<std::endl;
@@ -290,18 +290,18 @@ void CDisassemblerCoreZX::disassembleBlock(const CAddr &st_addr) {
       //call
       std::cout<<"call: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString()<<std::endl;
       std::cout<<"st_addr="<<st_addr.toString()<<std::endl;
-      chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, CReference::Type::CALL));
+      chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, Reference::Type::CALL));
       addr+=res;
       break;
     case IDisassemblerCore::Type::JT_COND_JUMP:
       //conditional jump
       std::cout<<"cond jump: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString()<<std::endl;
-      chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, CReference::Type::JUMP));
+      chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, Reference::Type::JUMP));
       addr+=res;
       break;
     case IDisassemblerCore::Type::JT_JUMP:
       std::cout<<"jump: addr=" <<addr.toString()<< "to_addr" <<jump_addr.toString()<<std::endl;
-      chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, CReference::Type::JUMP));
+      chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, Reference::Type::JUMP));
       res=0;
       break;
     case IDisassemblerCore::Type::JT_COND_RET:
@@ -318,18 +318,18 @@ void CDisassemblerCoreZX::disassembleBlock(const CAddr &st_addr) {
       break;
     }
   } while (res);
-  std::cout<<"finished chunk:st_addr="<<st_addr.toString()<<" m_chunks.count="<<m_Chunks.count()<<std::endl;
+  std::cout<<"finished chunk:st_addr="<<st_addr.toString()<<" m_chunks.count="<<_chunks.count()<<std::endl;
 }
 
-bool CDisassemblerCoreZX::labelPresent(const CAddr &addr) const {
-  return m_Labels.find(addr)!=m_Labels.end();
+bool DisassemblerCoreZX::labelPresent(const Addr &addr) const {
+  return _labels.find(addr)!=_labels.end();
 }
 
-std::shared_ptr<CChunk> CDisassemblerCoreZX::createChunk(const CAddr &addr, CChunk::Type type) {
-  return m_Chunks.createChunk(addr, type);
+std::shared_ptr<Chunk> DisassemblerCoreZX::createChunk(const Addr &addr, Chunk::Type type) {
+  return _chunks.createChunk(addr, type);
 }
 
-std::shared_ptr<CLabel> CDisassemblerCoreZX::findKnownLabel(const CAddr &addr) {
+std::shared_ptr<Label> DisassemblerCoreZX::findKnownLabel(const Addr &addr) {
   auto it = _known_labels.find(addr);
   if (it != _known_labels.end()) {
     return it->second;
@@ -337,13 +337,13 @@ std::shared_ptr<CLabel> CDisassemblerCoreZX::findKnownLabel(const CAddr &addr) {
   return nullptr;
 }
 
-std::shared_ptr<CLabel> CDisassemblerCoreZX::makeJump(const CAddr &from_addr, const CAddr &jump_addr, CReference::Type ref_type) {
+std::shared_ptr<Label> DisassemblerCoreZX::makeJump(const Addr &from_addr, const Addr &jump_addr, Reference::Type ref_type) {
   disassembleBlock(jump_addr);
-  std::shared_ptr<CChunk> jmp_chunk=m_Chunks.getChunk(jump_addr);
+  std::shared_ptr<Chunk> jmp_chunk=_chunks.getChunk(jump_addr);
   if (jmp_chunk == nullptr) {
     std::cout<<"Split chunk at jump"<<std::endl;
     // split target chunk
-    std::shared_ptr<CChunk> near_chunk=m_Chunks.getChunkContains(jump_addr);
+    std::shared_ptr<Chunk> near_chunk=_chunks.getChunkContains(jump_addr);
     if (near_chunk==0) {
       std::cout<<"Fatal error on split: No target chunk"<<std::endl;
       return nullptr;
@@ -356,7 +356,7 @@ std::shared_ptr<CLabel> CDisassemblerCoreZX::makeJump(const CAddr &from_addr, co
     }
   }
   jmp_chunk->addCrossRef(from_addr, ref_type);
-  std::shared_ptr<CLabel> lbl = findKnownLabel(jump_addr);
+  std::shared_ptr<Label> lbl = findKnownLabel(jump_addr);
   if (jmp_chunk->label() == nullptr) {
     lbl=jmp_chunk->setLabel(lbl, ref_type);
   } else {
@@ -364,21 +364,21 @@ std::shared_ptr<CLabel> CDisassemblerCoreZX::makeJump(const CAddr &from_addr, co
   }
   if (!labelPresent(jump_addr)) {
     //CLabel label(jump_addr, lbl);
-    m_Labels[jump_addr]=lbl;
+    _labels[jump_addr]=lbl;
   }
   return lbl;
 }
 
-void CDisassemblerCoreZX::setRawMemory(unsigned char* buf, size_t size) {
+void DisassemblerCoreZX::setRawMemory(unsigned char* buf, size_t size) {
   _memory->getSegment(0)->fill(buf, size);
 }
 
-void CDisassemblerCoreZX::initialParse() {
-  m_Chunks.clear();
+void DisassemblerCoreZX::initialParse() {
+  _chunks.clear();
   for (unsigned long long i=0; i<_memory->wholeSize(); ++i) {
-    std::shared_ptr<CChunk> chunk=m_Chunks.createChunk(i, CChunk::Type::UNPARSED);
-    CByte byte=_memory->getByte(i);
-    CCommand cmd;
+    std::shared_ptr<Chunk> chunk=_chunks.createChunk(i, Chunk::Type::UNPARSED);
+    Byte byte=_memory->getByte(i);
+    Command cmd;
     cmd.command="db";
     cmd.addr = i;
     cmd.len=1;

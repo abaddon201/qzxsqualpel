@@ -16,12 +16,12 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 
-CWidgetChangeLabel::CWidgetChangeLabel(QWidget* par, QString old_link)
+WidgetChangeLabel::WidgetChangeLabel(QWidget* par, QString old_link)
   : QDialog(par) {
-  m_LinkName=new QLineEdit;
-  m_LinkName->setText(old_link);
+  _link_name=new QLineEdit;
+  _link_name->setText(old_link);
   QVBoxLayout* v=new QVBoxLayout();
-  v->addWidget(m_LinkName);
+  v->addWidget(_link_name);
   QHBoxLayout* h=new QHBoxLayout();
   QPushButton* bok=new QPushButton(tr("Ok"));
   QPushButton* bcanc=new QPushButton(tr("Cancel"));

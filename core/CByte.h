@@ -16,14 +16,14 @@
 #include <string>
 #include "utils.h"
 
-class CByte {
+class Byte {
 public:
-  CByte(unsigned char b=0) : m_Byte(b) {}
-  inline std::string toString() const {return byte2hex(m_Byte);}
-  operator unsigned char() const {return m_Byte;}
+  Byte(unsigned char b=0) : _byte(b) {}
+  inline std::string toString() const {return byte2hex(_byte);}
+  operator unsigned char() const {return _byte;}
 
 private:
-  unsigned char m_Byte;
+  unsigned char _byte;
 };
 
 #endif

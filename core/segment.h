@@ -28,7 +28,7 @@ public:
   inline IdType id() const {return _id;}
   inline unsigned long long dataSize() const {return _dataSize;}
 
-  inline CByte getByte(unsigned long long offset) const {if (offset<_dataSize) return _mem[offset]; else throw std::out_of_range("offset:"+std::to_string(offset)+", max:"+std::to_string(_dataSize));}
+  inline Byte getByte(unsigned long long offset) const {if (offset<_dataSize) return _mem[offset]; else throw std::out_of_range("offset:"+std::to_string(offset)+", max:"+std::to_string(_dataSize));}
 
 private:
   ///@brief размер сегмента в байтах

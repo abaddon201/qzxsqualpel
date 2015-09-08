@@ -13,14 +13,14 @@
 #include "CAddr.h"
 #include "utils.h"
 
-const std::string& CAddr::toString() const {
+const std::string& Addr::toString() const {
   if (_dirty) {
-    _hex_cache = hexify(m_Segment, 4) + ":" + hexify(m_Offset, 4);
+    _hex_cache = hexify(_segment, 4) + ":" + hexify(_offset, 4);
     _dirty = false;
   }
   return _hex_cache;
 }
 
-std::string CAddr::offsetString() const {
-  return hexify(m_Offset, 4);
+std::string Addr::offsetString() const {
+  return hexify(_offset, 4);
 }

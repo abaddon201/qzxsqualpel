@@ -8,23 +8,25 @@
 #include "CLabelsWidget.h"
 
 
-class CMainWindow : public QMainWindow, public IGUIUpdater {
+class MainWindow : public QMainWindow, public IGUIUpdater {
   Q_OBJECT
 public:
-  CMainWindow();
-  CLabelsWidget* labelsWidget() {
-    return m_LabelsWidget;
+  MainWindow();
+  LabelsWidget* labelsWidget() {
+    return _labels_widget;
   }
 
   void updateWidgets() override;
+
 private:
   //Ui::CMainWindow ui;
-  QListWidget* navigationStack;
+  QListWidget* _navigation_stack;
 //  Highlighter* m_Highlighter;
-  CDisassemblerWidget* m_DisassemblerWidget;
-  CLabelsWidget* m_LabelsWidget;
+  DisassemblerWidget* _disassembler_widget;
+  LabelsWidget* _labels_widget;
 
   void setupFileMenu();
+
 private slots:
   void loadGuesses();
 

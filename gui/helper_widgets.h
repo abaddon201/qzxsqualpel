@@ -5,23 +5,22 @@
 #include "CDisassemblerWidget.h"
 
 class NavigateToAddrDlg : public QDialog {
-  //QDialog* dlg = new QDialog;
-  Ui::GotoAddressDlg ui;
-  CDisassemblerWidget* _wdg;
+  Ui::GotoAddressDlg _ui;
+  DisassemblerWidget* _wdg;
   Q_OBJECT;
-public:
 
-  NavigateToAddrDlg(CDisassemblerWidget* wdg):_wdg{wdg} {}
+public:
+  NavigateToAddrDlg(DisassemblerWidget* wdg):_wdg{wdg} {}
   virtual ~NavigateToAddrDlg() {}
   void operator() () {
-    ui.setupUi(this);
-    ui.addr->setFocus();
+    _ui.setupUi(this);
+    _ui.addr->setFocus();
     exec();
   }
 
 public slots:
   void accept() {
-    _wdg->navigateToAddress(CAddr(ui.addr->text().toInt(0, 16)));
+    _wdg->navigateToAddress(Addr(_ui.addr->text().toInt(0, 16)));
     close();
   }
 

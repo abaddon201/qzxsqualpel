@@ -23,7 +23,7 @@
 #include "CLabel.h"
 
 ///@brief Структура описывающая одну команду ассемблера
-struct CCommand {
+struct Command {
   //using OpcodesList = std::vector<CByte>;
   enum class ArgType {
     ARG_UNKNOWN=0,
@@ -50,12 +50,12 @@ struct CCommand {
   std::string auto_comment;
   ///@brief Адрес начала команды
   /// @todo Команда может быть разорвана по сегментам
-  CAddr addr;
+  Addr addr;
   ///@brief Длина команды в байтах
   int len;
 
-  CCommand() : command_code{0}, len{0} {}
-  CCommand(const CCommand &c) {
+  Command() : command_code{0}, len{0} {}
+  Command(const Command &c) {
     addr=c.addr;
     len=c.len;
     command_code=c.command_code;
@@ -65,7 +65,7 @@ struct CCommand {
     comment=c.comment;
     auto_comment=c.auto_comment;
   }
-  CCommand &operator=(const CCommand &c) {
+  Command &operator=(const Command &c) {
     addr=c.addr;
     len=c.len;
     command_code=c.command_code;
@@ -77,7 +77,7 @@ struct CCommand {
     return *this;
   }
 
-  CCommand &operator=(const CCommand &&c) {
+  Command &operator=(const Command &&c) {
     addr=c.addr;
     len=c.len;
     command_code=c.command_code;
@@ -94,12 +94,12 @@ struct CCommand {
   ///@brief Возвращает опкоды команды в виде строки
   /// @todo стоит добавить ограничение на кол-во опкодов
   std::string getOpcodesString() const;
-  CByte opcodes(unsigned long long offs) const;
+  Byte opcodes(unsigned long long offs) const;
   ///@brief Возвращает адрес перехода команды (первый либо второй аргумент)
-  CAddr getJmpAddr() const;
-  CAddr getJmpAddrFromString() const;
+  Addr getJmpAddr() const;
+  Addr getJmpAddrFromString() const;
   ///@brief Устанавливает метку перехода команды (первый либо второй аргумент)
-  void setJmpAddr(const std::shared_ptr<CLabel> label);
+  void setJmpAddr(const std::shared_ptr<Label> label);
 };
 
 #endif

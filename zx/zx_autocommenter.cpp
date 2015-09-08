@@ -1,6 +1,6 @@
 #include "CDisassemblerCoreZX.h"
 
-void CDisassemblerCoreZX::autoCommentCommand(CCommand &out_command) {
+void DisassemblerCoreZX::autoCommentCommand(Command &out_command) {
   if (out_command.command_code==CMD_RST) {
     //known RST's
     if (out_command.arg1->toString()=="10") {
@@ -17,7 +17,7 @@ void CDisassemblerCoreZX::autoCommentCommand(CCommand &out_command) {
   }
 }
 
-std::string CDisassemblerCoreZX::getRST28AutoComment(unsigned char b, int &args_count) {
+std::string DisassemblerCoreZX::getRST28AutoComment(unsigned char b, int &args_count) {
   args_count=0;
   switch (b) {
   case 0x00:

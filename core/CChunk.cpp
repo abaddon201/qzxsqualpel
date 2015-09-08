@@ -14,66 +14,66 @@
 #include "IDisassemblerCore.h"
 #include "debug_printers.h"
 
-void CChunk::addCrossRef(CAddr addr, CReference::Type type) {
-  CReference ref(addr, type);
+void Chunk::addCrossRef(Addr addr, Reference::Type type) {
+  Reference ref(addr, type);
   _references.push_back(ref);
 }
 
-void CChunk::appendCommand(CCommand cmd) {
-  m_Commands.push_back(cmd);
-  m_Length+=cmd.len;
-  _last_addr = m_StartingAddr + m_Length;
+void Chunk::appendCommand(Command cmd) {
+  _commands.push_back(cmd);
+  _length+=cmd.len;
+  _last_addr = _starting_addr + _length;
 }
 
-CCommand &CChunk::getCommand(int idx) {
-  if (m_Commands.size()==0) {
+Command &Chunk::getCommand(int idx) {
+  if (_commands.size()==0) {
     std::cerr<<"No commands here"<<std::endl;
     throw int(666);
   }
-  return m_Commands[idx];
+  return _commands[idx];
 }
 
-std::shared_ptr<CLabel> CChunk::setLabel(std::shared_ptr<CLabel> label, CReference::Type ref_type) {
+std::shared_ptr<Label> Chunk::setLabel(std::shared_ptr<Label> label, Reference::Type ref_type) {
   if (label==nullptr) {
     //generate from name
-    std::string t1{m_StartingAddr.offsetString()};
+    std::string t1{_starting_addr.offsetString()};
     switch (ref_type) {
-    case CReference::Type::JUMP:
-      m_Label=std::make_shared<CLabel>(m_StartingAddr, std::string("jmp_")+t1);
+    case Reference::Type::JUMP:
+      _label=std::make_shared<Label>(_starting_addr, std::string("jmp_")+t1);
       break;
-    case CReference::Type::CALL:
-      m_Label=std::make_shared<CLabel>(m_StartingAddr, std::string("sub_")+t1);
+    case Reference::Type::CALL:
+      _label=std::make_shared<Label>(_starting_addr, std::string("sub_")+t1);
       break;
-    case CReference::Type::READ_BYTE:
-    case CReference::Type::WRITE_BYTE:
-      m_Label=std::make_shared<CLabel>(m_StartingAddr, std::string("byte_")+t1);
+    case Reference::Type::READ_BYTE:
+    case Reference::Type::WRITE_BYTE:
+      _label=std::make_shared<Label>(_starting_addr, std::string("byte_")+t1);
       break;
-    case CReference::Type::READ_WORD:
-    case CReference::Type::WRITE_WORD:
-      m_Label=std::make_shared<CLabel>(m_StartingAddr, std::string("word_")+t1);
+    case Reference::Type::READ_WORD:
+    case Reference::Type::WRITE_WORD:
+      _label=std::make_shared<Label>(_starting_addr, std::string("word_")+t1);
       break;
     }
   } else {
-    m_Label = label;
+    _label = label;
   }
-  return m_Label;
+  return _label;
 }
 
-std::shared_ptr<CLabel> CChunk::setLabel(std::string label, CReference::Type ref_type) {
-  m_Label = std::make_shared<CLabel>(m_StartingAddr, label);
-  return m_Label;
+std::shared_ptr<Label> Chunk::setLabel(std::string label, Reference::Type ref_type) {
+  _label = std::make_shared<Label>(_starting_addr, label);
+  return _label;
 }
 
-std::shared_ptr<CChunk> CChunk::splitAt(CAddr addr) {
-  std::cout<<"splitAt: commans.count="<<m_Commands.size()<<std::endl;
-  if (m_Commands.size()<2) {
+std::shared_ptr<Chunk> Chunk::splitAt(Addr addr) {
+  std::cout<<"splitAt: commans.count="<<_commands.size()<<std::endl;
+  if (_commands.size()<2) {
     //split impossible, too short chunk
     return 0;
   }
   CommandsList::iterator it;
-  CAddr cur_addr=m_StartingAddr;
+  Addr cur_addr=_starting_addr;
   int len=0;
-  for (it=m_Commands.begin(); it!=m_Commands.end(); ++it) {
+  for (it=_commands.begin(); it!=_commands.end(); ++it) {
     std::cout<<"caddr"<<cur_addr.toString()<<std::endl;
     if (cur_addr==addr) {
       //start splitting
@@ -85,23 +85,23 @@ std::shared_ptr<CChunk> CChunk::splitAt(CAddr addr) {
     cur_addr+=(*it).len;
     len+=(*it).len;
   }
-  m_Length = len;
-  _last_addr = m_StartingAddr + m_Length;
+  _length = len;
+  _last_addr = _starting_addr + _length;
   std::cout<<"moving commands"<<std::endl;
-  std::shared_ptr<CChunk> new_chunk=IDisassemblerCore::inst()->createChunk(addr, m_Type);
+  std::shared_ptr<Chunk> new_chunk=IDisassemblerCore::inst()->createChunk(addr, _type);
   if (new_chunk==nullptr) {
     std::cerr<<"ERROR: Can't create chunk"<<std::endl;
     return nullptr;
   }
   int cnt=0;
   len = 0;
-  for (; it!=m_Commands.end();) {
+  for (; it!=_commands.end();) {
     std::cout<<"count"<<cnt<<std::endl;
     cnt++;
     new_chunk->appendCommand(*it);
-    it=m_Commands.erase(it);
+    it=_commands.erase(it);
     //if (it==m_Commands.end()) break;
   }
-  std::cout<<"splitAt: commans.count="<<m_Commands.size()<<"new count"<<new_chunk->m_Commands.size()<<std::endl;
+  std::cout<<"splitAt: commans.count="<<_commands.size()<<"new count"<<new_chunk->_commands.size()<<std::endl;
   return new_chunk;
 }

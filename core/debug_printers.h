@@ -4,29 +4,29 @@
 #include "CLabel.h"
 #include "CChunk.h"
 
-inline std::ostream &operator<<(std::ostream &out, CLabel &lab) {
+inline std::ostream &operator<<(std::ostream &out, Label &lab) {
   out<<"Label: Name='"<<lab.name<<"', addr="<<lab.addr.toString();
   return out;
 }
 
-inline std::ostream &operator<<(std::ostream &out, CChunk::Type t) {
+inline std::ostream &operator<<(std::ostream &out, Chunk::Type t) {
   switch (t) {
-  case CChunk::Type::UNKNOWN:
+  case Chunk::Type::UNKNOWN:
     out<<"UNKNOWN";
     break;
-  case CChunk::Type::UNPARSED:
+  case Chunk::Type::UNPARSED:
     out<<"UNPARSED";
     break;
-  case CChunk::Type::CODE:
+  case Chunk::Type::CODE:
     out<<"CODE";
     break;
-  case CChunk::Type::DATA_BYTE:
+  case Chunk::Type::DATA_BYTE:
     out<<"DATA_BYTE";
     break;
-  case CChunk::Type::DATA_WORD:
+  case Chunk::Type::DATA_WORD:
     out<<"DATA_WORD";
     break;
-  case CChunk::Type::DATA_ARRAY:
+  case Chunk::Type::DATA_ARRAY:
     out<<"DATA_ARRAY";
     break;
   }

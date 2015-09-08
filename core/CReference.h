@@ -15,7 +15,7 @@
 
 #include "CAddr.h"
 
-struct CReference {
+struct Reference {
   enum class Type {
     JUMP=1,
     CALL,
@@ -24,10 +24,10 @@ struct CReference {
     READ_WORD,
     WRITE_WORD
   };
-  CReference(CAddr addr_, Type type_);
+  Reference(Addr addr_, Type type_);
   std::string toString();
 
-  CAddr addr;
+  Addr addr;
   Type type;
 };
 

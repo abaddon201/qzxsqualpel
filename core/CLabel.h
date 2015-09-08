@@ -15,23 +15,23 @@
 
 #include "CAddr.h"
 
-struct CLabel {
-  CLabel() {};
-  CLabel(CAddr addr, std::string name) : name(name), addr(addr) {}
+struct Label {
+  Label() {}
+  Label(Addr addr, std::string name) : name(name), addr(addr) {}
 
-  CLabel(const CLabel &s) {
+  Label(const Label &s) {
     addr=s.addr;
     name=s.name;
   }
-  CLabel &operator = (const CLabel &s) {
+  Label &operator = (const Label &s) {
     addr=s.addr;
     name=s.name;
     return *this;
   }
-  ~CLabel() {}
+  ~Label() {}
 
   std::string name;
-  CAddr addr;
+  Addr addr;
 };
 
 #endif

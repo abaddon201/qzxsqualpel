@@ -34,9 +34,7 @@ HEADERS += core/CAddr.h \
     core/memory.h \
     gui/helper_widgets.h \
     gui/qt_debug_printers.h \
-    core/arg.h \
-    core/arg_label.h \
-    core/arg_default.h
+    core/arg.h
 SOURCES += core/CAddr.cpp \
            core/CByte.cpp \
            core/CChunk.cpp \

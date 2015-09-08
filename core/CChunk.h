@@ -19,10 +19,10 @@
 #include "CCommand.h"
 #include "CLabel.h"
 
-class CChunk {
+class Chunk {
 public:
-  using ReferencesList = std::vector<CReference>;
-  using CommandsList = std::vector<CCommand>;
+  using ReferencesList = std::vector<Reference>;
+  using CommandsList = std::vector<Command>;
   enum class Type {
     UNKNOWN=-1,
     UNPARSED=0,
@@ -32,54 +32,54 @@ public:
     DATA_ARRAY=4
   };
 
-  ~CChunk() {}
+  ~Chunk() {}
 
-  CChunk(const CChunk &ch) {makeCopy(ch);}
-  CChunk &operator=(const CChunk &ch) { makeCopy(ch); return *this; }
+  Chunk(const Chunk &ch) {makeCopy(ch);}
+  Chunk &operator=(const Chunk &ch) { makeCopy(ch); return *this; }
 
-  std::shared_ptr<CChunk> splitAt(CAddr addr);
-  void addCrossRef(CAddr addr, CReference::Type type);
+  std::shared_ptr<Chunk> splitAt(Addr addr);
+  void addCrossRef(Addr addr, Reference::Type type);
 
-  void appendCommand(CCommand cmd);
-  CCommand& getCommand(int idx) ;
-  CCommand& lastCommand() { return m_Commands.back(); }
+  void appendCommand(Command cmd);
+  Command& getCommand(int idx) ;
+  Command& lastCommand() { return _commands.back(); }
 
-  inline int commandsCount() const {return m_Commands.size();}
-  inline CommandsList &commands() {return m_Commands;}
+  inline int commandsCount() const {return _commands.size();}
+  inline CommandsList &commands() {return _commands;}
 
-  inline const CAddr& addr() const {return m_StartingAddr;}
-  inline bool containsAddr(const CAddr& addr) const {return (addr>=m_StartingAddr) && (addr<_last_addr);}
+  inline const Addr& addr() const {return _starting_addr;}
+  inline bool containsAddr(const Addr& addr) const {return (addr>=_starting_addr) && (addr<_last_addr);}
 
-  inline unsigned long long length() const {return m_Length;}
+  inline unsigned long long length() const {return _length;}
 
-  inline Type type() const {return m_Type;}
+  inline Type type() const {return _type;}
 
-  std::shared_ptr<CLabel> label() const {return m_Label;}
-  std::shared_ptr<CLabel> setLabel(std::shared_ptr<CLabel> label = nullptr, CReference::Type=CReference::Type::JUMP);
-  std::shared_ptr<CLabel> setLabel(std::string label, CReference::Type=CReference::Type::JUMP);
+  std::shared_ptr<Label> label() const {return _label;}
+  std::shared_ptr<Label> setLabel(std::shared_ptr<Label> label = nullptr, Reference::Type=Reference::Type::JUMP);
+  std::shared_ptr<Label> setLabel(std::string label, Reference::Type=Reference::Type::JUMP);
 //  void changeLabel(std::string label) {m_Label=label;}
 
   ReferencesList& references() {return _references;}
   std::string comment() const {return _comment;}
 
-  bool isEmpty() const { return !((type()!=CChunk::Type::UNPARSED) && (type()!=CChunk::Type::UNKNOWN)); }
+  bool isEmpty() const { return !((type()!=Chunk::Type::UNPARSED) && (type()!=Chunk::Type::UNKNOWN)); }
 
-  CChunk(CAddr addr, CChunk::Type type=CChunk::Type::UNKNOWN) : m_Type(type), m_StartingAddr(addr), m_Length{0} {}
+  Chunk(Addr addr, Chunk::Type type=Chunk::Type::UNKNOWN) : _type(type), _starting_addr(addr), _length{0} {}
 
 private:
 //  friend class CChunkList;
 
-  CChunk() : m_Length(0) {}
+  Chunk() : _length(0) {}
 
-  virtual void makeCopy(const CChunk &ch) {
-    m_StartingAddr=ch.m_StartingAddr;
+  virtual void makeCopy(const Chunk &ch) {
+    _starting_addr=ch._starting_addr;
     _last_addr=ch._last_addr;
-    m_Length=ch.m_Length;
+    _length=ch._length;
     _comment=ch._comment;
-    m_Commands=ch.m_Commands;
+    _commands=ch._commands;
     _references=ch._references;
-    m_Label=ch.m_Label;
-    m_Type=ch.m_Type;
+    _label=ch._label;
+    _type=ch._type;
   }
 
   ///@brief Комментарий для блока
@@ -87,16 +87,16 @@ private:
   ///@brief Ссылки на блок
   ReferencesList _references;
   ///@brief Метка блока
-  std::shared_ptr<CLabel> m_Label;
+  std::shared_ptr<Label> _label;
   ///@brief Команды блока
-  CommandsList m_Commands;
+  CommandsList _commands;
   ///@brief Тип блока
-  Type m_Type;
+  Type _type;
   ///@brief Адрес начала блока
-  CAddr m_StartingAddr;
-  CAddr _last_addr;
+  Addr _starting_addr;
+  Addr _last_addr;
   ///@brief Длина блока
-  unsigned long long m_Length;
+  unsigned long long _length;
 };
 
 #endif

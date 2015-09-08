@@ -18,27 +18,27 @@
 #include "core/CChunkList.h"
 #include "core/CLabels.h"
 
-class CDisassemblerCoreZX : public IDisassemblerCore {
+class DisassemblerCoreZX : public IDisassemblerCore {
 public:
-  CDisassemblerCoreZX(IGUIUpdater* updater);
+  DisassemblerCoreZX(IGUIUpdater* updater);
 
   void init() override;
   void loadGuessFile(const std::string &fname) override;
   ///@bug поменять местами возвращаемые значения, чтобы не было такой вырви-глаз конструкции
-  virtual int disassembleInstruction(const CAddr &addr, std::shared_ptr<CChunk>& out_chunk) override;
-  void disassembleBlock(const CAddr &st_addr) override;
+  virtual int disassembleInstruction(const Addr &addr, std::shared_ptr<Chunk>& out_chunk) override;
+  void disassembleBlock(const Addr &st_addr) override;
   void initialParse() override;
 
 
-  CLabels &labels() override { return m_Labels;}
-  bool labelPresent(const CAddr &addr) const;
+  Labels &labels() override { return _labels;}
+  bool labelPresent(const Addr &addr) const;
 
-  std::shared_ptr<CChunk> createChunk(const CAddr &addr, CChunk::Type type=CChunk::Type::UNKNOWN) override;
-  CChunkList &chunks() override {return m_Chunks;}
-  bool isChunkEmpty(CChunk* chunk);
+  std::shared_ptr<Chunk> createChunk(const Addr &addr, Chunk::Type type=Chunk::Type::UNKNOWN) override;
+  ChunkList &chunks() override {return _chunks;}
+  bool isChunkEmpty(Chunk* chunk);
 
-  std::shared_ptr<CLabel> makeJump(const CAddr &from_addr, const CAddr &jump_addr, CReference::Type ref_type) override;
-  virtual Type getLastCmdJumpType(std::shared_ptr<CChunk> chunk, CAddr &jump_addr) override;
+  std::shared_ptr<Label> makeJump(const Addr &from_addr, const Addr &jump_addr, Reference::Type ref_type) override;
+  virtual Type getLastCmdJumpType(std::shared_ptr<Chunk> chunk, Addr &jump_addr) override;
 
   void setRawMemory(unsigned char* buf, size_t size) override;
 
@@ -54,16 +54,16 @@ public:
   };
 private:
   int command2code(const std::string &cmd) const;
-  void parseCommand(std::string &src, CCommand &out_command);
-  void autoCommentCommand(CCommand &out_command);
+  void parseCommand(std::string &src, Command &out_command);
+  void autoCommentCommand(Command &out_command);
   std::string getRST28AutoComment(unsigned char b, int &args_count);
-  std::shared_ptr<CLabel> findKnownLabel(const CAddr &addr);
+  std::shared_ptr<Label> findKnownLabel(const Addr &addr);
 
-  int postProcessChunk(std::shared_ptr<CChunk> chunk, int len);
+  int postProcessChunk(std::shared_ptr<Chunk> chunk, int len);
 
-  CChunkList m_Chunks;
-  CLabels m_Labels;
-  CLabels _known_labels;
+  ChunkList _chunks;
+  Labels _labels;
+  Labels _known_labels;
 };
 
 #endif

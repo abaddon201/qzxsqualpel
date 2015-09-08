@@ -7,7 +7,7 @@ int main(int argc, char** argv) {
   QApplication app(argc, argv);
 
   initHexes();
-  CMainWindow* mainwnd=new CMainWindow();
+  MainWindow* mainwnd=new MainWindow();
   mainwnd->show();
   return app.exec();
 }

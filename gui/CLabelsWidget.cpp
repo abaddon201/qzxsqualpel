@@ -15,16 +15,16 @@
 #include "core/CLabel.h"
 #include "CDisassemblerWidget.h"
 
-CLabelsWidget::CLabelsWidget(QWidget* par, CDisassemblerWidget* disasm)
+LabelsWidget::LabelsWidget(QWidget* par, DisassemblerWidget* disasm)
   : QTableWidget(par),
     _disasm{disasm} {
   setSortingEnabled(true);
   connect(this, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(jumpToLabel(int, int)));
 }
 
-Q_DECLARE_METATYPE(CAddr)
+Q_DECLARE_METATYPE(Addr)
 
-void CLabelsWidget::refresh() {
+void LabelsWidget::refresh() {
   clear();
   setColumnCount(2);
   QStringList strlist;
@@ -32,7 +32,7 @@ void CLabelsWidget::refresh() {
   setHorizontalHeaderLabels(strlist);
   setSortingEnabled(false);
   int i=0;
-  CLabels& my_labels=IDisassemblerCore::inst()->labels();
+  Labels& my_labels=IDisassemblerCore::inst()->labels();
   setRowCount(my_labels.size());
   for(auto lbl: my_labels) {
       QTableWidgetItem* nameItem = new QTableWidgetItem(QString::fromStdString(lbl.second->name));
@@ -40,14 +40,14 @@ void CLabelsWidget::refresh() {
       QTableWidgetItem* addrItem = new QTableWidgetItem(QString::fromStdString(lbl.second->addr.toString()));
       setItem(i, 1, addrItem);
       QVariant var;
-      var.setValue<CAddr>(lbl.second->addr);
+      var.setValue<Addr>(lbl.second->addr);
       nameItem->setData(Qt::UserRole, var);
       i++;
   }
   setSortingEnabled(true);
 }
 
-void CLabelsWidget::jumpToLabel(int row, int) {
-  CAddr addr = item(row,0)->data(Qt::UserRole).value<CAddr>();
+void LabelsWidget::jumpToLabel(int row, int) {
+  Addr addr = item(row,0)->data(Qt::UserRole).value<Addr>();
   _disasm->navigateToAddress(addr);
 }

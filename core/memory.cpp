@@ -14,7 +14,7 @@ void Memory::createSegment(Segment::IdType id, unsigned long long size) {
   _segments[id] = std::make_shared<Segment>(id, size);
 }
 
-CByte Memory::getByte(const CAddr& addr) {
+Byte Memory::getByte(const Addr& addr) {
   return _segments[addr.segment()]->getByte(addr.offset());
 }
 

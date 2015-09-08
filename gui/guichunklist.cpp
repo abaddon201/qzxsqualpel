@@ -15,7 +15,7 @@ std::shared_ptr<GUIChunk> GUIChunkList::getChunkByPosition(int pos) const {
   return nullptr;
 }
 
-std::shared_ptr<GUIChunk> GUIChunkList::getChunkContains(const CAddr &addr) const {
+std::shared_ptr<GUIChunk> GUIChunkList::getChunkContains(const Addr &addr) const {
   auto res = std::find_if(_chunks.begin(), _chunks.end(), [&addr] (auto chunk) {return (chunk->core()->containsAddr(addr));});
   if (res != _chunks.end()) {
     return *res;
@@ -23,7 +23,7 @@ std::shared_ptr<GUIChunk> GUIChunkList::getChunkContains(const CAddr &addr) cons
   return nullptr;
 }
 
-void GUIChunkList::update(CChunkList &chunks) {
+void GUIChunkList::update(ChunkList &chunks) {
   _chunks.clear();
   for (auto ch: chunks.chunks()) {
 // for debug only    if (ch.second!=nullptr) {

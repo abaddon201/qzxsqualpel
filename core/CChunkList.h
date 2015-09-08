@@ -21,24 +21,24 @@
 /**
  * @todo split address space to segment based model. ie change any indices to form like m_Segments[addr.segemnt()].m_Offsets[addr.offset()]
  */
-class CChunkList {
+class ChunkList {
 public:
-  using List = std::map<const CAddr, std::shared_ptr<CChunk>>;
+  using List = std::map<const Addr, std::shared_ptr<Chunk>>;
 
-  CChunkList();
-  std::shared_ptr<CChunk> createChunk(const CAddr &addr, CChunk::Type type=CChunk::Type::UNKNOWN);
-  std::shared_ptr<CChunk> getChunkContains(const CAddr &addr) const;
-  void removeChunk(const CAddr &addr);
-  void addChunk(const CAddr &addr, std::shared_ptr<CChunk> chunk) { m_Chunks[addr]=chunk;}
-  List &chunks() {return m_Chunks;}
+  ChunkList();
+  std::shared_ptr<Chunk> createChunk(const Addr &addr, Chunk::Type type=Chunk::Type::UNKNOWN);
+  std::shared_ptr<Chunk> getChunkContains(const Addr &addr) const;
+  void removeChunk(const Addr &addr);
+  void addChunk(const Addr &addr, std::shared_ptr<Chunk> chunk) { _chunks[addr]=chunk;}
+  List &chunks() {return _chunks;}
   int count() const;
   void clear();
 
   void printDebug();
 
-  std::shared_ptr<CChunk> getChunk(const CAddr &addr) { auto it=m_Chunks.find(addr); if (it == m_Chunks.end()) {return nullptr;} else return it->second;}
+  std::shared_ptr<Chunk> getChunk(const Addr &addr) { auto it=_chunks.find(addr); if (it == _chunks.end()) {return nullptr;} else return it->second;}
 private:
-  List m_Chunks;
+  List _chunks;
 };
 
 #endif

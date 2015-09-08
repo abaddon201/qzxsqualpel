@@ -12,29 +12,29 @@
 
 #include "CChunkList.h"
 
-CChunkList::CChunkList() {
+ChunkList::ChunkList() {
 }
 
-std::shared_ptr<CChunk> CChunkList::createChunk(const CAddr &addr, CChunk::Type type) {
+std::shared_ptr<Chunk> ChunkList::createChunk(const Addr &addr, Chunk::Type type) {
 
-  auto ch1 = m_Chunks.find(addr.offset());
-  if (ch1 != m_Chunks.end()) {
-    if (ch1->second->type()!=CChunk::Type::UNPARSED)
+  auto ch1 = _chunks.find(addr.offset());
+  if (ch1 != _chunks.end()) {
+    if (ch1->second->type()!=Chunk::Type::UNPARSED)
       return nullptr;
   }
 
-  std::shared_ptr<CChunk> ch;
-  ch = std::make_shared<CChunk>(addr, type);
-  m_Chunks[addr.offset()]=ch;
+  std::shared_ptr<Chunk> ch;
+  ch = std::make_shared<Chunk>(addr, type);
+  _chunks[addr.offset()]=ch;
   return ch;
 }
 
-std::shared_ptr<CChunk> CChunkList::getChunkContains(const CAddr &addr) const {
+std::shared_ptr<Chunk> ChunkList::getChunkContains(const Addr &addr) const {
   ///@todo подумать что с этой х-ней сделать... 70% нагрузки на ней...
-  CAddr a = addr;
+  Addr a = addr;
   do {
     List::const_iterator it;
-    if ((it = m_Chunks.find(a)) != m_Chunks.end()) {
+    if ((it = _chunks.find(a)) != _chunks.end()) {
       return it->second;
     }
     --a;
@@ -43,23 +43,23 @@ std::shared_ptr<CChunk> CChunkList::getChunkContains(const CAddr &addr) const {
   return nullptr;
 }
 
-void CChunkList::removeChunk(const CAddr &addr) {
-  auto it = m_Chunks.find(addr);
-  if (it!=m_Chunks.end())
-    m_Chunks.erase(it);
+void ChunkList::removeChunk(const Addr &addr) {
+  auto it = _chunks.find(addr);
+  if (it!=_chunks.end())
+    _chunks.erase(it);
 }
 
-int CChunkList::count() const {
-  return m_Chunks.size();
+int ChunkList::count() const {
+  return _chunks.size();
 }
 
-void CChunkList::clear() {
-  m_Chunks.clear();
+void ChunkList::clear() {
+  _chunks.clear();
 }
 
 #include "debug_printers.h"
-void CChunkList::printDebug() {
-  for (auto ch: m_Chunks) {
+void ChunkList::printDebug() {
+  for (auto ch: _chunks) {
     std::cout<<"chunk orig addr:"<<ch.first.toString()<<"::";
     if (ch.second)
       std::cout<<"chunk addr:"<<ch.second->addr().toString()<<std::endl;
