@@ -14,7 +14,7 @@
 #define CLABELSWIDGET_H
 
 #include <QTableWidget>
-#include "CDisassemblerWidget.h"
+#include "disassembler_widget.h"
 
 class LabelsWidget : public QTableWidget {
   Q_OBJECT

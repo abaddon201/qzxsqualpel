@@ -2,7 +2,7 @@
 #define HELPER_WIDGETS
 
 #include "ui_goto_address.h"
-#include "CDisassemblerWidget.h"
+#include "disassembler_widget.h"
 
 class NavigateToAddrDlg : public QDialog {
   Ui::GotoAddressDlg _ui;

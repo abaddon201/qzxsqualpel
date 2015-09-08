@@ -13,7 +13,7 @@
 #include "CLabelsWidget.h"
 
 #include "core/label.h"
-#include "CDisassemblerWidget.h"
+#include "disassembler_widget.h"
 
 LabelsWidget::LabelsWidget(QWidget* par, DisassemblerWidget* disasm)
   : QTableWidget(par),

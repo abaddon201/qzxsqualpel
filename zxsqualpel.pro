@@ -16,7 +16,6 @@ HEADERS += \
            zx/disassemble.h \
            gui/CLabelsWidget.h \
            gui/CMainWindow.h \
-           gui/CDisassemblerWidget.h \
     core/utils.h \
     core/debug_printers.h \
     gui/guichunk.h \
@@ -35,13 +34,13 @@ HEADERS += \
     core/labels.h \
     core/reference.h \
     core/i_disassembler_core.h \
-    zx/disassembler_core_ZX.h
+    zx/disassembler_core_ZX.h \
+    gui/disassembler_widget.h
 SOURCES += \
            zx/disassemble.cpp \
            gui/CWidgetChangeLabel.cpp \
            gui/CLabelsWidget.cpp \
            gui/CMainWindow.cpp \
-           gui/CDisassemblerWidget.cpp \
            main.cpp \
     gui/guichunklist.cpp \
     core/segment.cpp \
@@ -57,7 +56,8 @@ SOURCES += \
     core/labels.cpp \
     core/reference.cpp \
     core/i_disassembler_core.cpp \
-    zx/disassembler_core_ZX.cpp
+    zx/disassembler_core_ZX.cpp \
+    gui/disassembler_widget.cpp
 
 #win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgets
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgetsd

@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QListWidget>
 
-#include "CDisassemblerWidget.h"
+#include "disassembler_widget.h"
 #include "CLabelsWidget.h"
 
 

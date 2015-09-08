@@ -3,7 +3,7 @@
 
 #include "helper_widgets.h"
 
-#include "CDisassemblerWidget.h"
+#include "disassembler_widget.h"
 
 #include <QFile>
 #include <QTextTable>
