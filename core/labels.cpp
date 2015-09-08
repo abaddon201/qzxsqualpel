@@ -10,7 +10,7 @@
 //
 //
 
-#include "CLabels.h"
+#include "labels.h"
 #include "chunk.h"
 #include "chunk_list.h"
 #include "IDisassemblerCore.h"

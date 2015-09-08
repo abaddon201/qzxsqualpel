@@ -11,7 +11,7 @@
 //
 
 #include "CReference.h"
-#include "CLabels.h"
+#include "labels.h"
 #include "IDisassemblerCore.h"
 
 Reference::Reference(Addr addr_, Type type_)

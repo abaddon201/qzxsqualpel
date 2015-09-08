@@ -8,7 +8,7 @@
 
 #include "core/chunk_list.h"
 #include "core/label.h"
-#include "core/CLabels.h"
+#include "core/labels.h"
 #include "core/IDisassemblerCore.h"
 
 #include "guichunklist.h"
