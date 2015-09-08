@@ -11,7 +11,7 @@
 //
 
 #include "command.h"
-#include "IDisassemblerCore.h"
+#include "i_disassembler_core.h"
 
 Addr Command::getJmpAddrFromString() const {
   if (arg2==nullptr) {

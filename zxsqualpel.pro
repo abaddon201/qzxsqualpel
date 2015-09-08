@@ -12,7 +12,6 @@ QMAKE_CXXFLAGS += -std=c++14
 
 # Input
 HEADERS += \
-           core/IDisassemblerCore.h \
            gui/CWidgetChangeLabel.h \
            zx/CDisassemblerCoreZX.h \
            zx/disassemble.h \
@@ -35,9 +34,9 @@ HEADERS += \
     core/command.h \
     core/label.h \
     core/labels.h \
-    core/reference.h
+    core/reference.h \
+    core/i_disassembler_core.h
 SOURCES += \
-          core/IDisassemblerCore.cpp \
            zx/CDisassemblerCoreZX.cpp \
            zx/disassemble.cpp \
            gui/CWidgetChangeLabel.cpp \
@@ -57,7 +56,8 @@ SOURCES += \
     core/command.cpp \
     core/label.cpp \
     core/labels.cpp \
-    core/reference.cpp
+    core/reference.cpp \
+    core/i_disassembler_core.cpp
 
 #win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgets
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgetsd

@@ -12,7 +12,7 @@
 
 #include "reference.h"
 #include "labels.h"
-#include "IDisassemblerCore.h"
+#include "i_disassembler_core.h"
 
 Reference::Reference(Addr addr_, Type type_)
   : addr(addr_), type(type_) {

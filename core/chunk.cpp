@@ -11,7 +11,7 @@
 //
 
 #include "chunk.h"
-#include "IDisassemblerCore.h"
+#include "i_disassembler_core.h"
 #include "debug_printers.h"
 
 void Chunk::addCrossRef(Addr addr, Reference::Type type) {

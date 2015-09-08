@@ -9,7 +9,7 @@
 #include "core/chunk_list.h"
 #include "core/label.h"
 #include "core/labels.h"
-#include "core/IDisassemblerCore.h"
+#include "core/i_disassembler_core.h"
 
 #include "guichunklist.h"
 

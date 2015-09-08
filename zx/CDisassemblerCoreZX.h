@@ -13,7 +13,7 @@
 #ifndef CDISASSEMBLERCOREZX_H
 #define CDISASSEMBLERCOREZX_H
 
-#include "core/IDisassemblerCore.h"
+#include "core/i_disassembler_core.h"
 
 #include "core/chunk_list.h"
 #include "core/labels.h"
