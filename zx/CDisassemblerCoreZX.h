@@ -15,7 +15,7 @@
 
 #include "core/IDisassemblerCore.h"
 
-#include "core/CChunkList.h"
+#include "core/chunk_list.h"
 #include "core/CLabels.h"
 
 class DisassemblerCoreZX : public IDisassemblerCore {

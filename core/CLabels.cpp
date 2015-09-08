@@ -12,7 +12,7 @@
 
 #include "CLabels.h"
 #include "chunk.h"
-#include "CChunkList.h"
+#include "chunk_list.h"
 #include "IDisassemblerCore.h"
 
 #include "debug_printers.h"

@@ -12,7 +12,6 @@ QMAKE_CXXFLAGS += -std=c++14
 
 # Input
 HEADERS += \
-           core/CChunkList.h \
            core/CCommand.h \
            core/IDisassemblerCore.h \
            core/CLabel.h \
@@ -35,12 +34,12 @@ HEADERS += \
     core/arg.h \
     core/addr.h \
     core/byte.h \
-    core/chunk.h
+    core/chunk.h \
+    core/chunk_list.h
 SOURCES += \
            core/CLabel.cpp \
            core/CCommand.cpp \
            core/CReference.cpp \
-           core/CChunkList.cpp \
            core/CLabels.cpp \
           core/IDisassemblerCore.cpp \
            zx/CDisassemblerCoreZX.cpp \
@@ -57,7 +56,8 @@ SOURCES += \
     zx/zx_autocommenter.cpp \
     core/addr.cpp \
     core/byte.cpp \
-    core/chunk.cpp
+    core/chunk.cpp \
+    core/chunk_list.cpp
 
 #win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgets
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgetsd

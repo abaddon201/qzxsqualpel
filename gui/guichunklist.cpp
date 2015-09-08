@@ -5,7 +5,7 @@
 #include "guichunk.h"
 #include "guichunklist.h"
 
-#include "core/CChunkList.h"
+#include "core/chunk_list.h"
 
 std::shared_ptr<GUIChunk> GUIChunkList::getChunkByPosition(int pos) const {
   auto res = std::find_if(_chunks.begin(), _chunks.end(), [pos] (auto chunk) {return ((chunk->cursorStartPosition()<pos) && (chunk->cursorEndPosition()>=pos));});
