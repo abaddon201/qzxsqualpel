@@ -10,7 +10,7 @@
 //
 //
 
-#include "CWidgetChangeLabel.h"
+#include "widget_change_label.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>

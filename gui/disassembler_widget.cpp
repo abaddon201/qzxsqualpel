@@ -14,7 +14,7 @@
 #include <memory>
 
 #include "main_window.h"
-#include "CWidgetChangeLabel.h"
+#include "widget_change_label.h"
 #include "guichunk.h"
 #include "core/debug_printers.h"
 
