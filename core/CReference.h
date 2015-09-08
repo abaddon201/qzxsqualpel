@@ -13,7 +13,7 @@
 #ifndef CREFERENCE_H
 #define CREFERENCE_H
 
-#include "CAddr.h"
+#include "addr.h"
 
 struct Reference {
   enum class Type {

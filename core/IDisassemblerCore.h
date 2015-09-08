@@ -17,7 +17,7 @@
 #include <functional>
 
 #include "CChunk.h"
-#include "CAddr.h"
+#include "addr.h"
 #include "memory.h"
 
 class Labels;

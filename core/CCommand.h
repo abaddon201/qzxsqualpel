@@ -13,8 +13,8 @@
 #ifndef CCOMMAND_H
 #define CCOMMAND_H
 
-#include "CByte.h"
-#include "CAddr.h"
+#include "byte.h"
+#include "addr.h"
 
 #include <vector>
 #include <memory>

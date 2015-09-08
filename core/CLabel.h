@@ -13,7 +13,7 @@
 #ifndef CLABEL_H
 #define CLABEL_H
 
-#include "CAddr.h"
+#include "addr.h"
 
 struct Label {
   Label() {}

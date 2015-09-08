@@ -6,8 +6,8 @@
 #include <memory>
 
 #include "segment.h"
-#include "CAddr.h"
-#include "CByte.h"
+#include "addr.h"
+#include "byte.h"
 
 ///@brief Класс представляющий содержимое памяти
 class Memory {

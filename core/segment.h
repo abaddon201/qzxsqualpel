@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include "CByte.h"
+#include "byte.h"
 
 ///@brief Описание сегмента памяти
 class Segment {
