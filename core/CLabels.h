@@ -16,7 +16,7 @@
 #include <map>
 #include <memory>
 
-#include "CLabel.h"
+#include "label.h"
 #include "chunk.h"
 
 class Labels : public std::map<Addr, std::shared_ptr<Label>> {

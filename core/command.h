@@ -20,7 +20,7 @@
 #include <memory>
 
 #include "arg.h"
-#include "CLabel.h"
+#include "label.h"
 
 ///@brief Структура описывающая одну команду ассемблера
 struct Command {

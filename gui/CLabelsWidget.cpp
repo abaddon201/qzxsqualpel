@@ -12,7 +12,7 @@
 
 #include "CLabelsWidget.h"
 
-#include "core/CLabel.h"
+#include "core/label.h"
 #include "CDisassemblerWidget.h"
 
 LabelsWidget::LabelsWidget(QWidget* par, DisassemblerWidget* disasm)

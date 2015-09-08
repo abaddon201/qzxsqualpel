@@ -7,7 +7,7 @@
 #include <QPlainTextEdit>
 
 #include "core/chunk_list.h"
-#include "core/CLabel.h"
+#include "core/label.h"
 #include "core/CLabels.h"
 #include "core/IDisassemblerCore.h"
 

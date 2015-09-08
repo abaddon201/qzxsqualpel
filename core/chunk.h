@@ -17,7 +17,7 @@
 
 #include "CReference.h"
 #include "command.h"
-#include "CLabel.h"
+#include "label.h"
 
 class Chunk {
 public:

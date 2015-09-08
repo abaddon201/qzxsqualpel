@@ -26,7 +26,7 @@ public:
 };
 
 #include <memory>
-#include "CLabel.h"
+#include "label.h"
 
 class ArgLabel : public Arg {
 public:

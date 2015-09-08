@@ -1,7 +1,7 @@
 #ifndef DEBUG_PRINTERS_H
 #define DEBUG_PRINTERS_H
 
-#include "CLabel.h"
+#include "label.h"
 #include "chunk.h"
 
 inline std::ostream &operator<<(std::ostream &out, Label &lab) {
