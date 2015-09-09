@@ -14,7 +14,8 @@
 #include <memory>
 
 #include "main_window.h"
-#include "widget_change_label.h"
+#include "widget_change_text.h"
+#include "gui_text_block_user_data.h"
 #include "guichunk.h"
 #include "core/debug_printers.h"
 
@@ -60,7 +61,7 @@ void DisassemblerWidget::init() {
 }
 
 void DisassemblerWidget::navigateToAddress(const Addr &addr) {
-  qDebug()<< "navigate to address:" << addr.toString();
+  qDebug()<< "GUI: navigate to address:" << addr.toString();
   std::shared_ptr<GUIChunk> chunk = _chunks.getChunkContains(addr);
   if (nullptr!=chunk) {
     QTextCursor cursor(textCursor());
@@ -70,12 +71,65 @@ void DisassemblerWidget::navigateToAddress(const Addr &addr) {
   centerCursor();
 }
 
-void DisassemblerWidget::paintEvent(QPaintEvent* event) {
-  QPlainTextEdit::paintEvent(event);
-  QPainter p(viewport());
-  QRect cr = cursorRect();
-  cr.setRight(cr.right()+5);
-  p.fillRect(cr, QBrush(QColor(0, 100, 255, 120)));
+void DisassemblerWidget::commentCommandUnderCursor() {
+  QTextCursor cursor(textCursor());
+  qDebug()<<"GUI: commentCommand:"<<cursor.block().text();
+  qDebug()<<"GUI: Cursor pos:"<<cursor.position();
+  std::shared_ptr<GUIChunk> chunk=_chunks.getChunkByPosition(cursor.position());
+  if (nullptr==chunk) {
+    return;
+  }
+  GUITextBlockUserData* ud = (GUITextBlockUserData*)cursor.block().userData();
+  if (!ud) {
+    return;
+  }
+  Command* cmd = ud->cmd;
+  if (cmd) {
+    WidgetChangeText dlg(this, QString::fromStdString(cmd->comment));
+    if (dlg.exec()) {
+      cmd->comment = dlg.text().toStdString();
+      refreshView();
+      navigateToAddress(chunk->core()->addr());
+    }
+  }
+}
+
+void DisassemblerWidget::changeNameUnderCursor() {
+  QTextCursor cursor(textCursor());
+  qDebug()<<"GUI: changeName:"<<cursor.block().text();
+  qDebug()<<"GUI: Cursor pos:"<<cursor.position();
+  std::shared_ptr<GUIChunk> chunk=_chunks.getChunkByPosition(cursor.position());
+  if (nullptr==chunk) {
+    return;
+  }
+  if ((chunk->core()->type()==Chunk::Type::CODE)
+      || (chunk->core()->type()==Chunk::Type::DATA_BYTE)
+      || (chunk->core()->type()==Chunk::Type::DATA_ARRAY)
+      || (chunk->core()->type()==Chunk::Type::DATA_WORD)
+     ) {
+    WidgetChangeText dlg(this, QString::fromStdString(chunk->core()->label()->name));
+    if (dlg.exec()) {
+      _disassembler_core->labels().changeLabel(chunk->core()->addr(), dlg.text().toStdString());
+      refreshView();
+      navigateToAddress(chunk->core()->addr());
+    }
+  }
+}
+
+void DisassemblerWidget::makeCodeUnderCursor() {
+  QTextCursor cursor(textCursor());
+  qDebug()<<"GUI: make code:"<<cursor.block().text();
+  qDebug()<<"GUI: Cursor pos:"<<cursor.position();
+  std::shared_ptr<GUIChunk> chunk=_chunks.getChunkByPosition(cursor.position());
+  if (nullptr==chunk) {
+    return;
+  }
+  if (chunk->core()->isEmpty()) {
+    Addr ret_addr = chunk->core()->addr();
+    _disassembler_core->disassembleBlock(chunk->core()->addr());
+    refreshView();
+    navigateToAddress(ret_addr);
+  }
 }
 
 void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
@@ -97,6 +151,10 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
   case Qt::Key_O:
     // must set offset under cursor
     return;
+  case Qt::Key_Semicolon:
+    // must set comment for command under cursor
+    commentCommandUnderCursor();
+    return;
   case Qt::Key_G:
     // jump to addr
   {
@@ -114,6 +172,8 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
   //PageUp, PageDown, Up, Down, Left, and Right
   if ((event->key()==Qt::Key_PageUp)
       || (event->key()==Qt::Key_PageDown)
+      || (event->key()==Qt::Key_Home)
+      || (event->key()==Qt::Key_End)
       || (event->key()==Qt::Key_Up)
       || (event->key()==Qt::Key_Down)
       || (event->key()==Qt::Key_Left)
@@ -121,42 +181,12 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
     QPlainTextEdit::keyPressEvent(event);
 }
 
-void DisassemblerWidget::changeNameUnderCursor() {
-  QTextCursor cursor(textCursor());
-  qDebug()<<"!!!!!!!!!!!:"<<cursor.block().text();
-  qDebug()<<"Cursor pos:"<<cursor.position();
-  std::shared_ptr<GUIChunk> chunk=_chunks.getChunkByPosition(cursor.position());
-  if (nullptr==chunk) {
-    return;
-  }
-  if ((chunk->core()->type()==Chunk::Type::CODE)
-      || (chunk->core()->type()==Chunk::Type::DATA_BYTE)
-      || (chunk->core()->type()==Chunk::Type::DATA_ARRAY)
-      || (chunk->core()->type()==Chunk::Type::DATA_WORD)
-     ) {
-    WidgetChangeLabel dlg(this, QString::fromStdString(chunk->core()->label()->name));
-    if (dlg.exec()) {
-      _disassembler_core->labels().changeLabel(chunk->core()->addr(), dlg.label().toStdString());
-      refreshView();
-      navigateToAddress(chunk->core()->addr());
-    }
-  }
-}
-
-void DisassemblerWidget::makeCodeUnderCursor() {
-  QTextCursor cursor(textCursor());
-  qDebug()<<"!!!!!!!!!!!:"<<cursor.block().text();
-  qDebug()<<"Cursor pos:"<<cursor.position();
-  std::shared_ptr<GUIChunk> chunk=_chunks.getChunkByPosition(cursor.position());
-  if (nullptr==chunk) {
-    return;
-  }
-  if (chunk->core()->isEmpty()) {
-    Addr ret_addr = chunk->core()->addr();
-    _disassembler_core->disassembleBlock(chunk->core()->addr());
-    refreshView();
-    navigateToAddress(ret_addr);
-  }
+void DisassemblerWidget::paintEvent(QPaintEvent* event) {
+  QPlainTextEdit::paintEvent(event);
+  QPainter p(viewport());
+  QRect cr = cursorRect();
+  cr.setRight(cr.right()+5);
+  p.fillRect(cr, QBrush(QColor(0, 100, 255, 120)));
 }
 
 void DisassemblerWidget::openRAWFile(QString fileName) {
@@ -257,8 +287,9 @@ void DisassemblerWidget::printChunkCode(QTextCursor &cursor, std::shared_ptr<GUI
     printCell(cursor, chunk->core()->label()->name + ":", _cell_length_label, _cell_format_label);
     printReferences(cursor, chunk);
   }
-  foreach (Command cmd, chunk->core()->commands()) {
+  for (Command& cmd: chunk->core()->commands()) {
     printCommand(cursor, cmd);
+    cursor.block().setUserData(new GUITextBlockUserData(chunk->core(), &cmd));
 //    cursor.movePosition(QTextCursor::End);
   }
 //  cursor.movePosition(QTextCursor::End);

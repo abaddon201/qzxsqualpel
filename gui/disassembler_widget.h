@@ -45,6 +45,7 @@ private:
 
   void changeNameUnderCursor();
   void makeCodeUnderCursor();
+  void commentCommandUnderCursor();
 
   void navigateToAddrDlg();
 

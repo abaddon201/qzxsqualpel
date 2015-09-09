@@ -33,7 +33,7 @@ unsigned char readbyte_internal(unsigned short addr) {
   return IDisassemblerCore::inst()->getMemoryByte(addr);
 }
 
-std::string DisassemblerCoreZX::disassembleInstructionInt(const Addr &addr, size_t len) {
+std::string DisassemblerCoreZX::disassembleInstructionInt(const Addr &addr, size_t& len) {
   char tbuff[128];
   debugger_disassemble( tbuff, 128, &len, addr.offset() );
   return std::string(tbuff);

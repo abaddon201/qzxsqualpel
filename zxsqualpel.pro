@@ -35,7 +35,8 @@ HEADERS += \
     gui/disassembler_widget.h \
     gui/labels_widget.h \
     gui/main_window.h \
-    gui/widget_change_label.h
+    gui/widget_change_text.h \
+    gui/gui_text_block_user_data.h
 SOURCES += \
            zx/disassemble.cpp \
            main.cpp \
@@ -57,7 +58,7 @@ SOURCES += \
     gui/disassembler_widget.cpp \
     gui/labels_widget.cpp \
     gui/main_window.cpp \
-    gui/widget_change_label.cpp
+    gui/widget_change_text.cpp
 
 #win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgets
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../Qt5_0_1/5.0.1/msvc2010/lib/ -lQt5Widgetsd

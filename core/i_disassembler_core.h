@@ -44,7 +44,7 @@ public:
 
   virtual void init() = 0;
 
-  virtual std::string disassembleInstructionInt(const Addr &addr, size_t len) = 0;
+  virtual std::string disassembleInstructionInt(const Addr &addr, size_t& len) = 0;
   ///@bug поменять местами возвращаемые значения, чтобы не было такой вырви-глаз конструкции
   int disassembleInstruction(const Addr &addr, std::shared_ptr<Chunk> &out_chunk);
   void disassembleBlock(const Addr &addr);

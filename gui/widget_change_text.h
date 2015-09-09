@@ -16,14 +16,14 @@
 #include <QDialog>
 #include <QLineEdit>
 
-class WidgetChangeLabel : public QDialog {
+class WidgetChangeText : public QDialog {
   Q_OBJECT
 public:
-  WidgetChangeLabel(QWidget* par, QString old_link);
-  QString label() { return _link_name->text(); }
+  WidgetChangeText(QWidget* par, QString old_text);
+  QString text() { return _text->text(); }
 
 private:
-  QLineEdit* _link_name;
+  QLineEdit* _text;
 };
 
 #endif

@@ -10,18 +10,18 @@
 //
 //
 
-#include "widget_change_label.h"
+#include "widget_change_text.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
 
-WidgetChangeLabel::WidgetChangeLabel(QWidget* par, QString old_link)
+WidgetChangeText::WidgetChangeText(QWidget* par, QString old_text)
   : QDialog(par) {
-  _link_name=new QLineEdit;
-  _link_name->setText(old_link);
+  _text=new QLineEdit;
+  _text->setText(old_text);
   QVBoxLayout* v=new QVBoxLayout();
-  v->addWidget(_link_name);
+  v->addWidget(_text);
   QHBoxLayout* h=new QHBoxLayout();
   QPushButton* bok=new QPushButton(tr("Ok"));
   QPushButton* bcanc=new QPushButton(tr("Cancel"));

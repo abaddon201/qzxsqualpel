@@ -23,7 +23,7 @@ public:
   DisassemblerCoreZX(IGUIUpdater* updater);
 
   void init() override;
-  std::string disassembleInstructionInt(const Addr &addr, size_t len) override;
+  std::string disassembleInstructionInt(const Addr &addr, size_t& len) override;
 
   virtual Type getLastCmdJumpType(std::shared_ptr<Chunk> chunk, Addr &jump_addr) override;
 
