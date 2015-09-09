@@ -15,8 +15,6 @@ void MainWindow::updateWidgets() {
 MainWindow::MainWindow() {
   //ui.setupUi(this);
 
-  setupFileMenu();
-
   _disassembler_widget=new DisassemblerWidget(this);
 
   IDisassemblerCore* core=new DisassemblerCoreZX(this);
@@ -36,27 +34,30 @@ MainWindow::MainWindow() {
 
   //m_Highlighter=new Highlighter(m_Disassembler->document());
   setCentralWidget(_disassembler_widget);
+
+  setupMenu();
 }
 
-void MainWindow::setupFileMenu() {
+void MainWindow::setupMenu() {
   QMenu* fileMenu = new QMenu(tr("&File"), this);
   menuBar()->addMenu(fileMenu);
 
-  fileMenu->addAction(tr("&Open..."), this, SLOT(openFile()),
-                      QKeySequence(tr("Ctrl+O",
-                                      "File|Open")));
-  fileMenu->addAction(tr("&Save..."), this, SLOT(saveFile()),
-                      QKeySequence(tr("Ctrl+S",
-                                      "File|Save")));
-  fileMenu->addAction(tr("E&xit"), qApp, SLOT(quit()),
-                      QKeySequence(tr("Ctrl+Q",
-                                      "File|Exit")));
+  fileMenu->addAction(tr("&Open..."), this, SLOT(openFile()), QKeySequence(tr("Ctrl+O", "File|Open")));
+  fileMenu->addAction(tr("&Save ASM..."), this, SLOT(saveFile()), QKeySequence(tr("Ctrl+S", "File|Save ASM")));
+  fileMenu->addAction(tr("E&xit"), qApp, SLOT(quit()), QKeySequence(tr("Ctrl+Q", "File|Exit")));
+
+  QMenu* disassmMenu = new QMenu(tr("&Disassm"), this);
+  menuBar()->addMenu(disassmMenu);
+
+  disassmMenu->addAction(tr("&Code"), _disassembler_widget, SLOT(makeCodeUnderCursor()), QKeySequence(tr("C", "Disassm|Code")));
+  disassmMenu->addSeparator();
+  disassmMenu->addAction(tr("Comment command..."), _disassembler_widget, SLOT(commentCommandUnderCursor()), QKeySequence(tr(";", "Disassm|Comment command")));
+  disassmMenu->addAction(tr("change &Name..."), _disassembler_widget, SLOT(changeNameUnderCursor()), QKeySequence(tr("N", "Disassm|change Name")));
+
   QMenu* toolsMenu = new QMenu(tr("&Tools"), this);
   menuBar()->addMenu(toolsMenu);
 
-  toolsMenu->addAction(tr("&Load guesses..."), this, SLOT(loadGuesses()),
-                      QKeySequence(tr("Ctrl+L",
-                                      "File|Load")));
+  toolsMenu->addAction(tr("&Load guesses..."), this, SLOT(loadGuesses()), QKeySequence(tr("Ctrl+L", "File|Load")));
 }
 
 void MainWindow::openFile() {

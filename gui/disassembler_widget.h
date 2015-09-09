@@ -31,6 +31,11 @@ public:
   void paintEvent(QPaintEvent* event);
   void refreshView();
 
+public slots:
+  void changeNameUnderCursor();
+  void makeCodeUnderCursor();
+  void commentCommandUnderCursor();
+
 private:
   DisassemblerWidget();
   void init();
@@ -42,10 +47,6 @@ private:
   void printCommand(QTextCursor &cursor, const Command &cmd);
   void __attribute__ ((deprecated)) printChunkUnparsed(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
   void printChunkCode(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
-
-  void changeNameUnderCursor();
-  void makeCodeUnderCursor();
-  void commentCommandUnderCursor();
 
   void navigateToAddrDlg();
 
@@ -81,6 +82,7 @@ private:
   IDisassemblerCore* _disassembler_core;
 
   GUIChunkList _chunks;
+  Q_OBJECT
 };
 
 #endif

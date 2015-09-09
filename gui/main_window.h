@@ -25,7 +25,7 @@ private:
   DisassemblerWidget* _disassembler_widget;
   LabelsWidget* _labels_widget;
 
-  void setupFileMenu();
+  void setupMenu();
 
 private slots:
   void loadGuesses();
