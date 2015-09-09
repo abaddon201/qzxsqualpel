@@ -19,7 +19,7 @@
 class WidgetChangeText : public QDialog {
   Q_OBJECT
 public:
-  WidgetChangeText(QWidget* par, QString old_text);
+  WidgetChangeText(QWidget* par, QString title, QString label, QString old_text);
   QString text() { return _text->text(); }
 
 private:

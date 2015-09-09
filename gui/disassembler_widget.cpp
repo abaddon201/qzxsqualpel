@@ -85,7 +85,7 @@ void DisassemblerWidget::commentCommandUnderCursor() {
   }
   Command* cmd = ud->cmd;
   if (cmd) {
-    WidgetChangeText dlg(this, QString::fromStdString(cmd->comment));
+    WidgetChangeText dlg(this, tr("Change command comment"), tr("Comment:"), QString::fromStdString(cmd->comment));
     if (dlg.exec()) {
       cmd->comment = dlg.text().toStdString();
       refreshView();
@@ -107,7 +107,7 @@ void DisassemblerWidget::changeNameUnderCursor() {
       || (chunk->core()->type()==Chunk::Type::DATA_ARRAY)
       || (chunk->core()->type()==Chunk::Type::DATA_WORD)
      ) {
-    WidgetChangeText dlg(this, QString::fromStdString(chunk->core()->label()->name));
+    WidgetChangeText dlg(this, tr("Change label name"), tr("Label:"), QString::fromStdString(chunk->core()->label()->name));
     if (dlg.exec()) {
       _disassembler_core->labels().changeLabel(chunk->core()->addr(), dlg.text().toStdString());
       refreshView();
