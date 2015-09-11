@@ -4,8 +4,8 @@
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
-#include <ctype.h>
-
+#include <cctype>
+#include <vector>
 #include <iostream>
 
 extern std::string _hex[256];
