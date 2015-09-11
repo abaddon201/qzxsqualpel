@@ -23,13 +23,6 @@ public:
   unsigned long long segment() const { return _segment; }
 
   bool compare(unsigned long long s) const { return _offset==s; }
-  bool operator==(const Addr &s) const { return ((_offset==s._offset) && (_segment==s._segment)); }
-  bool operator!=(const Addr &s) const { return ((_offset!=s._offset) || (_segment!=s._segment)); }
-  ///@bug не учитывается сегмент в сравнениях больше/меньше
-  bool operator>=(const Addr &s) const { return ((_offset>=s._offset) && (_segment==s._segment)); }
-  bool operator<=(const Addr &s) const { return ((_offset<=s._offset) && (_segment==s._segment)); }
-  bool operator>(const Addr &s) const { return ((_offset>s._offset) && (_segment==s._segment)); }
-  bool operator<(const Addr &s) const { return ((_offset<s._offset) && (_segment==s._segment)); }
 
   Addr &operator++() { _offset++; _dirty = true; return*this;}
   Addr &operator--() { _offset--; _dirty = true; return*this;}
@@ -45,6 +38,9 @@ public:
   const std::string& toString() const;
   std::string offsetString() const;
 
+  friend bool operator< (const Addr &lhs, const Addr &rhs);
+  friend bool operator==(const Addr &lhs, const Addr &rhs);
+
 private:
   unsigned long long _offset;
   unsigned long long _segment;
@@ -52,5 +48,27 @@ private:
   mutable std::string _hex_cache;
   mutable bool _dirty;
 };
+
+//idiomatic way -- http://en.cppreference.com/w/cpp/language/operators
+//example -- https://github.com/llvm-mirror/libcxx/blob/master/include/tuple#L949
+///@bug не учитывается сегмент в сравнениях больше/меньше
+inline bool operator<(const Addr &lhs, const Addr &rhs) {
+  if (lhs.segment() != rhs.segment())
+    return false;
+
+  return lhs._offset < rhs._offset;
+}
+
+inline bool operator==(const Addr &lhs, const Addr &rhs) {
+  if (lhs.segment() != rhs.segment())
+    return false;
+
+  return lhs._offset == rhs._offset;
+}
+
+inline bool operator> (const Addr &lhs, const Addr &rhs) { return rhs < lhs; }
+inline bool operator>=(const Addr &lhs, const Addr &rhs) { return !(rhs < lhs);}
+inline bool operator<=(const Addr &lhs, const Addr &rhs) { return !(lhs > rhs); } 
+inline bool operator!=(const Addr &lhs, const Addr &rhs) { return !(lhs == rhs); }
 
 #endif
