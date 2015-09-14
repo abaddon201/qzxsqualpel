@@ -17,40 +17,74 @@
 
 class Addr {
 public:
-  Addr(unsigned long long offs=0, unsigned long long seg=0) : _offset{offs}, _segment{seg}, _dirty{true} {}
+  using addr_t = unsigned long long;
 
-  unsigned long long offset() const { return _offset; }
-  unsigned long long segment() const { return _segment; }
+  Addr(addr_t offs = 0, addr_t seg = 0) 
+    : _offset{offs}, _segment{seg}, _dirty{true} { }
+  Addr(const Addr &rhs)            = default;
+  Addr& operator=(const Addr& rhs) = default;
+  virtual ~Addr()                  = default;
 
-  bool compare(unsigned long long s) const { return _offset==s; }
-  bool operator==(const Addr &s) const { return ((_offset==s._offset) && (_segment==s._segment)); }
-  bool operator!=(const Addr &s) const { return ((_offset!=s._offset) || (_segment!=s._segment)); }
-  ///@bug не учитывается сегмент в сравнениях больше/меньше
-  bool operator>=(const Addr &s) const { return ((_offset>=s._offset) && (_segment==s._segment)); }
-  bool operator<=(const Addr &s) const { return ((_offset<=s._offset) && (_segment==s._segment)); }
-  bool operator>(const Addr &s) const { return ((_offset>s._offset) && (_segment==s._segment)); }
-  bool operator<(const Addr &s) const { return ((_offset<s._offset) && (_segment==s._segment)); }
+  addr_t offset() const { return _offset; }
+  addr_t segment() const { return _segment; }
 
+  bool compare(addr_t s) const { return _offset==s; }
+
+  //prefix cases
   Addr &operator++() { _offset++; _dirty = true; return*this;}
   Addr &operator--() { _offset--; _dirty = true; return*this;}
 
-  Addr operator+(unsigned long long offs) const {return _offset+offs;}
-  Addr operator-(unsigned long long offs) const {return _offset-offs;}
-  Addr operator-(const Addr &raddr) const { return _offset-raddr._offset; }
-  Addr operator+(const Addr &raddr) const { return _offset+raddr._offset; }
+  //postfix cases
+  Addr operator++(int) { Addr tmp(*this); operator++(); return tmp; }
+  Addr operator--(int) { Addr tmp(*this); operator--(); return tmp; }
 
-  Addr &operator+=(unsigned long long offs) { _offset+=offs; _dirty = true; return *this; }
-  Addr &operator-=(unsigned long long offs) { _offset-=offs; _dirty = true; return *this; }
+  Addr &operator+=(const Addr &rhs) { _offset += rhs.offset(); _dirty = true; return *this; }
+  Addr &operator-=(const Addr &rhs) { _offset -= rhs.offset(); _dirty = true; return *this; }
+
+  //TODO: consider case to change operation overloadings below (are not used 
+  //currently) to functions i.e incOffset() :)
+  Addr operator+(addr_t offs) const {return _offset+offs;}
+  Addr operator-(addr_t offs) const {return _offset-offs;}
+  Addr &operator+=(addr_t offs) { _offset+=offs; _dirty = true; return *this; }
+  Addr &operator-=(addr_t offs) { _offset-=offs; _dirty = true; return *this; }
 
   const std::string& toString() const;
   std::string offsetString() const;
 
+  friend bool operator< (const Addr &lhs, const Addr &rhs);
+  friend bool operator==(const Addr &lhs, const Addr &rhs);
+  friend Addr operator+ (Addr lhs, const Addr &rhs);
+  friend Addr operator- (Addr lhs, const Addr &rhs);
+
 private:
-  unsigned long long _offset;
-  unsigned long long _segment;
+  addr_t _offset;
+  addr_t _segment;
 ///@todo не всегда нужен кэш строки... Может стоит разбить на 2 класса
   mutable std::string _hex_cache;
   mutable bool _dirty;
 };
 
+//idiomatic way -- http://en.cppreference.com/w/cpp/language/operators
+//example -- https://github.com/llvm-mirror/libcxx/blob/master/include/tuple#L949
+///@bug не учитывается сегмент в сравнениях больше/меньше
+inline bool operator<(const Addr &lhs, const Addr &rhs) {
+  if (lhs.segment() != rhs.segment())
+    return false;
+
+  return lhs._offset < rhs._offset;
+}
+
+inline bool operator==(const Addr &lhs, const Addr &rhs) {
+  if (lhs.segment() != rhs.segment())
+    return false;
+
+  return lhs._offset == rhs._offset;
+}
+
+inline bool operator> (const Addr &lhs, const Addr &rhs) { return rhs < lhs; }
+inline bool operator>=(const Addr &lhs, const Addr &rhs) { return !(lhs < rhs);}
+inline bool operator<=(const Addr &lhs, const Addr &rhs) { return !(lhs > rhs); } 
+inline bool operator!=(const Addr &lhs, const Addr &rhs) { return !(lhs == rhs); }
+inline Addr operator- (Addr lhs, const Addr &rhs) { lhs -= rhs; return lhs; }
+inline Addr operator+ (Addr lhs, const Addr &rhs) { lhs += rhs; return lhs; }
 #endif

@@ -45,7 +45,8 @@ private:
 
   void printReferences(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
   void printCommand(QTextCursor &cursor, const Command &cmd);
-  void __attribute__ ((deprecated)) printChunkUnparsed(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
+  //C++14 atributes -- http://en.cppreference.com/w/cpp/language/attributes
+  [[deprecated]] void printChunkUnparsed(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
   void printChunkCode(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
 
   void navigateToAddrDlg();
