@@ -23,6 +23,8 @@ class Chunk {
 public:
   using ReferencesList = std::vector<Reference>;
   using CommandsList = std::vector<Command>;
+  using size_type = size_t;
+
   enum class Type {
     UNKNOWN=-1,
     UNPARSED=0,
@@ -50,7 +52,7 @@ public:
   inline const Addr& addr() const {return _starting_addr;}
   inline bool containsAddr(const Addr& addr) const {return (addr>=_starting_addr) && (addr<_last_addr);}
 
-  inline unsigned long long length() const {return _length;}
+  inline size_type length() const {return _length;}
 
   inline Type type() const {return _type;}
 
@@ -96,7 +98,7 @@ private:
   Addr _starting_addr;
   Addr _last_addr;
   ///@brief Длина блока
-  unsigned long long _length;
+  size_type _length;
 };
 
 #endif

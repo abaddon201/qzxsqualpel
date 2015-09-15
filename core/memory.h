@@ -12,16 +12,18 @@
 ///@brief Класс представляющий содержимое памяти
 class Memory {
 public:
+  using size_type = size_t;
+
   Memory();
 
-  void createSegment(Segment::IdType id, unsigned long long size);
+  void createSegment(Segment::IdType id, size_type size);
   void switchSegment(Segment::IdType src, Segment::IdType dst);
   std::shared_ptr<Segment> getSegment(Segment::IdType id) {return _segments[id];}
   const Addr getMaxAddr() const {return _segments.rbegin()->second->dataSize();}
 
   Byte getByte(const Addr& addr);
 
-  unsigned long long wholeSize();
+  size_type wholeSize();
 private:
   std::map<Segment::IdType, std::shared_ptr<Segment>> _segments;
 };
