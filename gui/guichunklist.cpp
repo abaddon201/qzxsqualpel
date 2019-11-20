@@ -8,7 +8,9 @@
 #include "core/chunk_list.h"
 
 std::shared_ptr<GUIChunk> GUIChunkList::getChunkByPosition(int pos) const {
-  auto res = std::find_if(_chunks.begin(), _chunks.end(), [pos] (auto chunk) {return ((chunk->cursorStartPosition()<pos) && (chunk->cursorEndPosition()>=pos));});
+  auto res = std::find_if(_chunks.begin(), _chunks.end(), [pos](auto chunk) {
+    return ((chunk->cursorStartPosition() < pos) && (chunk->cursorEndPosition() >= pos));
+  });
   if (res != _chunks.end()) {
     return *res;
   }
@@ -16,7 +18,8 @@ std::shared_ptr<GUIChunk> GUIChunkList::getChunkByPosition(int pos) const {
 }
 
 std::shared_ptr<GUIChunk> GUIChunkList::getChunkContains(const Addr &addr) const {
-  auto res = std::find_if(_chunks.begin(), _chunks.end(), [&addr] (auto chunk) {return (chunk->core()->containsAddr(addr));});
+  auto res = std::find_if(_chunks.begin(), _chunks.end(),
+                          [&addr](auto chunk) { return (chunk->core()->containsAddr(addr)); });
   if (res != _chunks.end()) {
     return *res;
   }
@@ -25,11 +28,7 @@ std::shared_ptr<GUIChunk> GUIChunkList::getChunkContains(const Addr &addr) const
 
 void GUIChunkList::update(ChunkList &chunks) {
   _chunks.clear();
-  for (auto ch: chunks.chunks()) {
-// for debug only    if (ch.second!=nullptr) {
+  for (auto &ch: chunks.chunks()) {
     _chunks.push_back(std::make_shared<GUIChunk>(ch.second));
-    /*    } else {
-          qDebug()<<"ERROR: null chunk";
-        }*/
   }
 }

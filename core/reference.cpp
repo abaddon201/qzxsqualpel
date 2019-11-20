@@ -14,32 +14,32 @@
 #include "labels.h"
 #include "i_disassembler_core.h"
 
-Reference::Reference(Addr addr_, Type type_)
-  : addr(addr_), type(type_) {
+Reference::Reference(const Addr &addr_, Type type_)
+    : addr(addr_), type(type_) {
 }
 
 std::string Reference::toString() {
-  std::string res="; XRef: ";
-  res+=IDisassemblerCore::inst()->labels().offsetInLabel(addr);
+  std::string res = "; XRef: ";
+  res += IDisassemblerCore::inst()->labels().offsetInLabel(addr);
   switch (type) {
-  case Type::JUMP:
-    res+="/j";
-    break;
-  case Type::CALL:
-    res+="/c";
-    break;
-  case Type::READ_BYTE:
-    res+="/rb";
-    break;
-  case Type::WRITE_BYTE:
-    res+="/wb";
-    break;
-  case Type::READ_WORD:
-    res+="/rw";
-    break;
-  case Type::WRITE_WORD:
-    res+="/ww";
-    break;
+    case Type::JUMP:
+      res += "/j";
+      break;
+    case Type::CALL:
+      res += "/c";
+      break;
+    case Type::READ_BYTE:
+      res += "/rb";
+      break;
+    case Type::WRITE_BYTE:
+      res += "/wb";
+      break;
+    case Type::READ_WORD:
+      res += "/rw";
+      break;
+    case Type::WRITE_WORD:
+      res += "/ww";
+      break;
   };
   return res;
 }

@@ -28,29 +28,29 @@
  * и формируется строка вида <label>+<offset>, если смещение не нулевое, и <label>, в противном случае
  */
 std::string Labels::offsetInLabel(const Addr &addr) const {
-  if (size()==0) {
-    std::cout<<"no labels"<<std::endl;
+  if (size() == 0) {
+    std::cout << "no labels" << std::endl;
     return addr.toString();
   }
-  std::shared_ptr<Chunk> chunk=IDisassemblerCore::inst()->chunks().getChunkContains(addr);
-  if (chunk==nullptr) {
-    std::cout<<"no label for addr"<<std::endl;
+  std::shared_ptr<Chunk> chunk = IDisassemblerCore::inst()->chunks().getChunkContains(addr);
+  if (chunk == nullptr) {
+    std::cout << "no label for addr" << std::endl;
     return addr.toString();
   }
-  Addr ch_addr=chunk->addr();
-  std::cout<<"addr:"<<ch_addr.toString()<<std::endl;
-  std::shared_ptr<Label> lbl=chunk->label();
+  Addr ch_addr = chunk->addr();
+  std::cout << "addr:" << ch_addr.toString() << std::endl;
+  std::shared_ptr<Label> lbl = chunk->label();
   if (lbl == nullptr) {
-    std::cout<<"no label for chunk"<<std::endl;
+    std::cout << "no label for chunk" << std::endl;
     return addr.toString();
   }
-  Addr delta=addr-ch_addr;
+  Addr delta = addr - ch_addr;
   if (delta == 0) {
     return lbl->name;
   }
   return lbl->name + "+" + std::to_string(delta.offset());
 }
 
-void Labels::changeLabel(const Addr &addr, const std::string new_label) {
+void Labels::changeLabel(const Addr &addr, const std::string &new_label) {
   this->at(addr)->name = new_label;
 }

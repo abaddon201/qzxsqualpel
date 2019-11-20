@@ -15,21 +15,28 @@ public:
 
   enum class Type {
     ///@brief Неопознаный тип
-    RAW,
+        RAW,
     ///@brief Кодовый сегмент
-    CODE,
+        CODE,
     ///@brief Сегмент данных
-    DATA
+        DATA
   };
 
   Segment() : _size{0}, _dataSize{0}, _id{0} {}
+
   Segment(IdType id, size_type sz) : _size{sz}, _dataSize{0}, _id{id} {}
+
   void fill(unsigned char buff[], size_type size);
 
-  inline IdType id() const {return _id;}
-  inline size_type dataSize() const {return _dataSize;}
+  inline IdType id() const { return _id; }
 
-  inline Byte getByte(size_type offset) const {if (offset<_dataSize) return _mem[offset]; else throw std::out_of_range("offset:"+std::to_string(offset)+", max:"+std::to_string(_dataSize));}
+  inline size_type dataSize() const { return _dataSize; }
+
+  inline Byte getByte(size_type offset) const {
+    if (offset < _dataSize)
+      return _mem[offset];
+    else throw std::out_of_range("offset:" + std::to_string(offset) + ", max:" + std::to_string(_dataSize));
+  }
 
 private:
   ///@brief размер сегмента в байтах

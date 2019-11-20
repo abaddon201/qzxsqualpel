@@ -13,22 +13,27 @@
 #ifndef CLABEL_H
 #define CLABEL_H
 
+#include <utility>
+
 #include "addr.h"
 
 struct Label {
-  Label() {}
-  Label(Addr addr, std::string name) : name(name), addr(addr) {}
+  Label() = default;
+
+  Label(const Addr &addr, std::string name) : name(std::move(name)), addr(addr) {}
 
   Label(const Label &s) {
-    addr=s.addr;
-    name=s.name;
+    addr = s.addr;
+    name = s.name;
   }
-  Label &operator = (const Label &s) {
-    addr=s.addr;
-    name=s.name;
+
+  Label &operator=(const Label &s) {
+    addr = s.addr;
+    name = s.name;
     return *this;
   }
-  ~Label() {}
+
+  ~Label() = default;
 
   std::string name;
   Addr addr;

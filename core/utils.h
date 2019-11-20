@@ -10,24 +10,24 @@
 
 extern std::string _hex[256];
 
-inline const std::string& byte2hex(unsigned char b) {
+inline const std::string &byte2hex(unsigned char b) {
   return _hex[b];
 }
 
 ///@todo make from this things class
-template< typename T >
+template<typename T>
 std::string hexify(T i, int len = 0) {
   std::stringbuf buf;
   std::ostream os(&buf);
-  len = len?len:(sizeof(T)*2);
+  len = len ? len : (sizeof(T) * 2);
 
   os << std::setfill('0') << std::setw(len) << std::hex << (unsigned long long) i;
   return buf.str();
 }
 
 inline void initHexes() {
-  for(int i = 0;i<256;++i)
-    _hex[i]=hexify(i, 2);
+  for (int i = 0; i < 256; ++i)
+    _hex[i] = hexify(i, 2);
 }
 
 inline std::string tolowerStd(std::string s) {
@@ -47,8 +47,8 @@ inline std::vector<std::string> split(const std::string &s, char delim) {
   return elems;
 }
 
-inline bool contains(const std::string& src, const std::string& f) {
-  return src.find(f)!=std::string::npos;
+inline bool contains(const std::string &src, const std::string &f) {
+  return src.find(f) != std::string::npos;
 }
 
 #endif

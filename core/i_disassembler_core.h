@@ -25,13 +25,14 @@
 class IGUIUpdater {
 public:
   virtual void updateWidgets() = 0;
-  virtual ~IGUIUpdater() {}
+
+  virtual ~IGUIUpdater() = default;
 };
 
 class IDisassemblerCore {
 public:
   enum class Type {
-    JT_NONE=0,
+    JT_NONE = 0,
     JT_CALL,
     JT_COND_JUMP,
     JT_JUMP,
@@ -39,44 +40,56 @@ public:
     JT_RET,
   };
 
-  IDisassemblerCore(IGUIUpdater* updater_, IDisassemblerCore* inst) : updater{updater_} {_inst=inst; _memory=std::unique_ptr<Memory> {new Memory()};}
-  virtual ~IDisassemblerCore() {}
+  IDisassemblerCore(IGUIUpdater *updater_, IDisassemblerCore *inst) : updater{updater_} {
+    _inst = inst;
+    _memory = std::make_unique<Memory>();
+  }
+
+  virtual ~IDisassemblerCore() = default;
 
   virtual void init() = 0;
 
-  virtual std::string disassembleInstructionInt(const Addr &addr, size_t& len) = 0;
+  virtual std::string disassembleInstructionInt(const Addr &addr, size_t &len) = 0;
+
   ///@bug поменять местами возвращаемые значения, чтобы не было такой вырви-глаз конструкции
   int disassembleInstruction(const Addr &addr, std::shared_ptr<Chunk> &out_chunk);
+
   void disassembleBlock(const Addr &addr);
 
-  void setRawMemory(unsigned char* buf, size_t size);
+  void setRawMemory(unsigned char *buf, size_t size);
+
   void initialParse();
 
   std::shared_ptr<Chunk> createChunk(const Addr &addr, Chunk::Type type) { return _chunks.createChunk(addr, type); }
-  ChunkList &chunks() {return _chunks;}
+
+  ChunkList &chunks() { return _chunks; }
 
   void loadGuessFile(const std::string &fname);
-  Labels &labels() {return _labels;}
+
+  Labels &labels() { return _labels; }
 
   std::shared_ptr<Label> makeJump(const Addr &from_addr, const Addr &jump_addr, Reference::Type ref_type);
-  virtual Type getLastCmdJumpType(std::shared_ptr<Chunk> chunk, Addr &jump_addr)=0;
 
-  Byte getMemoryByte(const Addr &addr) const {return _memory->getByte(addr);}
+  virtual Type getLastCmdJumpType(std::shared_ptr<Chunk> chunk, Addr &jump_addr) = 0;
 
-  static IDisassemblerCore* inst() {return _inst;}
+  Byte getMemoryByte(const Addr &addr) const { return _memory->getByte(addr); }
+
+  static IDisassemblerCore *inst() { return _inst; }
 
 protected:
 
   bool labelPresent(const Addr &addr) const;
+
   std::shared_ptr<Label> findKnownLabel(const Addr &addr);
 
   virtual void parseCommand(std::string &src, Command &out_command) = 0;
+
   virtual int postProcessChunk(std::shared_ptr<Chunk> chunk, int len) = 0;
 
   ///@brief кого оповещать об обновлении состояния
-  IGUIUpdater* updater;
+  IGUIUpdater *updater;
   ///@brief указатель на инстанс
-  static IDisassemblerCore* _inst;
+  static IDisassemblerCore *_inst;
   ///@brief содержимое памяти
   std::unique_ptr<Memory> _memory;
   ///@brief распознаные цепочки

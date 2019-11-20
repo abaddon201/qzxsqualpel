@@ -6,20 +6,23 @@
 
 class NavigateToAddrDlg : public QDialog {
   Ui::GotoAddressDlg _ui;
-  DisassemblerWidget* _wdg;
-  Q_OBJECT;
+  DisassemblerWidget *_wdg;
+Q_OBJECT;
 
 public:
-  NavigateToAddrDlg(DisassemblerWidget* wdg):_wdg{wdg} {}
+  NavigateToAddrDlg(DisassemblerWidget *wdg) : _wdg{wdg} {}
+
   virtual ~NavigateToAddrDlg() {}
-  void operator() () {
+
+  void operator()() {
     _ui.setupUi(this);
     _ui.addr->setFocus();
     exec();
   }
 
 public slots:
-  void accept() {
+
+  void accept() override {
     _wdg->navigateToAddress(Addr(_ui.addr->text().toInt(0, 16)));
     close();
   }

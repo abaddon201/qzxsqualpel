@@ -18,9 +18,9 @@
 
 class Byte {
 public:
-  Byte(unsigned char b=0) : _byte(b) {}
+  explicit Byte(unsigned char b=0) : _byte(b) {}
   inline std::string toString() const {return byte2hex(_byte);}
-  operator unsigned char() const {return _byte;}
+  explicit operator unsigned char() const {return _byte;}
 
 private:
   unsigned char _byte;

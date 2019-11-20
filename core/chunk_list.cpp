@@ -19,13 +19,13 @@ std::shared_ptr<Chunk> ChunkList::createChunk(const Addr &addr, Chunk::Type type
 
   auto ch1 = _chunks.find(addr.offset());
   if (ch1 != _chunks.end()) {
-    if (ch1->second->type()!=Chunk::Type::UNPARSED)
+    if (ch1->second->type() != Chunk::Type::UNPARSED)
       return nullptr;
   }
 
   std::shared_ptr<Chunk> ch;
   ch = std::make_shared<Chunk>(addr, type);
-  _chunks[addr.offset()]=ch;
+  _chunks[addr.offset()] = ch;
   return ch;
 }
 
@@ -39,13 +39,13 @@ std::shared_ptr<Chunk> ChunkList::getChunkContains(const Addr &addr) const {
     }
     --a;
     ///@bug вообще, тут должна быть ловля исключения, а не проверка. ибо аддр может вполне себе переходить по сегментам (не сейчас)s
-  } while (a>=0);
+  } while (a >= 0);
   return nullptr;
 }
 
 void ChunkList::removeChunk(const Addr &addr) {
   auto it = _chunks.find(addr);
-  if (it!=_chunks.end())
+  if (it != _chunks.end())
     _chunks.erase(it);
 }
 
@@ -58,12 +58,13 @@ void ChunkList::clear() {
 }
 
 #include "debug_printers.h"
+
 void ChunkList::printDebug() {
-  for (auto ch: _chunks) {
-    std::cout<<"chunk orig addr:"<<ch.first.toString()<<"::";
+  for (const auto &ch: _chunks) {
+    std::cout << "chunk orig addr:" << ch.first.toString() << "::";
     if (ch.second)
-      std::cout<<"chunk addr:"<<ch.second->addr().toString()<<std::endl;
+      std::cout << "chunk addr:" << ch.second->addr().toString() << std::endl;
     else
-      std::cout<<"ERROR: chunk is NULL"<<std::endl;
+      std::cout << "ERROR: chunk is NULL" << std::endl;
   }
 }

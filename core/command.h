@@ -26,13 +26,13 @@
 struct Command {
   //using OpcodesList = std::vector<CByte>;
   enum class ArgType {
-    ARG_UNKNOWN=0,
-    ARG_REGISTER=1,
-    ARG_DATAOFFSET=2,
-    ARG_JUMPOFFSET=3,
-    ARG_VALUE=4,
-    ARG_VALOFFSET=5,
-    ARG_FLAG=6
+    ARG_UNKNOWN = 0,
+    ARG_REGISTER = 1,
+    ARG_DATAOFFSET = 2,
+    ARG_JUMPOFFSET = 3,
+    ARG_VALUE = 4,
+    ARG_VALOFFSET = 5,
+    ARG_FLAG = 6
   };
 
   //OpcodesList opcodes;
@@ -55,49 +55,56 @@ struct Command {
   int len;
 
   Command() : command_code{0}, len{0} {}
+
   Command(const Command &c) {
-    addr=c.addr;
-    len=c.len;
-    command_code=c.command_code;
-    command=c.command;
-    arg1=c.arg1;
-    arg2=c.arg2;
-    comment=c.comment;
-    auto_comment=c.auto_comment;
+    addr = c.addr;
+    len = c.len;
+    command_code = c.command_code;
+    command = c.command;
+    arg1 = c.arg1;
+    arg2 = c.arg2;
+    comment = c.comment;
+    auto_comment = c.auto_comment;
   }
+
   Command &operator=(const Command &c) {
-    addr=c.addr;
-    len=c.len;
-    command_code=c.command_code;
-    command=c.command;
-    arg1=c.arg1;
-    arg2=c.arg2;
-    comment=c.comment;
-    auto_comment=c.auto_comment;
+    addr = c.addr;
+    len = c.len;
+    command_code = c.command_code;
+    command = c.command;
+    arg1 = c.arg1;
+    arg2 = c.arg2;
+    comment = c.comment;
+    auto_comment = c.auto_comment;
     return *this;
   }
 
   Command &operator=(const Command &&c) {
-    addr=c.addr;
-    len=c.len;
-    command_code=c.command_code;
-    command=c.command;
-    arg1=c.arg1;
-    arg2=c.arg2;
-    comment=c.comment;
-    auto_comment=c.auto_comment;
+    addr = c.addr;
+    len = c.len;
+    command_code = c.command_code;
+    command = c.command;
+    arg1 = c.arg1;
+    arg2 = c.arg2;
+    comment = c.comment;
+    auto_comment = c.auto_comment;
     return *this;
   }
 
   ///@brief Возвращает аргументы команды в виде строки
   std::string getArgsString() const;
+
   ///@brief Возвращает опкоды команды в виде строки
   /// @todo стоит добавить ограничение на кол-во опкодов
   std::string getOpcodesString() const;
+
   Byte opcodes(unsigned long long offs) const;
+
   ///@brief Возвращает адрес перехода команды (первый либо второй аргумент)
   Addr getJmpAddr() const;
+
   Addr getJmpAddrFromString() const;
+
   ///@brief Устанавливает метку перехода команды (первый либо второй аргумент)
   void setJmpAddr(const std::shared_ptr<Label> label);
 };

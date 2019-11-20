@@ -17,14 +17,16 @@
 
 struct Reference {
   enum class Type {
-    JUMP=1,
+    JUMP = 1,
     CALL,
     READ_BYTE,
     WRITE_BYTE,
     READ_WORD,
     WRITE_WORD
   };
-  Reference(Addr addr_, Type type_);
+
+  Reference(const Addr &addr_, Type type_);
+
   std::string toString();
 
   Addr addr;

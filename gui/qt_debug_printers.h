@@ -2,7 +2,7 @@
 #define QT_DEBUG_PRINTERS_H
 
 inline QDebug operator<<(QDebug out, std::string str) {
-  out<<QString::fromStdString(str);
+  out << QString::fromStdString(str);
   return out;
 }
 

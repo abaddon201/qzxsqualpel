@@ -11,27 +11,28 @@ enum ArgTypes {
 class Arg {
 public:
   virtual std::string toString() = 0;
-  virtual ~Arg() {}
+  virtual ~Arg() = default;
   int arg_type;
 };
 
 class ArgDefault : public Arg {
 public:
-  ArgDefault(std::string s) : value{s} {arg_type=ARG_DEFAULT;}
-  virtual ~ArgDefault() {}
+  explicit ArgDefault(std::string s) : value{std::move(s)} {arg_type=ARG_DEFAULT;}
+  virtual ~ArgDefault() = default;
 
-  std::string toString() {return value;}
+  std::string toString() override {return value;}
 
   std::string value;
 };
 
 #include <memory>
+#include <utility>
 #include "label.h"
 
 class ArgLabel : public Arg {
 public:
-  ArgLabel(std::shared_ptr<Label> l) : label{l} {arg_type=ARG_LABEL;}
-  virtual ~ArgLabel() {}
+  ArgLabel(std::shared_ptr<Label> l) : label{std::move(l)} {arg_type=ARG_LABEL;}
+  virtual ~ArgLabel() = default;
 
   std::string toString() override {return label->name;}
 

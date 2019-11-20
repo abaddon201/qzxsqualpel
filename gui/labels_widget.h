@@ -17,16 +17,18 @@
 #include "disassembler_widget.h"
 
 class LabelsWidget : public QTableWidget {
-  Q_OBJECT
+Q_OBJECT
 public:
-  LabelsWidget(QWidget* par, DisassemblerWidget* disasm);
+  LabelsWidget(QWidget *par, DisassemblerWidget *disasm);
+
   void refresh();
 
 public slots:
+
   void jumpToLabel(int, int);
 
 private:
-  DisassemblerWidget* _disasm;
+  DisassemblerWidget *_disasm;
 };
 
 #endif

@@ -21,8 +21,8 @@ public:
   void setCore(IDisassemblerCore* core) {
     _disassembler_core=core;
   }
-  void openRAWFile(QString fileName);
-  void saveASMFile(QString fileName);
+  void openRAWFile(const QString& fileName);
+  void saveASMFile(const QString& fileName);
   void keyPressEvent ( QKeyEvent* );
 
   ///@brief Показать на экране код с меткой под номером
@@ -40,8 +40,8 @@ private:
   DisassemblerWidget();
   void init();
 
-  void printCell(QTextCursor &cursor, std::string text, int length, QTextCharFormat fmt);
-  void printCell(QTextCursor &cursor, std::string text, int length);
+  void printCell(QTextCursor &cursor, const std::string& text, int length, const QTextCharFormat& fmt);
+  void printCell(QTextCursor &cursor, const std::string& text, int length);
 
   void printReferences(QTextCursor &cursor, std::shared_ptr<GUIChunk> chunk);
   void printCommand(QTextCursor &cursor, const Command &cmd);
@@ -52,6 +52,7 @@ private:
   void navigateToAddrDlg();
 
   QTextCharFormat _cell_format_addr;
+  QTextCharFormat _cell_format_addr_rom;
   QTextCharFormat _cell_format_opcodes;
   QTextCharFormat _cell_format_label;
   QTextCharFormat _cell_format_command;

@@ -17,20 +17,20 @@
 #include <QPushButton>
 #include <QLabel>
 
-WidgetChangeText::WidgetChangeText(QWidget* par, QString title, QString label, QString old_text)
-  : QDialog(par) {
+WidgetChangeText::WidgetChangeText(QWidget *par, QString title, QString label, QString old_text)
+    : QDialog(par) {
   setWindowTitle(title);
-  _text=new QLineEdit;
+  _text = new QLineEdit;
   _text->setText(old_text);
-  QVBoxLayout* v=new QVBoxLayout();
-  QHBoxLayout* h2=new QHBoxLayout();
-  QLabel * l = new QLabel(label);
+  QVBoxLayout *v = new QVBoxLayout();
+  QHBoxLayout *h2 = new QHBoxLayout();
+  QLabel *l = new QLabel(label);
   h2->addWidget(l);
   h2->addWidget(_text);
   v->addLayout(h2);
-  QHBoxLayout* h=new QHBoxLayout();
-  QPushButton* bok=new QPushButton(tr("Ok"));
-  QPushButton* bcanc=new QPushButton(tr("Cancel"));
+  QHBoxLayout *h = new QHBoxLayout();
+  QPushButton *bok = new QPushButton(tr("Ok"));
+  QPushButton *bcanc = new QPushButton(tr("Cancel"));
   h->addWidget(bok);
   h->addWidget(bcanc);
   v->addLayout(h);
