@@ -4,7 +4,7 @@
 // Description:
 //
 //
-// Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
+// Author: Glebov Alex <aglebov2@gmail.com>, (C) 2009
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -21,6 +21,9 @@
 
 #include "arg.h"
 #include "label.h"
+
+namespace dasm {
+namespace core {
 
 ///@brief Структура описывающая одну команду ассемблера
 struct Command {
@@ -54,9 +57,9 @@ struct Command {
   ///@brief Длина команды в байтах
   int len;
 
-  Command() : command_code{0}, len{0} {}
+  Command() : command_code{ 0 }, len{ 0 } {}
 
-  Command(const Command &c) {
+  Command(const Command& c) {
     addr = c.addr;
     len = c.len;
     command_code = c.command_code;
@@ -67,7 +70,7 @@ struct Command {
     auto_comment = c.auto_comment;
   }
 
-  Command &operator=(const Command &c) {
+  Command& operator=(const Command& c) {
     addr = c.addr;
     len = c.len;
     command_code = c.command_code;
@@ -79,7 +82,7 @@ struct Command {
     return *this;
   }
 
-  Command &operator=(const Command &&c) {
+  Command& operator=(const Command&& c) {
     addr = c.addr;
     len = c.len;
     command_code = c.command_code;
@@ -109,4 +112,6 @@ struct Command {
   void setJmpAddr(const std::shared_ptr<Label> label);
 };
 
+}
+}
 #endif

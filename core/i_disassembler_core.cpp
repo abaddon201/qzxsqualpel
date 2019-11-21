@@ -3,9 +3,11 @@
 #include <memory>
 #include <fstream>
 
-IDisassemblerCore *IDisassemblerCore::_inst = nullptr;
+namespace dasm {
+namespace core {
+IDisassemblerCore* IDisassemblerCore::_inst = nullptr;
 
-void IDisassemblerCore::loadGuessFile(const std::string &fname) {
+void IDisassemblerCore::loadGuessFile(const std::string& fname) {
   std::ifstream f(fname);
   while (!f.eof()) {
     unsigned long long seg, off;
@@ -21,11 +23,11 @@ void IDisassemblerCore::loadGuessFile(const std::string &fname) {
   }
 }
 
-bool IDisassemblerCore::labelPresent(const Addr &addr) const {
+bool IDisassemblerCore::labelPresent(const Addr& addr) const {
   return _labels.find(addr) != _labels.end();
 }
 
-std::shared_ptr<Label> IDisassemblerCore::findKnownLabel(const Addr &addr) {
+std::shared_ptr<Label> IDisassemblerCore::findKnownLabel(const Addr& addr) {
   auto it = _known_labels.find(addr);
   if (it != _known_labels.end()) {
     return it->second;
@@ -33,7 +35,7 @@ std::shared_ptr<Label> IDisassemblerCore::findKnownLabel(const Addr &addr) {
   return nullptr;
 }
 
-void IDisassemblerCore::setRawMemory(unsigned char *buf, size_t size) {
+void IDisassemblerCore::setRawMemory(unsigned char* buf, size_t size) {
   _memory->getSegment(0)->fill(buf, size);
 }
 
@@ -52,7 +54,7 @@ void IDisassemblerCore::initialParse() {
   updater->updateWidgets();
 }
 
-int IDisassemblerCore::disassembleInstruction(const Addr &addr, std::shared_ptr<Chunk> &out_chunk) {
+int IDisassemblerCore::disassembleInstruction(const Addr& addr, std::shared_ptr<Chunk>& out_chunk) {
   size_t len = 0;
   if (addr >= _memory->getMaxAddr()) {
     std::cerr << "address out of range" << addr.toString();
@@ -99,8 +101,8 @@ int IDisassemblerCore::disassembleInstruction(const Addr &addr, std::shared_ptr<
     }
     if (len > 1) {
       for (size_t i = 1; i < len; i++) {
-        std::shared_ptr<Chunk> ch = _chunks.getChunk(addr + i);
-        if (ch == 0) {
+        auto ch = _chunks.getChunk(addr + i);
+        if (ch == nullptr) {
           std::cout << "Instrunction longer than unparsed block" << std::endl;
           //m_Chunks.removeChunk(addr);
           _chunks.addChunk(addr, old_chunk);
@@ -129,7 +131,7 @@ int IDisassemblerCore::disassembleInstruction(const Addr &addr, std::shared_ptr<
   return len;
 }
 
-void IDisassemblerCore::disassembleBlock(const Addr &st_addr) {
+void IDisassemblerCore::disassembleBlock(const Addr& st_addr) {
   int res = 0;
   Addr addr = st_addr;
   std::cout << "disassembleBlock(): addr" << addr.toString() << std::endl;
@@ -151,43 +153,47 @@ void IDisassemblerCore::disassembleBlock(const Addr &st_addr) {
       return;
     }
     switch (getLastCmdJumpType(chunk, jump_addr)) {
-      case IDisassemblerCore::Type::JT_CALL:
+      case JumpType::JT_CALL:
         //call
         std::cout << "call: addr=" << addr.toString() << "to_addr" << jump_addr.toString() << std::endl;
         std::cout << "st_addr=" << st_addr.toString() << std::endl;
         chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, Reference::Type::CALL));
         addr += res;
         break;
-      case IDisassemblerCore::Type::JT_COND_JUMP:
+      case JumpType::JT_COND_JUMP:
         //conditional jump
         std::cout << "cond jump: addr=" << addr.toString() << "to_addr" << jump_addr.toString() << std::endl;
         chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, Reference::Type::JUMP));
         addr += res;
         break;
-      case IDisassemblerCore::Type::JT_JUMP:
+      case JumpType::JT_JUMP:
         std::cout << "jump: addr=" << addr.toString() << "to_addr" << jump_addr.toString() << std::endl;
         chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, Reference::Type::JUMP));
         res = 0;
         break;
-      case IDisassemblerCore::Type::JT_COND_RET:
+      case JumpType::JT_COND_RET:
         //conditional ret
         std::cout << "cond_ret: addr=" << addr.toString() << std::endl;
         addr += res;
         break;
-      case IDisassemblerCore::Type::JT_RET:
+      case JumpType::JT_RET:
         std::cout << "ret: addr=" << addr.toString() << std::endl;
         res = 0;
         break;
-      case IDisassemblerCore::Type::JT_NONE:
+      case JumpType::JT_NONE:
         addr += res;
         break;
+    }
+    auto cmd = chunk->lastCommand();
+    if (_auto_commenter) {
+      _auto_commenter->commentCommand(cmd);
     }
   } while (res);
   std::cout << "finished chunk:st_addr=" << st_addr.toString() << " m_chunks.count=" << _chunks.count() << std::endl;
 }
 
 std::shared_ptr<Label>
-IDisassemblerCore::makeJump(const Addr &from_addr, const Addr &jump_addr, Reference::Type ref_type) {
+IDisassemblerCore::makeJump(const Addr& from_addr, const Addr& jump_addr, Reference::Type ref_type) {
   disassembleBlock(jump_addr);
   std::shared_ptr<Chunk> jmp_chunk = _chunks.getChunk(jump_addr);
   if (jmp_chunk == nullptr) {
@@ -217,4 +223,7 @@ IDisassemblerCore::makeJump(const Addr &from_addr, const Addr &jump_addr, Refere
     _labels[jump_addr] = lbl;
   }
   return lbl;
+}
+
+}
 }

@@ -4,7 +4,7 @@
 // Description:
 //
 //
-// Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
+// Author: Glebov Alex <aglebov2@gmail.com>, (C) 2009
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -14,6 +14,9 @@
 #define CREFERENCE_H
 
 #include "addr.h"
+
+namespace dasm {
+namespace core {
 
 struct Reference {
   enum class Type {
@@ -25,12 +28,15 @@ struct Reference {
     WRITE_WORD
   };
 
-  Reference(const Addr &addr_, Type type_);
+  Reference(const Addr& addr_, Type type_);
 
   std::string toString();
 
   Addr addr;
   Type type;
 };
+
+}
+}
 
 #endif

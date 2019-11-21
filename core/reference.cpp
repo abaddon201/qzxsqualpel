@@ -4,7 +4,7 @@
 // Description:
 //
 //
-// Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
+// Author: Glebov Alex <aglebov2@gmail.com>, (C) 2009
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -14,9 +14,11 @@
 #include "labels.h"
 #include "i_disassembler_core.h"
 
-Reference::Reference(const Addr &addr_, Type type_)
-    : addr(addr_), type(type_) {
-}
+namespace dasm {
+namespace core {
+
+Reference::Reference(const Addr& addr_, Type type_)
+  : addr(addr_), type(type_) {}
 
 std::string Reference::toString() {
   std::string res = "; XRef: ";
@@ -42,4 +44,7 @@ std::string Reference::toString() {
       break;
   };
   return res;
+}
+
+}
 }

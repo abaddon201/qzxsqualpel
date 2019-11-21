@@ -4,7 +4,7 @@
 // Description:
 //
 //
-// Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
+// Author: Glebov Alex <aglebov2@gmail.com>, (C) 2009
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -17,17 +17,20 @@
 
 #include "addr.h"
 
+namespace dasm {
+namespace core {
+
 struct Label {
   Label() = default;
 
-  Label(const Addr &addr, std::string name) : name(std::move(name)), addr(addr) {}
+  Label(const Addr& addr, std::string name) : name(std::move(name)), addr(addr) {}
 
-  Label(const Label &s) {
+  Label(const Label& s) {
     addr = s.addr;
     name = s.name;
   }
 
-  Label &operator=(const Label &s) {
+  Label& operator=(const Label& s) {
     addr = s.addr;
     name = s.name;
     return *this;
@@ -38,5 +41,8 @@ struct Label {
   std::string name;
   Addr addr;
 };
+
+}
+}
 
 #endif

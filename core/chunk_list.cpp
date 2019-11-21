@@ -4,7 +4,7 @@
 // Description:
 //
 //
-// Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
+// Author: Glebov Alex <aglebov2@gmail.com>, (C) 2009
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -12,10 +12,15 @@
 
 #include "chunk_list.h"
 
-ChunkList::ChunkList() {
-}
+#include "debug_printers.h"
 
-std::shared_ptr<Chunk> ChunkList::createChunk(const Addr &addr, Chunk::Type type) {
+
+namespace dasm {
+namespace core {
+
+ChunkList::ChunkList() {}
+
+std::shared_ptr<Chunk> ChunkList::createChunk(const Addr& addr, Chunk::Type type) {
 
   auto ch1 = _chunks.find(addr.offset());
   if (ch1 != _chunks.end()) {
@@ -29,7 +34,7 @@ std::shared_ptr<Chunk> ChunkList::createChunk(const Addr &addr, Chunk::Type type
   return ch;
 }
 
-std::shared_ptr<Chunk> ChunkList::getChunkContains(const Addr &addr) const {
+std::shared_ptr<Chunk> ChunkList::getChunkContains(const Addr& addr) const {
   ///@todo подумать что с этой х-ней сделать... 70% нагрузки на ней...
   Addr a = addr;
   do {
@@ -43,7 +48,7 @@ std::shared_ptr<Chunk> ChunkList::getChunkContains(const Addr &addr) const {
   return nullptr;
 }
 
-void ChunkList::removeChunk(const Addr &addr) {
+void ChunkList::removeChunk(const Addr& addr) {
   auto it = _chunks.find(addr);
   if (it != _chunks.end())
     _chunks.erase(it);
@@ -57,14 +62,15 @@ void ChunkList::clear() {
   _chunks.clear();
 }
 
-#include "debug_printers.h"
-
 void ChunkList::printDebug() {
-  for (const auto &ch: _chunks) {
+  for (const auto& ch : _chunks) {
     std::cout << "chunk orig addr:" << ch.first.toString() << "::";
     if (ch.second)
       std::cout << "chunk addr:" << ch.second->addr().toString() << std::endl;
     else
       std::cout << "ERROR: chunk is NULL" << std::endl;
   }
+}
+
+}
 }

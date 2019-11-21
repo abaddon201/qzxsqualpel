@@ -16,14 +16,20 @@
 #include <string>
 #include "utils.h"
 
+namespace dasm {
+namespace core {
+
 class Byte {
 public:
-  explicit Byte(unsigned char b=0) : _byte(b) {}
-  inline std::string toString() const {return byte2hex(_byte);}
-  explicit operator unsigned char() const {return _byte;}
+  explicit Byte(unsigned char b = 0) : _byte(b) {}
+  inline std::string toString() const { return byte2hex(_byte); }
+  explicit operator unsigned char() const { return _byte; }
 
 private:
   unsigned char _byte;
 };
+
+}
+}
 
 #endif

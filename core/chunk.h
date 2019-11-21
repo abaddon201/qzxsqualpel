@@ -4,7 +4,7 @@
 // Description:
 //
 //
-// Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
+// Author: Glebov Alex <aglebov2@gmail.com>, (C) 2009
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -18,6 +18,9 @@
 #include "reference.h"
 #include "command.h"
 #include "label.h"
+
+namespace dasm {
+namespace core {
 
 class Chunk {
 public:
@@ -36,32 +39,32 @@ public:
 
   ~Chunk() = default;
 
-  Chunk(const Chunk &ch) { makeCopy(ch); }
+  Chunk(const Chunk& ch) { makeCopy(ch); }
 
-  explicit Chunk(const Addr& addr, Chunk::Type type = Chunk::Type::UNKNOWN) : _type(type), _starting_addr(addr), _length{0} {}
+  explicit Chunk(const Addr& addr, Chunk::Type type = Chunk::Type::UNKNOWN) : _type(type), _starting_addr(addr), _length{ 0 } {}
 
-  Chunk &operator=(const Chunk &ch) {
+  Chunk& operator=(const Chunk& ch) {
     makeCopy(ch);
     return *this;
   }
 
-  std::shared_ptr<Chunk> splitAt(const Addr &addr);
+  std::shared_ptr<Chunk> splitAt(const Addr& addr);
 
-  void addCrossRef(const Addr &addr, Reference::Type type);
+  void addCrossRef(const Addr& addr, Reference::Type type);
 
-  void appendCommand(const Command &cmd);
+  void appendCommand(const Command& cmd);
 
-  Command &getCommand(int idx);
+  Command& getCommand(int idx);
 
-  Command &lastCommand() { return _commands.back(); }
+  Command& lastCommand() { return _commands.back(); }
 
   inline int commandsCount() const { return _commands.size(); }
 
-  inline CommandsList &commands() { return _commands; }
+  inline CommandsList& commands() { return _commands; }
 
-  inline const Addr &addr() const { return _starting_addr; }
+  inline const Addr& addr() const { return _starting_addr; }
 
-  inline bool containsAddr(const Addr &addr) const { return (addr >= _starting_addr) && (addr < _last_addr); }
+  inline bool containsAddr(const Addr& addr) const { return (addr >= _starting_addr) && (addr < _last_addr); }
 
   inline size_type length() const { return _length; }
 
@@ -69,9 +72,9 @@ public:
 
   std::shared_ptr<Label> label() const { return _label; }
 
-  std::shared_ptr<Label> setLabel(std::shared_ptr<Label> label = nullptr, Reference::Type= Reference::Type::JUMP);
+  std::shared_ptr<Label> setLabel(std::shared_ptr<Label> label = nullptr, Reference::Type = Reference::Type::JUMP);
 
-  std::shared_ptr<Label> setLabel(const std::string& label, Reference::Type= Reference::Type::JUMP);
+  std::shared_ptr<Label> setLabel(const std::string& label, Reference::Type = Reference::Type::JUMP);
 
   /*/const /
   void cha
@@ -79,18 +82,18 @@ public:
   ngeLabel(std::string
   label) { m_Label = label; }
 */
-  ReferencesList &references() { return _references; }
+  ReferencesList& references() { return _references; }
 
   std::string comment() const { return _comment; }
 
   bool isEmpty() const { return !((type() != Chunk::Type::UNPARSED) && (type() != Chunk::Type::UNKNOWN)); }
 
 private:
-//  friend class CChunkList;
+  //  friend class CChunkList;
 
   Chunk() : _length(0) {}
 
-  virtual void makeCopy(const Chunk &ch) {
+  virtual void makeCopy(const Chunk& ch) {
     _starting_addr = ch._starting_addr;
     _last_addr = ch._last_addr;
     _length = ch._length;
@@ -117,5 +120,8 @@ private:
   ///@brief Длина блока
   size_type _length{};
 };
+
+}
+}
 
 #endif

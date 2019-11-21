@@ -7,7 +7,7 @@
 
 #include "core/chunk_list.h"
 
-std::shared_ptr<GUIChunk> GUIChunkList::getChunkByPosition(int pos) const {
+GUIChunkPtr GUIChunkList::getChunkByPosition(int pos) const {
   auto res = std::find_if(_chunks.begin(), _chunks.end(), [pos](auto chunk) {
     return ((chunk->cursorStartPosition() < pos) && (chunk->cursorEndPosition() >= pos));
   });
@@ -17,7 +17,7 @@ std::shared_ptr<GUIChunk> GUIChunkList::getChunkByPosition(int pos) const {
   return nullptr;
 }
 
-std::shared_ptr<GUIChunk> GUIChunkList::getChunkContains(const Addr &addr) const {
+GUIChunkPtr GUIChunkList::getChunkContains(const dasm::core::Addr &addr) const {
   auto res = std::find_if(_chunks.begin(), _chunks.end(),
                           [&addr](auto chunk) { return (chunk->core()->containsAddr(addr)); });
   if (res != _chunks.end()) {
@@ -26,7 +26,7 @@ std::shared_ptr<GUIChunk> GUIChunkList::getChunkContains(const Addr &addr) const
   return nullptr;
 }
 
-void GUIChunkList::update(ChunkList &chunks) {
+void GUIChunkList::update(dasm::core::ChunkList &chunks) {
   _chunks.clear();
   for (auto &ch: chunks.chunks()) {
     _chunks.push_back(std::make_shared<GUIChunk>(ch.second));

@@ -17,34 +17,27 @@
 
 #include "core/chunk_list.h"
 #include "core/labels.h"
+#include "core/jump_type.h"
 
-class DisassemblerCoreZX : public IDisassemblerCore {
+#include "gui/gui_updater.h"
+
+class DisassemblerCoreZX : public dasm::core::IDisassemblerCore {
 public:
   DisassemblerCoreZX(IGUIUpdater* updater);
 
   void init() override;
-  std::string disassembleInstructionInt(const Addr &addr, size_t& len) override;
+  std::string disassembleInstructionInt(const dasm::core::Addr &addr, size_t& len) override;
 
-  virtual Type getLastCmdJumpType(std::shared_ptr<Chunk> chunk, Addr &jump_addr) override;
+  virtual dasm::core::JumpType getLastCmdJumpType(std::shared_ptr<dasm::core::Chunk> chunk, dasm::core::Addr &jump_addr) override;
 
-  enum {
-    CMD_NONE = 0,
-    CMD_CALL,
-    CMD_RST,
-    CMD_RET,
-    CMD_RETI,
-    CMD_RETN,
-    CMD_JP,
-    CMD_JR,
-  };
+  int postProcessChunk(std::shared_ptr<dasm::core::Chunk> chunk, int len) override;
 
 private:
   int command2code(const std::string &cmd) const;
-  void autoCommentCommand(Command &out_command);
-  std::string getRST28AutoComment(unsigned char b, int &args_count);
 
-  void parseCommand(std::string &src, Command &out_command) override;
-  int postProcessChunk(std::shared_ptr<Chunk> chunk, int len) override;
+  void parseCommand(std::string &src, dasm::core::Command &out_command) override;
+
+  std::string getRST28AutoComment(unsigned char b, int& args_count);
 };
 
 #endif

@@ -1,3 +1,5 @@
 *.user
 cmake-build-debug
 .idea
+out
+.vs

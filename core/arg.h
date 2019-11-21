@@ -1,6 +1,13 @@
 #ifndef ARG_H
 #define ARG_H
 
+#include <memory>
+#include <utility>
+#include "label.h"
+
+namespace dasm {
+namespace core {
+
 enum ArgTypes {
   ARG_DEFAULT,
   ARG_LABEL,
@@ -17,27 +24,26 @@ public:
 
 class ArgDefault : public Arg {
 public:
-  explicit ArgDefault(std::string s) : value{std::move(s)} {arg_type=ARG_DEFAULT;}
+  explicit ArgDefault(std::string s) : value{ std::move(s) } { arg_type = ARG_DEFAULT; }
   virtual ~ArgDefault() = default;
 
-  std::string toString() override {return value;}
+  std::string toString() override { return value; }
 
   std::string value;
 };
 
-#include <memory>
-#include <utility>
-#include "label.h"
-
 class ArgLabel : public Arg {
 public:
-  ArgLabel(std::shared_ptr<Label> l) : label{std::move(l)} {arg_type=ARG_LABEL;}
+  ArgLabel(std::shared_ptr<Label> l) : label{ std::move(l) } { arg_type = ARG_LABEL; }
   virtual ~ArgLabel() = default;
 
-  std::string toString() override {return label->name;}
+  std::string toString() override { return label->name; }
 
   std::shared_ptr<Label> label;
 };
+
+}
+}
 
 #endif // ARG_H
 

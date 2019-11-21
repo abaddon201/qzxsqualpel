@@ -22,7 +22,7 @@ LabelsWidget::LabelsWidget(QWidget *par, DisassemblerWidget *disasm)
   connect(this, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(jumpToLabel(int, int)));
 }
 
-Q_DECLARE_METATYPE(Addr)
+Q_DECLARE_METATYPE(dasm::core::Addr)
 
 void LabelsWidget::refresh() {
   clear();
@@ -32,7 +32,7 @@ void LabelsWidget::refresh() {
   setHorizontalHeaderLabels(strlist);
   setSortingEnabled(false);
   int i = 0;
-  Labels &my_labels = IDisassemblerCore::inst()->labels();
+  dasm::core::Labels &my_labels = dasm::core::IDisassemblerCore::inst()->labels();
   setRowCount(my_labels.size());
   for (auto lbl: my_labels) {
     QTableWidgetItem *nameItem = new QTableWidgetItem(QString::fromStdString(lbl.second->name));
@@ -40,7 +40,7 @@ void LabelsWidget::refresh() {
     QTableWidgetItem *addrItem = new QTableWidgetItem(QString::fromStdString(lbl.second->addr.toString()));
     setItem(i, 1, addrItem);
     QVariant var;
-    var.setValue<Addr>(lbl.second->addr);
+    var.setValue<dasm::core::Addr>(lbl.second->addr);
     nameItem->setData(Qt::UserRole, var);
     i++;
   }
@@ -48,6 +48,6 @@ void LabelsWidget::refresh() {
 }
 
 void LabelsWidget::jumpToLabel(int row, int) {
-  Addr addr = item(row, 0)->data(Qt::UserRole).value<Addr>();
+  dasm::core::Addr addr = item(row, 0)->data(Qt::UserRole).value<dasm::core::Addr>();
   _disasm->navigateToAddress(addr);
 }

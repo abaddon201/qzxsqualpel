@@ -4,7 +4,7 @@
 // Description:
 //
 //
-// Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
+// Author: Glebov Alex <aglebov2@gmail.com>, (C) 2009
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -14,18 +14,20 @@
 #include "i_disassembler_core.h"
 #include "debug_printers.h"
 
-void Chunk::addCrossRef(const Addr &addr, Reference::Type type) {
+namespace dasm {
+namespace core {
+void Chunk::addCrossRef(const Addr& addr, Reference::Type type) {
   Reference ref(addr, type);
   _references.push_back(ref);
 }
 
-void Chunk::appendCommand(const Command &cmd) {
+void Chunk::appendCommand(const Command& cmd) {
   _commands.push_back(cmd);
   _length += cmd.len;
   _last_addr = _starting_addr + _length;
 }
 
-Command &Chunk::getCommand(int idx) {
+Command& Chunk::getCommand(int idx) {
   if (_commands.size() == 0) {
     std::cerr << "No commands here" << std::endl;
     throw int(666);
@@ -36,7 +38,7 @@ Command &Chunk::getCommand(int idx) {
 std::shared_ptr<Label> Chunk::setLabel(std::shared_ptr<Label> label, Reference::Type ref_type) {
   if (label == nullptr) {
     //generate from name
-    std::string t1{_starting_addr.offsetString()};
+    std::string t1{ _starting_addr.offsetString() };
     switch (ref_type) {
       case Reference::Type::JUMP:
         _label = std::make_shared<Label>(_starting_addr, std::string("jmp_") + t1);
@@ -104,4 +106,7 @@ std::shared_ptr<Chunk> Chunk::splitAt(const Addr& addr) {
   }
   std::cout << "splitAt: commans.count=" << _commands.size() << "new count" << new_chunk->_commands.size() << std::endl;
   return new_chunk;
+}
+
+}
 }

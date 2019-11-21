@@ -1,7 +1,9 @@
 #include "memory.h"
 
-Memory::Memory() {
-}
+namespace dasm {
+namespace core {
+
+Memory::Memory() {}
 
 void Memory::createSegment(Segment::IdType id, size_type size) {
   //std::map<Segment::IdType, Segment>::iterator right;
@@ -15,16 +17,18 @@ void Memory::createSegment(Segment::IdType id, size_type size) {
   _segments[id] = std::make_shared<Segment>(id, size);
 }
 
-Byte Memory::getByte(const Addr &addr) {
+Byte Memory::getByte(const Addr& addr) {
   return _segments[addr.segment()]->getByte(addr.offset());
 }
 
 Memory::size_type Memory::wholeSize() {
   size_type res = 0;
 
-  for (auto &s: _segments) {
+  for (auto& s : _segments) {
     res += s.second->dataSize();
   }
   return res;
 }
 
+}
+}

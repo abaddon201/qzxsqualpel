@@ -5,23 +5,21 @@
 #include <list>
 
 #include "guichunk.h"
-
-class Addr;
-
-class ChunkList;
+#include "core/addr.h"
+#include "core/chunk_list.h"
 
 class GUIChunkList {
 public:
-  std::shared_ptr<GUIChunk> getChunkByPosition(int pos) const;
+  GUIChunkPtr getChunkByPosition(int pos) const;
 
-  std::shared_ptr<GUIChunk> getChunkContains(const Addr &addr) const;
+  GUIChunkPtr getChunkContains(const dasm::core::Addr &addr) const;
 
-  std::list<std::shared_ptr<GUIChunk>> &chunks() { return _chunks; }
+  std::list<GUIChunkPtr> &chunks() { return _chunks; }
 
-  void update(ChunkList &chunks);
+  void update(dasm::core::ChunkList &chunks);
 
 private:
-  std::list<std::shared_ptr<GUIChunk>> _chunks;
+  std::list<GUIChunkPtr> _chunks;
 };
 
 #endif // GUICHUNKLIST_H

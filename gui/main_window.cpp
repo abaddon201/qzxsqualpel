@@ -17,7 +17,7 @@ MainWindow::MainWindow() {
 
   _disassembler_widget = new DisassemblerWidget(this);
 
-  IDisassemblerCore *core = new DisassemblerCoreZX(this);
+  dasm::core::IDisassemblerCore *core = new DisassemblerCoreZX(this);
   core->init();
   _disassembler_widget->setCore(core);
   QDockWidget *dock = new QDockWidget(tr("Navigation Stack"), this);
@@ -73,7 +73,7 @@ void MainWindow::openFile() {
 void MainWindow::loadGuesses() {
   QString fileName = QFileDialog::getOpenFileName(this, tr("Load Guesses file"), "", "QSqualpel Guess Files (*.qzg)");
   if (!fileName.isEmpty()) {
-    IDisassemblerCore::inst()->loadGuessFile(fileName.toStdString());
+    dasm::core::IDisassemblerCore::inst()->loadGuessFile(fileName.toStdString());
   }
 }
 

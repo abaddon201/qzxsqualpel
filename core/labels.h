@@ -4,7 +4,7 @@
 // Description:
 //
 //
-// Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
+// Author: Glebov Alex <aglebov2@gmail.com>, (C) 2009
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -19,17 +19,23 @@
 #include "label.h"
 #include "chunk.h"
 
+namespace dasm {
+namespace core {
+
 class Labels : public std::map<Addr, std::shared_ptr<Label>> {
 public:
   ///@brief Вовращает сроку адреса относительно метки.
-  std::string offsetInLabel(const Addr &addr) const;
+  std::string offsetInLabel(const Addr& addr) const;
 
   /**
    * @brief Изменяет метку. Создаёт если не найдена соотв. метка
    * @param chunk Указатель на блок, для которого меняется метка
    * @param new_label Новое название метки
    */
-  void changeLabel(const Addr &addr, const std::string &new_label);
+  void changeLabel(const Addr& addr, const std::string& new_label);
 };
+
+}
+}
 
 #endif

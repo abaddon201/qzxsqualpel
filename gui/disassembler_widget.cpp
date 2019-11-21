@@ -60,9 +60,9 @@ void DisassemblerWidget::init() {
   setMinimumWidth(600);
 }
 
-void DisassemblerWidget::navigateToAddress(const Addr &addr) {
+void DisassemblerWidget::navigateToAddress(const dasm::core::Addr &addr) {
   qDebug() << "GUI: navigate to address:" << addr.toString();
-  std::shared_ptr<GUIChunk> chunk = _chunks.getChunkContains(addr);
+  auto chunk = _chunks.getChunkContains(addr);
   if (nullptr != chunk) {
     QTextCursor cursor(textCursor());
     cursor.setPosition(chunk->cursorStartPosition() + 1);
@@ -126,8 +126,8 @@ void DisassemblerWidget::makeCodeUnderCursor() {
     return;
   }
   if (chunk->core()->isEmpty()) {
-    Addr ret_addr = chunk->core()->addr();
-    _disassembler_core->disassembleBlock(chunk->core()->addr());
+    const auto& ret_addr = chunk->core()->addr();
+    _disassembler_core->disassembleBlock(ret_addr);
     refreshView();
     navigateToAddress(ret_addr);
   }

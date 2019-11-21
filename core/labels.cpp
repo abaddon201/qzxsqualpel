@@ -4,7 +4,7 @@
 // Description:
 //
 //
-// Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
+// Author: Glebov Alex <aglebov2@gmail.com>, (C) 2009
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -17,6 +17,9 @@
 
 #include "debug_printers.h"
 
+namespace dasm {
+namespace core {
+
 /**
  * @brief Вовращает сроку адреса относительно метки.
  * @param addr Искомый адрес
@@ -27,7 +30,7 @@
  * 2. Если метка существует, то вычисляется смещение запрошенного адреса, относительно метки
  * и формируется строка вида <label>+<offset>, если смещение не нулевое, и <label>, в противном случае
  */
-std::string Labels::offsetInLabel(const Addr &addr) const {
+std::string Labels::offsetInLabel(const Addr& addr) const {
   if (size() == 0) {
     std::cout << "no labels" << std::endl;
     return addr.toString();
@@ -51,6 +54,9 @@ std::string Labels::offsetInLabel(const Addr &addr) const {
   return lbl->name + "+" + std::to_string(delta.offset());
 }
 
-void Labels::changeLabel(const Addr &addr, const std::string &new_label) {
+void Labels::changeLabel(const Addr& addr, const std::string& new_label) {
   this->at(addr)->name = new_label;
+}
+
+}
 }

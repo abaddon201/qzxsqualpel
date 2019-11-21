@@ -4,6 +4,8 @@
 #include "label.h"
 #include "chunk.h"
 
+using namespace dasm::core;
+
 inline std::ostream &operator<<(std::ostream &out, Label &lab) {
   out << "Label: Name='" << lab.name << "', addr=" << lab.addr.toString();
   return out;

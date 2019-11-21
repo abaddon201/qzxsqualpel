@@ -18,17 +18,19 @@ public:
     _end_cursor_position = ch._end_cursor_position;
   }
 
-  std::shared_ptr<Chunk> core() { return _parent; }
+  std::shared_ptr<dasm::core::Chunk> core() { return _parent; }
 
-  GUIChunk(std::shared_ptr<Chunk> c) : _parent{c} {
+  GUIChunk(std::shared_ptr<dasm::core::Chunk> c) : _parent{c} {
   }
 
 private:
-  std::shared_ptr<Chunk> _parent;
+  std::shared_ptr<dasm::core::Chunk> _parent;
   ///@brief Позиция курсора в редакторе
   int _start_cursor_position;
   int _end_cursor_position;
 };
+
+using GUIChunkPtr = std::shared_ptr<GUIChunk>;
 
 #endif // GUICHUNK_H
 

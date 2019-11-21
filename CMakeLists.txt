@@ -9,7 +9,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_PREFIX_PATH "c:\\Qt\\5.11.2\\msvc2017_64\\lib\\cmake")
+set(CMAKE_PREFIX_PATH "c:\\Qt\\5.12.6\\msvc2017_64\\lib\\cmake")
 
 file(GLOB TGT_SRC  main.cpp
         "core/*.cpp"

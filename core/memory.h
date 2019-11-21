@@ -9,6 +9,9 @@
 #include "addr.h"
 #include "byte.h"
 
+namespace dasm {
+namespace core {
+
 ///@brief Класс представляющий содержимое памяти
 class Memory {
 public:
@@ -24,12 +27,15 @@ public:
 
   Addr getMaxAddr() const { return _segments.rbegin()->second->dataSize(); }
 
-  Byte getByte(const Addr &addr);
+  Byte getByte(const Addr& addr);
 
   size_type wholeSize();
 
 private:
   std::map<Segment::IdType, std::shared_ptr<Segment>> _segments;
 };
+
+}
+}
 
 #endif // IMEMORY_H

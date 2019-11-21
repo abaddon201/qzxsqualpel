@@ -7,6 +7,9 @@
 
 #include "byte.h"
 
+namespace dasm {
+namespace core {
+
 ///@brief Описание сегмента памяти
 class Segment {
 public:
@@ -15,16 +18,16 @@ public:
 
   enum class Type {
     ///@brief Неопознаный тип
-        RAW,
+    RAW,
     ///@brief Кодовый сегмент
-        CODE,
+    CODE,
     ///@brief Сегмент данных
-        DATA
+    DATA
   };
 
-  Segment() : _size{0}, _dataSize{0}, _id{0} {}
+  Segment() : _size{ 0 }, _dataSize{ 0 }, _id{ 0 } {}
 
-  Segment(IdType id, size_type sz) : _size{sz}, _dataSize{0}, _id{id} {}
+  Segment(IdType id, size_type sz) : _size{ sz }, _dataSize{ 0 }, _id{ id } {}
 
   void fill(unsigned char buff[], size_type size);
 
@@ -50,5 +53,8 @@ private:
   ///@brief Содержимое сегмента
   std::vector<Byte> _mem;
 };
+
+}
+}
 
 #endif // SEGMENT_H

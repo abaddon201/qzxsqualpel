@@ -4,7 +4,7 @@
 // Description:
 //
 //
-// Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
+// Author: Glebov Alex <aglebov2@gmail.com>, (C) 2009
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -12,6 +12,9 @@
 
 #include "command.h"
 #include "i_disassembler_core.h"
+
+namespace dasm {
+namespace core {
 
 Addr Command::getJmpAddrFromString() const {
   if (arg2 == nullptr) {
@@ -26,10 +29,10 @@ Addr Command::getJmpAddrFromString() const {
 Addr Command::getJmpAddr() const {
   if (arg2 == nullptr) {
     //get from arg1
-    return dynamic_cast<ArgLabel *>(arg1.get())->label->addr;
+    return dynamic_cast<ArgLabel*>(arg1.get())->label->addr;
   } else {
     //get from arg2
-    return dynamic_cast<ArgLabel *>(arg2.get())->label->addr;
+    return dynamic_cast<ArgLabel*>(arg2.get())->label->addr;
   }
 }
 
@@ -51,7 +54,7 @@ std::string Command::getArgsString() const {
   if (arg2 == nullptr) {
     return arg1->toString(); //std::toupper(arg1);
   }
-//  return arg1.toUpper()+", "+arg2.toUpper();
+  //  return arg1.toUpper()+", "+arg2.toUpper();
   return arg1->toString() + ", " + arg2->toString();
 }
 
@@ -67,4 +70,7 @@ std::string Command::getOpcodesString() const {
 
 Byte Command::opcodes(unsigned long long offs) const {
   return IDisassemblerCore::inst()->getMemoryByte(addr + offs);
+}
+
+}
 }
