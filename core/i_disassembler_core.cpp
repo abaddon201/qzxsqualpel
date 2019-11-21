@@ -63,62 +63,57 @@ int IDisassemblerCore::disassembleInstruction(const Addr& addr, std::shared_ptr<
   std::string buff = disassembleInstructionInt(addr, len);
 
   if (len) {
-    //initialize chunk
+    if (addr + len >= _memory->getMaxAddr()) {
+      std::cout << "instruction out of mem block" << std::endl;
+      return -3;
+    }
+    //check address can be disassembled
     std::shared_ptr<Chunk> chunk_i = _chunks.getChunk(addr);
     if (chunk_i == nullptr) {
+      // address is not loaded
       std::cout << "no instruction here: " << addr.toString() << std::endl;
       return 0;
     }
     if (!chunk_i->isEmpty()) {
+      // address allready disassembled
       std::cout << "allready parsed: " << addr.toString() << std::endl;
       return 0;
     }
-    std::shared_ptr<Chunk> old_chunk = _chunks.getChunk(addr);
-    _chunks.removeChunk(addr);
+    ///@bug must be in segment range check... think about it
+    if (len > 1) {
+      // check that all bytes for the command are not parsed, if so, remove their chunks, if not, don't do anything
+      for (size_t i = 1; i < len; i++) {
+        auto ch = _chunks.getChunk(addr + i);
+        if ((ch == nullptr) || (ch->type() != Chunk::Type::UNPARSED)) {
+          std::cout << "Instrunction longer than unparsed block" << std::endl;
+          return -4;
+        }
+      }
+    }
+    // found not disassembled chunk, remove it (we will replace it with code chunk)
+    for (size_t i = 0; i < len; i++) {
+      _chunks.removeChunk(addr + i);
+    }
     std::shared_ptr<Chunk> target_chunk;
     if (addr.compare(0)) {
-      //parsing current addr
+      //parse from memory start, there are no previous chunks present, so just say that it's now a code chunk
       target_chunk = _chunks.createChunk(addr, Chunk::Type::CODE);
     } else {
+      // not at start of memory, possibly we have some code chunk before this address, check it
       target_chunk = _chunks.getChunkContains(addr - 1);
-      if (target_chunk == nullptr) {
-        std::cout << "No target for disassemble" << std::endl;
+      auto klbl = _known_labels.find(addr);
+      if ((target_chunk == nullptr) || (target_chunk->type() != Chunk::Type::CODE) || (klbl != _known_labels.end())) {
+        // no code chunk before this address, create new one
+        // or we found address with known label, start new chunk from it
+        std::cout << "No CODE chunk before this address" << std::endl;
         target_chunk = _chunks.createChunk(addr, Chunk::Type::CODE);
-      }
-      //appending to prev. parsed block
-      if (target_chunk->type() != Chunk::Type::CODE) {
-        std::cout << "Not code previous chunk" << std::endl;
-        //parsing current addr
-        target_chunk = _chunks.createChunk(addr, Chunk::Type::CODE);
+        if (klbl != _known_labels.end()) {
+          target_chunk->setLabel(klbl->second->name);
+        }
       }
     }
     std::cout << "addr=" << addr.toString() << "command=" << buff << "len=" << len << std::endl;
-    ///@bug must be in segment range check... think about it
-    if (addr + len >= _memory->getMaxAddr()) {
-      std::cout << "instruction out of mem block" << std::endl;
-      _chunks.addChunk(addr, old_chunk);
-      return -3;
-    }
-    if (len > 1) {
-      for (size_t i = 1; i < len; i++) {
-        auto ch = _chunks.getChunk(addr + i);
-        if (ch == nullptr) {
-          std::cout << "Instrunction longer than unparsed block" << std::endl;
-          //m_Chunks.removeChunk(addr);
-          _chunks.addChunk(addr, old_chunk);
-          return -4;
-        }
-        if (ch->type() != Chunk::Type::UNPARSED) {
-          std::cout << "Instrunction longer than unparsed block2" << std::endl;
-          //m_Chunks.removeChunk(addr);
-          _chunks.addChunk(addr, old_chunk);
-          return -4;
-        }
-      }
-      for (size_t i = 1; i < len; i++) {
-        _chunks.removeChunk(addr + i);
-      }
-    }
+
     Command cmd;
     cmd.addr = addr;
     cmd.len += len;

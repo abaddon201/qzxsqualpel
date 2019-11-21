@@ -20,6 +20,7 @@ namespace core {
 
 struct Reference {
   enum class Type {
+    UNKNOWN = 0,
     JUMP = 1,
     CALL,
     READ_BYTE,

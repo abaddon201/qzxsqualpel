@@ -61,7 +61,7 @@ std::shared_ptr<Label> Chunk::setLabel(std::shared_ptr<Label> label, Reference::
   return _label;
 }
 
-std::shared_ptr<Label> Chunk::setLabel(const std::string& label, Reference::Type ref_type) {
+std::shared_ptr<Label> Chunk::setLabel(const std::string& label) {
   _label = std::make_shared<Label>(_starting_addr, label);
   return _label;
 }

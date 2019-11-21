@@ -74,7 +74,7 @@ public:
 
   std::shared_ptr<Label> setLabel(std::shared_ptr<Label> label = nullptr, Reference::Type = Reference::Type::JUMP);
 
-  std::shared_ptr<Label> setLabel(const std::string& label, Reference::Type = Reference::Type::JUMP);
+  std::shared_ptr<Label> setLabel(const std::string& label);
 
   /*/const /
   void cha
