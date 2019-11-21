@@ -218,7 +218,7 @@ void DisassemblerWidget::saveASMFile(const QString &fileName) {
 
 void
 DisassemblerWidget::printCell(QTextCursor &cursor, const std::string &text, int length, const QTextCharFormat &fmt) {
-  int spclen = length - text.length();
+  int spclen = length - (int) text.length();
   if (spclen > 0) {
     std::string spcline(spclen, ' ');
     cursor.insertText(QString::fromStdString(text + spcline), fmt);
@@ -228,7 +228,7 @@ DisassemblerWidget::printCell(QTextCursor &cursor, const std::string &text, int 
 }
 
 void DisassemblerWidget::printCell(QTextCursor &cursor, const std::string &text, int length) {
-  int spclen = length - text.length();
+  int spclen = length - (int) text.length();
   if (spclen < 0) {
     spclen = 0;
   }
@@ -312,7 +312,8 @@ void DisassemblerWidget::refreshView() {
     chunk->setCursorStartPosition(cursor.position());
     switch (chunk->core()->type()) {
       case Chunk::Type::UNPARSED:
-        printChunkUnparsed(cursor, chunk);
+        //printChunkUnparsed(cursor, chunk);
+        printChunkCode(cursor, chunk);
         break;
       case Chunk::Type::CODE:
         printChunkCode(cursor, chunk);

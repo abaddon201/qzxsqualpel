@@ -37,7 +37,7 @@ unsigned char readbyte_internal(unsigned short addr) {
 
 std::string DisassemblerCoreZX::disassembleInstructionInt(const dasm::core::Addr &addr, size_t &len) {
   char tbuff[128];
-  debugger_disassemble(tbuff, 128, &len, addr.offset());
+  debugger_disassemble(tbuff, 128, &len, (libspectrum_word) addr.offset());
   return std::string(tbuff);
 }
 
@@ -110,7 +110,7 @@ void DisassemblerCoreZX::parseCommand(std::string &src, dasm::core::Command &out
   }
 }
 
-int DisassemblerCoreZX::postProcessChunk(std::shared_ptr<dasm::core::Chunk> chunk, int len) {
+size_t DisassemblerCoreZX::postProcessChunk(std::shared_ptr<dasm::core::Chunk> chunk, size_t len) {
   /// RST 28 Нужно анализировать особо... после RST располагается набор инструкций для вычислений (bcalc)
   /// Пример:
   /// 2E24 PF-SMALL RST 0028, FP-CALC

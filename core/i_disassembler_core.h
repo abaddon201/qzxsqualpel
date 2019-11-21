@@ -44,7 +44,7 @@ public:
   virtual std::string disassembleInstructionInt(const Addr& addr, size_t& len) = 0;
 
   ///@bug поменять местами возвращаемые значения, чтобы не было такой вырви-глаз конструкции
-  int disassembleInstruction(const Addr& addr, std::shared_ptr<Chunk>& out_chunk);
+  size_t disassembleInstruction(const Addr& addr, std::shared_ptr<Chunk>& out_chunk);
 
   void disassembleBlock(const Addr& addr);
 
@@ -76,7 +76,7 @@ protected:
 
   virtual void parseCommand(std::string& src, Command& out_command) = 0;
 
-  virtual int postProcessChunk(std::shared_ptr<Chunk> chunk, int len) = 0;
+  virtual size_t postProcessChunk(std::shared_ptr<Chunk> chunk, size_t len) = 0;
 
   ///@brief кого оповещать об обновлении состояния
   IGUIUpdater* updater;

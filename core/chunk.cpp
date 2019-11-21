@@ -74,7 +74,7 @@ std::shared_ptr<Chunk> Chunk::splitAt(const Addr& addr) {
   }
   CommandsList::iterator it;
   Addr cur_addr = _starting_addr;
-  int len = 0;
+  size_t len = 0;
   for (it = _commands.begin(); it != _commands.end(); ++it) {
     std::cout << "caddr" << cur_addr.toString() << std::endl;
     if (cur_addr == addr) {

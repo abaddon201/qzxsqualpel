@@ -54,10 +54,6 @@ void ChunkList::removeChunk(const Addr& addr) {
     _chunks.erase(it);
 }
 
-int ChunkList::count() const {
-  return _chunks.size();
-}
-
 void ChunkList::clear() {
   _chunks.clear();
 }

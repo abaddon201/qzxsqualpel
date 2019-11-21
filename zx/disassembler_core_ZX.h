@@ -30,7 +30,7 @@ public:
 
   virtual dasm::core::JumpType getLastCmdJumpType(std::shared_ptr<dasm::core::Chunk> chunk, dasm::core::Addr &jump_addr) override;
 
-  int postProcessChunk(std::shared_ptr<dasm::core::Chunk> chunk, int len) override;
+  size_t postProcessChunk(std::shared_ptr<dasm::core::Chunk> chunk, size_t len) override;
 
 private:
   int command2code(const std::string &cmd) const;

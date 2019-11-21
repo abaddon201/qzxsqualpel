@@ -20,7 +20,7 @@ namespace core {
 
 class Addr {
 public:
-  using addr_t = unsigned long long;
+  using addr_t = uint64_t;
 
   Addr(addr_t offs = 0, addr_t seg = 0)
     : _offset{ offs }, _segment{ seg }, _dirty{ true } {}

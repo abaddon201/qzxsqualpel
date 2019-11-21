@@ -58,7 +58,7 @@ public:
 
   Command& lastCommand() { return _commands.back(); }
 
-  inline int commandsCount() const { return _commands.size(); }
+  inline size_t commandsCount() const { return _commands.size(); }
 
   inline CommandsList& commands() { return _commands; }
 

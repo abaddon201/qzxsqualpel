@@ -54,7 +54,7 @@ void IDisassemblerCore::initialParse() {
   updater->updateWidgets();
 }
 
-int IDisassemblerCore::disassembleInstruction(const Addr& addr, std::shared_ptr<Chunk>& out_chunk) {
+size_t IDisassemblerCore::disassembleInstruction(const Addr& addr, std::shared_ptr<Chunk>& out_chunk) {
   size_t len = 0;
   if (addr >= _memory->getMaxAddr()) {
     std::cerr << "address out of range" << addr.toString();
@@ -127,7 +127,7 @@ int IDisassemblerCore::disassembleInstruction(const Addr& addr, std::shared_ptr<
 }
 
 void IDisassemblerCore::disassembleBlock(const Addr& st_addr) {
-  int res = 0;
+  size_t res = 0;
   Addr addr = st_addr;
   std::cout << "disassembleBlock(): addr" << addr.toString() << std::endl;
   do {

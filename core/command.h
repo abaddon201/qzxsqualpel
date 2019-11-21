@@ -55,7 +55,7 @@ struct Command {
   /// @todo Команда может быть разорвана по сегментам
   Addr addr;
   ///@brief Длина команды в байтах
-  int len;
+  size_t len;
 
   Command() : command_code{ 0 }, len{ 0 } {}
 

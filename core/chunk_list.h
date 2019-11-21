@@ -41,7 +41,9 @@ public:
 
   List& chunks() { return _chunks; }
 
-  int count() const;
+  size_t count() const {
+    return _chunks.size();
+  }
 
   void clear();
 

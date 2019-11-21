@@ -60,7 +60,7 @@ std::string Command::getArgsString() const {
 
 std::string Command::getOpcodesString() const {
   std::string tmp;
-  int l1 = len;
+  auto l1 = len;
   Addr a = addr;
   for (; l1; --l1, ++a) {
     tmp += " " + IDisassemblerCore::inst()->getMemoryByte(a).toString();
