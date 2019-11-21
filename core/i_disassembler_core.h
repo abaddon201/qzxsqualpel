@@ -41,6 +41,8 @@ public:
 
   virtual void init() = 0;
 
+  void loadGuessFile(const std::string& fname);
+
   virtual std::string disassembleInstructionInt(const Addr& addr, size_t& len) = 0;
 
   ///@bug поменять местами возвращаемые значения, чтобы не было такой вырви-глаз конструкции
@@ -56,8 +58,6 @@ public:
 
   ChunkList& chunks() { return _chunks; }
 
-  void loadGuessFile(const std::string& fname);
-
   Labels& labels() { return _labels; }
 
   std::shared_ptr<Label> makeJump(const Addr& from_addr, const Addr& jump_addr, Reference::Type ref_type);
@@ -71,8 +71,6 @@ public:
 protected:
 
   bool labelPresent(const Addr& addr) const;
-
-  std::shared_ptr<Label> findKnownLabel(const Addr& addr);
 
   virtual void parseCommand(std::string& src, Command& out_command) = 0;
 
@@ -88,8 +86,6 @@ protected:
   ChunkList _chunks;
   ///@brief метки, собранные в результате дизасма
   Labels _labels;
-  ///@brief метки, подгруженные из внешнего файла
-  Labels _known_labels;
 
   std::shared_ptr<AutoCommenter> _auto_commenter;
 };

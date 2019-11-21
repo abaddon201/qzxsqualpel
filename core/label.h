@@ -14,6 +14,7 @@
 #define CLABEL_H
 
 #include <utility>
+#include <memory>
 
 #include "addr.h"
 
@@ -42,6 +43,7 @@ struct Label {
   Addr addr;
 };
 
+using LabelPtr = std::shared_ptr<Label>;
 }
 }
 

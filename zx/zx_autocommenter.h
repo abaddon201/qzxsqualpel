@@ -7,6 +7,4 @@
 class ZXAutoCommenter :public dasm::core::AutoCommenter {
 public:
   void commentCommand(dasm::core::Command& out_command) override;
-
-private:
 };

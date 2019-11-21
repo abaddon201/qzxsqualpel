@@ -8,31 +8,13 @@ namespace core {
 IDisassemblerCore* IDisassemblerCore::_inst = nullptr;
 
 void IDisassemblerCore::loadGuessFile(const std::string& fname) {
-  std::ifstream f(fname);
-  while (!f.eof()) {
-    unsigned long long seg, off;
-    std::string nm;
-    f >> std::hex >> seg;
-    f.ignore(1);
-    f >> std::hex >> off;
-    f >> nm;
-    if (!nm.empty()) {
-      Addr a(off, seg);
-      _known_labels[a] = std::make_shared<Label>(a, nm);
-    }
+  if (_auto_commenter) {
+    _auto_commenter->loadGuessFile(fname);
   }
 }
 
 bool IDisassemblerCore::labelPresent(const Addr& addr) const {
   return _labels.find(addr) != _labels.end();
-}
-
-std::shared_ptr<Label> IDisassemblerCore::findKnownLabel(const Addr& addr) {
-  auto it = _known_labels.find(addr);
-  if (it != _known_labels.end()) {
-    return it->second;
-  }
-  return nullptr;
 }
 
 void IDisassemblerCore::setRawMemory(unsigned char* buf, size_t size) {
@@ -101,14 +83,17 @@ size_t IDisassemblerCore::disassembleInstruction(const Addr& addr, std::shared_p
     } else {
       // not at start of memory, possibly we have some code chunk before this address, check it
       target_chunk = _chunks.getChunkContains(addr - 1);
-      auto klbl = _known_labels.find(addr);
-      if ((target_chunk == nullptr) || (target_chunk->type() != Chunk::Type::CODE) || (klbl != _known_labels.end())) {
+      LabelPtr klbl{ nullptr };
+      if (_auto_commenter) {
+        klbl = _auto_commenter->getLabelForAddr(addr);
+      }
+      if ((target_chunk == nullptr) || (target_chunk->type() != Chunk::Type::CODE) || (nullptr != klbl)) {
         // no code chunk before this address, create new one
         // or we found address with known label, start new chunk from it
         std::cout << "No CODE chunk before this address" << std::endl;
         target_chunk = _chunks.createChunk(addr, Chunk::Type::CODE);
-        if (klbl != _known_labels.end()) {
-          target_chunk->setLabel(klbl->second->name);
+        if (nullptr != klbl) {
+          target_chunk->setLabel(klbl->name);
         }
       }
     }
@@ -207,7 +192,10 @@ IDisassemblerCore::makeJump(const Addr& from_addr, const Addr& jump_addr, Refere
     }
   }
   jmp_chunk->addCrossRef(from_addr, ref_type);
-  std::shared_ptr<Label> lbl = findKnownLabel(jump_addr);
+  std::shared_ptr<Label> lbl{ nullptr };
+  if (_auto_commenter) {
+    lbl = _auto_commenter->getLabelForAddr(jump_addr);
+  }
   if (jmp_chunk->label() == nullptr) {
     lbl = jmp_chunk->setLabel(lbl, ref_type);
   } else {
