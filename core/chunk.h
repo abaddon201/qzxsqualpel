@@ -15,7 +15,7 @@
 
 #include <memory>
 
-#include "reference.h"
+#include "memory/reference.h"
 #include "command.h"
 #include "label.h"
 
@@ -24,7 +24,7 @@ namespace core {
 
 class Chunk {
 public:
-  using ReferencesList = std::vector<Reference>;
+  using ReferencesList = std::vector<memory::Reference>;
   using CommandsList = std::vector<Command>;
   using size_type = size_t;
 
@@ -41,16 +41,16 @@ public:
 
   Chunk(const Chunk& ch) { makeCopy(ch); }
 
-  explicit Chunk(const Addr& addr, Chunk::Type type = Chunk::Type::UNKNOWN) : _type(type), _starting_addr(addr), _length{ 0 } {}
+  explicit Chunk(const memory::Addr& addr, Chunk::Type type = Chunk::Type::UNKNOWN) : _type(type), _starting_addr(addr), _length{ 0 } {}
 
   Chunk& operator=(const Chunk& ch) {
     makeCopy(ch);
     return *this;
   }
 
-  std::shared_ptr<Chunk> splitAt(const Addr& addr);
+  std::shared_ptr<Chunk> splitAt(const memory::Addr& addr);
 
-  void addCrossRef(const Addr& addr, Reference::Type type);
+  void addCrossRef(const memory::Addr& addr, memory::Reference::Type type);
 
   void appendCommand(const Command& cmd);
 
@@ -62,9 +62,9 @@ public:
 
   inline CommandsList& commands() { return _commands; }
 
-  inline const Addr& addr() const { return _starting_addr; }
+  inline const memory::Addr& addr() const { return _starting_addr; }
 
-  inline bool containsAddr(const Addr& addr) const { return (addr >= _starting_addr) && (addr < _last_addr); }
+  inline bool containsAddr(const memory::Addr& addr) const { return (addr >= _starting_addr) && (addr < _last_addr); }
 
   inline size_type length() const { return _length; }
 
@@ -72,7 +72,7 @@ public:
 
   std::shared_ptr<Label> label() const { return _label; }
 
-  std::shared_ptr<Label> setLabel(std::shared_ptr<Label> label = nullptr, Reference::Type = Reference::Type::JUMP);
+  std::shared_ptr<Label> setLabel(std::shared_ptr<Label> label = nullptr, memory::Reference::Type = memory::Reference::Type::JUMP);
 
   std::shared_ptr<Label> setLabel(const std::string& label);
 
@@ -115,8 +115,8 @@ private:
   ///@brief Тип блока
   Type _type;
   ///@brief Адрес начала блока
-  Addr _starting_addr;
-  Addr _last_addr;
+  memory::Addr _starting_addr;
+  memory::Addr _last_addr;
   ///@brief Длина блока
   size_type _length{};
 };

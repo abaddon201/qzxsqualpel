@@ -4,72 +4,72 @@
 // Description:
 //
 //
-// Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
+// Author: Glebov Alex <aglebov2@gmail.com>, (C) 2019
 //
 // Copyright: See COPYING file that comes with this distribution
 //
 //
 #include "core/debug_printers.h"
-#include "core/utils.h"
-#include "disassemble.h"
+#include "utils/utils.h"
+#include "core/disassemble.h"
 #include "memory.h"
 #include "disassembler_core_ZX.h"
-#include "zx_autocommenter.h"
-#include "zx_jump_cmd.h"
+#include "postprocessors/autocommenter.h"
+#include "core/jump_type.h"
 
 #include <vector>
 #include <string>
 #include <fstream>
 
-DisassemblerCoreZX::DisassemblerCoreZX(IGUIUpdater *updater)
-    : IDisassemblerCore{updater, this, std::make_shared<ZXAutoCommenter>()} {
+//compatibility hack for fuse disassembler
+unsigned char readbyte_internal(unsigned short addr) {
+  return (unsigned char)dasm::core::IDisassemblerCore::inst()->getMemoryByte(addr);
+}
+
+namespace dasm {
+DisassemblerCoreZX::DisassemblerCoreZX(IGUIUpdater* updater)
+  : IDisassemblerCore{ updater, this, std::make_shared<postprocessors::AutoCommenter>() } {
   ///@bug zx 128 have multiple segments 8k size each
   _memory->createSegment(0, 0xFFFF);
 }
 
-void DisassemblerCoreZX::init() {
-}
+void DisassemblerCoreZX::init() {}
 
-//compatibility hack for fuse disassembler
-unsigned char readbyte_internal(unsigned short addr) {
-  return (unsigned char) dasm::core::IDisassemblerCore::inst()->getMemoryByte(addr);
-}
-
-std::string DisassemblerCoreZX::disassembleInstructionInt(const dasm::core::Addr &addr, size_t &len) {
+std::string DisassemblerCoreZX::disassembleInstructionInt(const memory::Addr& addr, size_t& len) {
   char tbuff[128];
-  debugger_disassemble(tbuff, 128, &len, (libspectrum_word) addr.offset());
+  debugger_disassemble(tbuff, 128, &len, (libspectrum_word)addr.offset());
   return std::string(tbuff);
 }
 
-int DisassemblerCoreZX::command2code(const std::string &cmd) const {
+int DisassemblerCoreZX::command2code(const std::string& cmd) const {
   if (cmd == "CALL") {
-    return (int)ZXJumpCmd::CMD_CALL;
+    return (int)JumpCmd::CMD_CALL;
   } else if (cmd == "RST") {
-    return (int)ZXJumpCmd::CMD_RST;
+    return (int)JumpCmd::CMD_RST;
   } else if (cmd == "RET") {
-    return (int)ZXJumpCmd::CMD_RET;
+    return (int)JumpCmd::CMD_RET;
   } else if (cmd == "RETI") {
-    return (int)ZXJumpCmd::CMD_RETI;
+    return (int)JumpCmd::CMD_RETI;
   } else if (cmd == "RETN") {
-    return (int)ZXJumpCmd::CMD_RETN;
+    return (int)JumpCmd::CMD_RETN;
   } else if (cmd == "JP") {
-    return (int)ZXJumpCmd::CMD_JP;
+    return (int)JumpCmd::CMD_JP;
   } else if (cmd == "JR") {
-    return (int)ZXJumpCmd::CMD_JR;
+    return (int)JumpCmd::CMD_JR;
   } else {
-    return (int)ZXJumpCmd::CMD_NONE;
+    return (int)JumpCmd::CMD_NONE;
   }
 }
 
-dasm::core::JumpType DisassemblerCoreZX::getLastCmdJumpType(std::shared_ptr<dasm::core::Chunk> chunk, dasm::core::Addr &jump_addr) {
+core::JumpType DisassemblerCoreZX::getLastCmdJumpType(std::shared_ptr<core::Chunk> chunk, memory::Addr& jump_addr) {
   ///@bug rst 28 not last command in the chunk
-  Command &cmd = chunk->lastCommand();
-  if ((cmd.command_code == (int)ZXJumpCmd::CMD_CALL) || (cmd.command_code == (int)ZXJumpCmd::CMD_RST)) {
+  Command& cmd = chunk->lastCommand();
+  if ((cmd.command_code == (int)JumpCmd::CMD_CALL) || (cmd.command_code == (int)JumpCmd::CMD_RST)) {
     jump_addr = cmd.getJmpAddrFromString();
     return dasm::core::JumpType::JT_CALL;
   }
-  if (((cmd.command_code == (int)ZXJumpCmd::CMD_JR) || (cmd.command_code == (int)ZXJumpCmd::CMD_JP)) && (cmd.arg2 == nullptr)) {
-    const std::string &arg1 = cmd.arg1->toString();
+  if (((cmd.command_code == (int)JumpCmd::CMD_JR) || (cmd.command_code == (int)JumpCmd::CMD_JP)) && (cmd.arg2 == nullptr)) {
+    const std::string& arg1 = cmd.arg1->toString();
     if (arg1[0] == '"' || contains(arg1, "IX") || contains(arg1, "IY") || contains(arg1, "HL")) {
       //jump to (HL) or (IX) or (IY). address unknown, so we just break disassembling here
       return dasm::core::JumpType::JT_RET;
@@ -77,26 +77,26 @@ dasm::core::JumpType DisassemblerCoreZX::getLastCmdJumpType(std::shared_ptr<dasm
     jump_addr = cmd.getJmpAddrFromString();
     return dasm::core::JumpType::JT_JUMP;
   }
-  if (((cmd.command_code == (int)ZXJumpCmd::CMD_JR) || (cmd.command_code == (int)ZXJumpCmd::CMD_JP)) && (cmd.arg2 != nullptr)) {
+  if (((cmd.command_code == (int)JumpCmd::CMD_JR) || (cmd.command_code == (int)JumpCmd::CMD_JP)) && (cmd.arg2 != nullptr)) {
     jump_addr = cmd.getJmpAddrFromString();
     return dasm::core::JumpType::JT_COND_JUMP;
   }
-  if ((cmd.command_code == (int)ZXJumpCmd::CMD_RET) && (cmd.arg1 != nullptr)) {
+  if ((cmd.command_code == (int)JumpCmd::CMD_RET) && (cmd.arg1 != nullptr)) {
     return dasm::core::JumpType::JT_COND_RET;
   }
-  if ((cmd.command_code == (int)ZXJumpCmd::CMD_RET) && (cmd.arg1 == nullptr)) {
+  if ((cmd.command_code == (int)JumpCmd::CMD_RET) && (cmd.arg1 == nullptr)) {
     return dasm::core::JumpType::JT_RET;
   }
-  if (cmd.command_code == (int)ZXJumpCmd::CMD_RETI) {
+  if (cmd.command_code == (int)JumpCmd::CMD_RETI) {
     return dasm::core::JumpType::JT_RET;
   }
-  if (cmd.command_code == (int)ZXJumpCmd::CMD_RETN) {
+  if (cmd.command_code == (int)JumpCmd::CMD_RETN) {
     return dasm::core::JumpType::JT_RET;
   }
   return dasm::core::JumpType::JT_NONE;
 }
 
-void DisassemblerCoreZX::parseCommand(std::string &src, dasm::core::Command &out_command) {
+void DisassemblerCoreZX::parseCommand(std::string& src, core::Command& out_command) {
   std::vector<std::string> strlist = split(src, ' ');
   out_command.command = strlist[0];
   out_command.command_code = command2code(out_command.command);
@@ -110,7 +110,61 @@ void DisassemblerCoreZX::parseCommand(std::string &src, dasm::core::Command &out
   }
 }
 
-size_t DisassemblerCoreZX::postProcessChunk(std::shared_ptr<dasm::core::Chunk> chunk, size_t len) {
+size_t DisassemblerCoreZX::postProcessChunk(std::shared_ptr<core::Chunk> chunk, size_t len) {
+  auto cmd = chunk->lastCommand();
+  if ((cmd.command == "RST") && (cmd.arg1->toString() == "28")) {
+    return processRST28(chunk, len, cmd.addr);
+  } else if (isLDICmd(cmd)) {
+    //findAndMarkDEandHL();
+    return len;
+  } else if (cmd.command == "LD") {
+    //check if it's accessed to memory
+    std::string& arg1str = cmd.arg1->toString();
+    if (arg1str.find("(") != arg1str.npos) {
+      if (getRegister(arg1str) != Register16::None) {
+        //need to find register fill
+      } else {
+        //it's memory address need to create memory label and replace arg with it
+      }
+    } else {
+      std::string& arg2str = cmd.arg2->toString();
+      if (arg2str.find("(") != arg2str.npos) {
+        if (getRegister(arg2str) != Register16::None) {
+          //need to find register fill
+        } else {
+          //it's memory address need to create memory label and replace arg with it
+        }
+      }
+    }
+  }
+  return len;
+}
+
+Register16 DisassemblerCoreZX::getRegister(const std::string& arg) {
+  if (arg.find("AF") != arg.npos) {
+    return Register16::AF;
+  } else if (arg.find("BC") != arg.npos) {
+    return Register16::BC;
+  } else if (arg.find("DE") != arg.npos) {
+    return Register16::DE;
+  } else if (arg.find("HL") != arg.npos) {
+    return Register16::HL;
+  } else if (arg.find("SP") != arg.npos) {
+    return Register16::SP;
+  } else if (arg.find("IX") != arg.npos) {
+    return Register16::IX;
+  } else if (arg.find("IY") != arg.npos) {
+    return Register16::IY;
+  } else {
+    return Register16::None;
+  }
+}
+
+bool DisassemblerCoreZX::isLDICmd(const core::Command& cmd) {
+  return (cmd.command == "LDI") || (cmd.command == "LDIR") || (cmd.command == "LDD") || (cmd.command == "LDDR");
+}
+
+size_t DisassemblerCoreZX::processRST28(std::shared_ptr<core::Chunk> chunk, size_t len, const memory::Addr& addr) {
   /// RST 28 Нужно анализировать особо... после RST располагается набор инструкций для вычислений (bcalc)
   /// Пример:
   /// 2E24 PF-SMALL RST 0028, FP-CALC
@@ -125,51 +179,48 @@ size_t DisassemblerCoreZX::postProcessChunk(std::shared_ptr<dasm::core::Chunk> c
   ///
   /// @bug: Переходы могут осуществляться через куски нормального года, что приводит к возникновению "рваных" цепей
   /// пример такого бага: 2DE3. Там осуществяется серия переходов, цели которых находятся после блока нормального ассемблера
-  auto cmd = chunk->lastCommand();
-  if ((cmd.command == "RST") && (cmd.arg1->toString() == "28")) {
-    Addr a = cmd.addr + 1;
+  memory::Addr a = addr + 1;
 
-    Byte b;
-    Command c;
-    int args_cnt;
-    try {
-      while ((unsigned char)(b = _memory->getByte(a)) != 0x38) {
+  Byte b;
+  Command c;
+  int args_cnt;
+  try {
+    while ((unsigned char)(b = _memory->getByte(a)) != 0x38) {
+      c.addr = a;
+      c.command = "DB";
+      c.arg1 = std::make_shared<ArgDefault>(b.toString());
+      c.auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
+      c.len = 1;
+
+      _chunks.removeChunk(a);
+      chunk->appendCommand(c);
+      len++;
+      ++a;
+      if (args_cnt) {
         c.addr = a;
         c.command = "DB";
+        b = _memory->getByte(a);
         c.arg1 = std::make_shared<ArgDefault>(b.toString());
-        c.auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
+        c.auto_comment = "dest_addr: " + memory::Addr(a + int{ (signed char)(unsigned char)b }).toString();
         c.len = 1;
 
         _chunks.removeChunk(a);
         chunk->appendCommand(c);
         len++;
         ++a;
-        if (args_cnt) {
-          c.addr = a;
-          c.command = "DB";
-          b = _memory->getByte(a);
-          c.arg1 = std::make_shared<ArgDefault>(b.toString());
-          c.auto_comment = "dest_addr: " + Addr(a + int{ (signed char)(unsigned char)b }).toString();
-          c.len = 1;
-
-          _chunks.removeChunk(a);
-          chunk->appendCommand(c);
-          len++;
-          ++a;
-        }
       }
-      c.addr = a;
-      c.command = "DB";
-      c.arg1 = std::make_shared<ArgDefault>(b.toString());
-      c.len = 1;
-      c.auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
-
-      _chunks.removeChunk(a);
-      chunk->appendCommand(c);
-      len++;
-    } catch (std::out_of_range&) {
-      std::cout << "finished due address exceeds" << std::endl;
     }
+    c.addr = a;
+    c.command = "DB";
+    c.arg1 = std::make_shared<ArgDefault>(b.toString());
+    c.len = 1;
+    c.auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
+
+    _chunks.removeChunk(a);
+    chunk->appendCommand(c);
+    len++;
+  } catch (std::out_of_range&) {
+    std::cout << "finished due address exceeds" << std::endl;
   }
   return len;
 }
@@ -497,4 +548,6 @@ std::string DisassemblerCoreZX::getRST28AutoComment(unsigned char b, int& args_c
     default:
       return "unkn_fp_command";
   }
+}
+
 }

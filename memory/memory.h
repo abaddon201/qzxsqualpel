@@ -7,10 +7,10 @@
 
 #include "segment.h"
 #include "addr.h"
-#include "byte.h"
+#include "core/byte.h"
 
 namespace dasm {
-namespace core {
+namespace memory {
 
 ///@brief Класс представляющий содержимое памяти
 class Memory {
@@ -27,7 +27,7 @@ public:
 
   Addr getMaxAddr() const { return _segments.rbegin()->second->dataSize(); }
 
-  Byte getByte(const Addr& addr);
+  core::Byte getByte(const Addr& addr);
 
   size_type wholeSize();
 

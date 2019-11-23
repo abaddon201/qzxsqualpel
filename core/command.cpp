@@ -16,7 +16,7 @@
 namespace dasm {
 namespace core {
 
-Addr Command::getJmpAddrFromString() const {
+memory::Addr Command::getJmpAddrFromString() const {
   if (arg2 == nullptr) {
     //get from arg1
     return std::stoi(arg1->toString(), nullptr, 16);
@@ -26,7 +26,7 @@ Addr Command::getJmpAddrFromString() const {
   }
 }
 
-Addr Command::getJmpAddr() const {
+memory::Addr Command::getJmpAddr() const {
   if (arg2 == nullptr) {
     //get from arg1
     return dynamic_cast<ArgLabel*>(arg1.get())->label->addr;
@@ -61,7 +61,7 @@ std::string Command::getArgsString() const {
 std::string Command::getOpcodesString() const {
   std::string tmp;
   auto l1 = len;
-  Addr a = addr;
+  memory::Addr a = addr;
   for (; l1; --l1, ++a) {
     tmp += " " + IDisassemblerCore::inst()->getMemoryByte(a).toString();
   }

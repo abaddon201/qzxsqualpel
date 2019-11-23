@@ -5,10 +5,10 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include "byte.h"
+#include "core/byte.h"
 
 namespace dasm {
-namespace core {
+namespace memory {
 
 ///@brief Описание сегмента памяти
 class Segment {
@@ -35,7 +35,7 @@ public:
 
   inline size_type dataSize() const { return _dataSize; }
 
-  inline Byte getByte(size_type offset) const {
+  inline core::Byte getByte(size_type offset) const {
     if (offset < _dataSize)
       return _mem[offset];
     else throw std::out_of_range("offset:" + std::to_string(offset) + ", max:" + std::to_string(_dataSize));
@@ -51,7 +51,7 @@ private:
   ///@brief Тип сегмента
   Type _type;
   ///@brief Содержимое сегмента
-  std::vector<Byte> _mem;
+  std::vector<core::Byte> _mem;
 };
 
 }

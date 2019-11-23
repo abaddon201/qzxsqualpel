@@ -11,10 +11,10 @@
 //
 
 #include "addr.h"
-#include "utils.h"
+#include "utils/utils.h"
 
 namespace dasm {
-namespace core {
+namespace memory {
 
 const std::string& Addr::toString() const {
   if (_dirty) {

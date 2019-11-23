@@ -11,18 +11,18 @@
 //
 
 #include "reference.h"
-#include "labels.h"
-#include "i_disassembler_core.h"
+#include "core/labels.h"
+#include "core/i_disassembler_core.h"
 
 namespace dasm {
-namespace core {
+namespace memory {
 
 Reference::Reference(const Addr& addr_, Type type_)
   : addr(addr_), type(type_) {}
 
 std::string Reference::toString() {
   std::string res = "; XRef: ";
-  res += IDisassemblerCore::inst()->labels().offsetInLabel(addr);
+  res += core::IDisassemblerCore::inst()->labels().offsetInLabel(addr);
   switch (type) {
     case Type::JUMP:
       res += "/j";

@@ -5,14 +5,14 @@
 #include <list>
 
 #include "guichunk.h"
-#include "core/addr.h"
+#include "memory/addr.h"
 #include "core/chunk_list.h"
 
 class GUIChunkList {
 public:
   GUIChunkPtr getChunkByPosition(int pos) const;
 
-  GUIChunkPtr getChunkContains(const dasm::core::Addr &addr) const;
+  GUIChunkPtr getChunkContains(const dasm::memory::Addr &addr) const;
 
   std::list<GUIChunkPtr> &chunks() { return _chunks; }
 

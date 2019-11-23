@@ -1,7 +1,7 @@
 #include <QApplication>
 
 #include "gui/main_window.h"
-#include "core/utils.h"
+#include "utils/utils.h"
 
 int main(int argc, char** argv) {
   QApplication app(argc, argv);

@@ -26,7 +26,7 @@ public:
   void keyPressEvent(QKeyEvent*);
 
   ///@brief Показать на экране код с меткой под номером
-  void navigateToAddress(const dasm::core::Addr& addr);
+  void navigateToAddress(const dasm::memory::Addr& addr);
 
   void paintEvent(QPaintEvent* event);
   void refreshView();

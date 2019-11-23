@@ -18,26 +18,37 @@
 #include "core/chunk_list.h"
 #include "core/labels.h"
 #include "core/jump_type.h"
+#include "core/registers.h"
 
 #include "gui/gui_updater.h"
 
-class DisassemblerCoreZX : public dasm::core::IDisassemblerCore {
+namespace dasm {
+
+class DisassemblerCoreZX : public core::IDisassemblerCore {
 public:
   DisassemblerCoreZX(IGUIUpdater* updater);
 
   void init() override;
-  std::string disassembleInstructionInt(const dasm::core::Addr &addr, size_t& len) override;
+  std::string disassembleInstructionInt(const memory::Addr& addr, size_t& len) override;
 
-  virtual dasm::core::JumpType getLastCmdJumpType(std::shared_ptr<dasm::core::Chunk> chunk, dasm::core::Addr &jump_addr) override;
+  virtual dasm::core::JumpType getLastCmdJumpType(std::shared_ptr<core::Chunk> chunk, memory::Addr& jump_addr) override;
 
-  size_t postProcessChunk(std::shared_ptr<dasm::core::Chunk> chunk, size_t len) override;
+  size_t postProcessChunk(std::shared_ptr<core::Chunk> chunk, size_t len) override;
 
 private:
-  int command2code(const std::string &cmd) const;
+  int command2code(const std::string& cmd) const;
 
-  void parseCommand(std::string &src, dasm::core::Command &out_command) override;
+  void parseCommand(std::string& src, core::Command& out_command) override;
+
+  dasm::core::Register16 getRegister(const std::string& arg);
+
+  bool isLDICmd(const core::Command& cmd);
+
+  size_t processRST28(std::shared_ptr<core::Chunk> chunk, size_t len, const memory::Addr& addr);
 
   std::string getRST28AutoComment(unsigned char b, int& args_count);
 };
+
+}
 
 #endif

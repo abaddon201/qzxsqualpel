@@ -16,7 +16,7 @@
 #include <string>
 
 namespace dasm {
-namespace core {
+namespace memory {
 
 class Addr {
 public:

@@ -60,7 +60,7 @@ void DisassemblerWidget::init() {
   setMinimumWidth(600);
 }
 
-void DisassemblerWidget::navigateToAddress(const dasm::core::Addr &addr) {
+void DisassemblerWidget::navigateToAddress(const dasm::memory::Addr &addr) {
   qDebug() << "GUI: navigate to address:" << addr.toString();
   auto chunk = _chunks.getChunkContains(addr);
   if (nullptr != chunk) {

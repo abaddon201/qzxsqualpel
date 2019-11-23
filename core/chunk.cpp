@@ -16,8 +16,9 @@
 
 namespace dasm {
 namespace core {
-void Chunk::addCrossRef(const Addr& addr, Reference::Type type) {
-  Reference ref(addr, type);
+
+void Chunk::addCrossRef(const memory::Addr& addr, memory::Reference::Type type) {
+  memory::Reference ref(addr, type);
   _references.push_back(ref);
 }
 
@@ -35,23 +36,23 @@ Command& Chunk::getCommand(int idx) {
   return _commands[idx];
 }
 
-std::shared_ptr<Label> Chunk::setLabel(std::shared_ptr<Label> label, Reference::Type ref_type) {
+std::shared_ptr<Label> Chunk::setLabel(std::shared_ptr<Label> label, memory::Reference::Type ref_type) {
   if (label == nullptr) {
     //generate from name
     std::string t1{ _starting_addr.offsetString() };
     switch (ref_type) {
-      case Reference::Type::JUMP:
+      case memory::Reference::Type::JUMP:
         _label = std::make_shared<Label>(_starting_addr, std::string("jmp_") + t1);
         break;
-      case Reference::Type::CALL:
+      case memory::Reference::Type::CALL:
         _label = std::make_shared<Label>(_starting_addr, std::string("sub_") + t1);
         break;
-      case Reference::Type::READ_BYTE:
-      case Reference::Type::WRITE_BYTE:
+      case memory::Reference::Type::READ_BYTE:
+      case memory::Reference::Type::WRITE_BYTE:
         _label = std::make_shared<Label>(_starting_addr, std::string("byte_") + t1);
         break;
-      case Reference::Type::READ_WORD:
-      case Reference::Type::WRITE_WORD:
+      case memory::Reference::Type::READ_WORD:
+      case memory::Reference::Type::WRITE_WORD:
         _label = std::make_shared<Label>(_starting_addr, std::string("word_") + t1);
         break;
     }
@@ -66,14 +67,14 @@ std::shared_ptr<Label> Chunk::setLabel(const std::string& label) {
   return _label;
 }
 
-std::shared_ptr<Chunk> Chunk::splitAt(const Addr& addr) {
+std::shared_ptr<Chunk> Chunk::splitAt(const memory::Addr& addr) {
   std::cout << "splitAt: commans.count=" << _commands.size() << std::endl;
   if (_commands.size() < 2) {
     //split impossible, too short chunk
     return nullptr;
   }
   CommandsList::iterator it;
-  Addr cur_addr = _starting_addr;
+  memory::Addr cur_addr = _starting_addr;
   size_t len = 0;
   for (it = _commands.begin(); it != _commands.end(); ++it) {
     std::cout << "caddr" << cur_addr.toString() << std::endl;

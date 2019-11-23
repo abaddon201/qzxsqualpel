@@ -1,7 +1,7 @@
 #include "memory.h"
 
 namespace dasm {
-namespace core {
+namespace memory {
 
 Memory::Memory() {}
 
@@ -17,7 +17,7 @@ void Memory::createSegment(Segment::IdType id, size_type size) {
   _segments[id] = std::make_shared<Segment>(id, size);
 }
 
-Byte Memory::getByte(const Addr& addr) {
+core::Byte Memory::getByte(const Addr& addr) {
   return _segments[addr.segment()]->getByte(addr.offset());
 }
 

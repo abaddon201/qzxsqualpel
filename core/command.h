@@ -13,32 +13,20 @@
 #ifndef CCOMMAND_H
 #define CCOMMAND_H
 
-#include "byte.h"
-#include "addr.h"
+#include "core/byte.h"
+#include "memory/addr.h"
 
 #include <vector>
 #include <memory>
 
-#include "arg.h"
-#include "label.h"
+#include "core/arg.h"
+#include "core/label.h"
 
 namespace dasm {
 namespace core {
 
 ///@brief Структура описывающая одну команду ассемблера
 struct Command {
-  //using OpcodesList = std::vector<CByte>;
-  enum class ArgType {
-    ARG_UNKNOWN = 0,
-    ARG_REGISTER = 1,
-    ARG_DATAOFFSET = 2,
-    ARG_JUMPOFFSET = 3,
-    ARG_VALUE = 4,
-    ARG_VALOFFSET = 5,
-    ARG_FLAG = 6
-  };
-
-  //OpcodesList opcodes;
   ///@brief символьное представление команды
   std::string command;
   ///@brief числовое представление команды (не обязательно опкод)
@@ -53,7 +41,7 @@ struct Command {
   std::string auto_comment;
   ///@brief Адрес начала команды
   /// @todo Команда может быть разорвана по сегментам
-  Addr addr;
+  memory::Addr addr;
   ///@brief Длина команды в байтах
   size_t len;
 
@@ -104,9 +92,9 @@ struct Command {
   Byte opcodes(unsigned long long offs) const;
 
   ///@brief Возвращает адрес перехода команды (первый либо второй аргумент)
-  Addr getJmpAddr() const;
+  memory::Addr getJmpAddr() const;
 
-  Addr getJmpAddrFromString() const;
+  memory::Addr getJmpAddrFromString() const;
 
   ///@brief Устанавливает метку перехода команды (первый либо второй аргумент)
   void setJmpAddr(const std::shared_ptr<Label> label);

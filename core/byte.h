@@ -4,7 +4,7 @@
 // Description:
 //
 //
-// Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
+// Author: Glebov Alex <aglebov2@gmail.com>, (C) 2019
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -14,7 +14,7 @@
 #define CBYTE_H
 
 #include <string>
-#include "utils.h"
+#include "utils/utils.h"
 
 namespace dasm {
 namespace core {

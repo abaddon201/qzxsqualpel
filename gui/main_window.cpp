@@ -17,7 +17,7 @@ MainWindow::MainWindow() {
 
   _disassembler_widget = new DisassemblerWidget(this);
 
-  dasm::core::IDisassemblerCore *core = new DisassemblerCoreZX(this);
+  dasm::core::IDisassemblerCore *core = new dasm::DisassemblerCoreZX(this);
   core->init();
   _disassembler_widget->setCore(core);
   QDockWidget *dock = new QDockWidget(tr("Navigation Stack"), this);

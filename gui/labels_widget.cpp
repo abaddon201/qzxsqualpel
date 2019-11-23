@@ -22,7 +22,7 @@ LabelsWidget::LabelsWidget(QWidget *par, DisassemblerWidget *disasm)
   connect(this, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(jumpToLabel(int, int)));
 }
 
-Q_DECLARE_METATYPE(dasm::core::Addr)
+Q_DECLARE_METATYPE(dasm::memory::Addr)
 
 void LabelsWidget::refresh() {
   clear();
@@ -40,7 +40,7 @@ void LabelsWidget::refresh() {
     QTableWidgetItem *addrItem = new QTableWidgetItem(QString::fromStdString(lbl.second->addr.toString()));
     setItem(i, 1, addrItem);
     QVariant var;
-    var.setValue<dasm::core::Addr>(lbl.second->addr);
+    var.setValue<dasm::memory::Addr>(lbl.second->addr);
     nameItem->setData(Qt::UserRole, var);
     i++;
   }
@@ -48,6 +48,6 @@ void LabelsWidget::refresh() {
 }
 
 void LabelsWidget::jumpToLabel(int row, int) {
-  dasm::core::Addr addr = item(row, 0)->data(Qt::UserRole).value<dasm::core::Addr>();
+  dasm::memory::Addr addr = item(row, 0)->data(Qt::UserRole).value<dasm::memory::Addr>();
   _disasm->navigateToAddress(addr);
 }

@@ -27,17 +27,17 @@ namespace core {
  */
 class ChunkList {
 public:
-  using List = std::map<const Addr, std::shared_ptr<Chunk>>;
+  using List = std::map<const memory::Addr, std::shared_ptr<Chunk>>;
 
   ChunkList();
 
-  std::shared_ptr<Chunk> createChunk(const Addr& addr, Chunk::Type type = Chunk::Type::UNKNOWN);
+  std::shared_ptr<Chunk> createChunk(const memory::Addr& addr, Chunk::Type type = Chunk::Type::UNKNOWN);
 
-  std::shared_ptr<Chunk> getChunkContains(const Addr& addr) const;
+  std::shared_ptr<Chunk> getChunkContains(const memory::Addr& addr) const;
 
-  void removeChunk(const Addr& addr);
+  void removeChunk(const memory::Addr& addr);
 
-  void addChunk(const Addr& addr, std::shared_ptr<Chunk> chunk) { _chunks[addr] = std::move(chunk); }
+  void addChunk(const memory::Addr& addr, std::shared_ptr<Chunk> chunk) { _chunks[addr] = std::move(chunk); }
 
   List& chunks() { return _chunks; }
 
@@ -49,7 +49,7 @@ public:
 
   void printDebug();
 
-  std::shared_ptr<Chunk> getChunk(const Addr& addr) {
+  std::shared_ptr<Chunk> getChunk(const memory::Addr& addr) {
     auto it = _chunks.find(addr);
     if (it == _chunks.end()) { return nullptr; } else return it->second;
   }

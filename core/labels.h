@@ -22,17 +22,17 @@
 namespace dasm {
 namespace core {
 
-class Labels : public std::map<Addr, std::shared_ptr<Label>> {
+class Labels : public std::map<memory::Addr, std::shared_ptr<Label>> {
 public:
   ///@brief Вовращает сроку адреса относительно метки.
-  std::string offsetInLabel(const Addr& addr) const;
+  std::string offsetInLabel(const memory::Addr& addr) const;
 
   /**
    * @brief Изменяет метку. Создаёт если не найдена соотв. метка
    * @param chunk Указатель на блок, для которого меняется метка
    * @param new_label Новое название метки
    */
-  void changeLabel(const Addr& addr, const std::string& new_label);
+  void changeLabel(const memory::Addr& addr, const std::string& new_label);
 };
 
 }

@@ -20,7 +20,7 @@ namespace core {
 
 ChunkList::ChunkList() {}
 
-std::shared_ptr<Chunk> ChunkList::createChunk(const Addr& addr, Chunk::Type type) {
+std::shared_ptr<Chunk> ChunkList::createChunk(const memory::Addr& addr, Chunk::Type type) {
 
   auto ch1 = _chunks.find(addr.offset());
   if (ch1 != _chunks.end()) {
@@ -34,9 +34,9 @@ std::shared_ptr<Chunk> ChunkList::createChunk(const Addr& addr, Chunk::Type type
   return ch;
 }
 
-std::shared_ptr<Chunk> ChunkList::getChunkContains(const Addr& addr) const {
+std::shared_ptr<Chunk> ChunkList::getChunkContains(const memory::Addr& addr) const {
   ///@todo подумать что с этой х-ней сделать... 70% нагрузки на ней...
-  Addr a = addr;
+  memory::Addr a = addr;
   do {
     List::const_iterator it;
     if ((it = _chunks.find(a)) != _chunks.end()) {
@@ -48,7 +48,7 @@ std::shared_ptr<Chunk> ChunkList::getChunkContains(const Addr& addr) const {
   return nullptr;
 }
 
-void ChunkList::removeChunk(const Addr& addr) {
+void ChunkList::removeChunk(const memory::Addr& addr) {
   auto it = _chunks.find(addr);
   if (it != _chunks.end())
     _chunks.erase(it);

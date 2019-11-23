@@ -16,7 +16,7 @@
 #include "addr.h"
 
 namespace dasm {
-namespace core {
+namespace memory {
 
 struct Reference {
   enum class Type {

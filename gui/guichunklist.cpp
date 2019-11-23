@@ -17,7 +17,7 @@ GUIChunkPtr GUIChunkList::getChunkByPosition(int pos) const {
   return nullptr;
 }
 
-GUIChunkPtr GUIChunkList::getChunkContains(const dasm::core::Addr &addr) const {
+GUIChunkPtr GUIChunkList::getChunkContains(const dasm::memory::Addr &addr) const {
   auto res = std::find_if(_chunks.begin(), _chunks.end(),
                           [&addr](auto chunk) { return (chunk->core()->containsAddr(addr)); });
   if (res != _chunks.end()) {
