@@ -35,7 +35,7 @@ std::string Labels::offsetInLabel(const memory::Addr& addr) const {
     std::cout << "no labels" << std::endl;
     return addr.toString();
   }
-  std::shared_ptr<Chunk> chunk = DisassemblerCore::inst()->chunks().getChunkContains(addr);
+  std::shared_ptr<Chunk> chunk = DisassemblerCore::inst().chunks().getChunkContains(addr);
   if (chunk == nullptr) {
     std::cout << "no label for addr" << std::endl;
     return addr.toString();

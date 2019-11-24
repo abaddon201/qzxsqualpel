@@ -110,7 +110,7 @@ void DisassemblerWidget::changeNameUnderCursor() {
     WidgetChangeText dlg(this, tr("Change label name"), tr("Label:"),
                          QString::fromStdString(chunk->core()->label()->name));
     if (dlg.exec()) {
-      _disassembler_core->labels().changeLabel(chunk->core()->addr(), dlg.text().toStdString());
+      dasm::core::DisassemblerCore::inst().labels().changeLabel(chunk->core()->addr(), dlg.text().toStdString());
       refreshView();
       navigateToAddress(chunk->core()->addr());
     }
@@ -127,7 +127,7 @@ void DisassemblerWidget::makeCodeUnderCursor() {
   }
   if (chunk->core()->isEmpty()) {
     const auto& ret_addr = chunk->core()->addr();
-    _disassembler_core->disassembleBlock(ret_addr);
+    dasm::core::DisassemblerCore::inst().disassembleBlock(ret_addr);
     refreshView();
     navigateToAddress(ret_addr);
   }
@@ -196,10 +196,10 @@ void DisassemblerWidget::openRAWFile(const QString &fileName) {
   FILE *f = fopen(fileName.toLocal8Bit(), "rb");
   loaded = fread(buf, 1, 65536, f);
   fclose(f);
-  _disassembler_core->setRawMemory(buf, loaded);
+  dasm::core::DisassemblerCore::inst().setRawMemory(buf, loaded);
   delete[] buf;
   ///@fixme: Add checks
-  _disassembler_core->initialParse();
+  dasm::core::DisassemblerCore::inst().initialParse();
 }
 
 void DisassemblerWidget::saveASMFile(const QString &fileName) {
@@ -303,7 +303,7 @@ void DisassemblerWidget::printChunkCode(QTextCursor &cursor, std::shared_ptr<GUI
 }
 
 void DisassemblerWidget::refreshView() {
-  _chunks.update(_disassembler_core->chunks());
+  _chunks.update(dasm::core::DisassemblerCore::inst().chunks());
   clear();
   QTextCursor cursor(textCursor());
   cursor.beginEditBlock();

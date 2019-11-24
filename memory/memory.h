@@ -27,7 +27,7 @@ public:
 
   Addr getMaxAddr() const { return _segments.rbegin()->second->dataSize(); }
 
-  core::Byte getByte(const Addr& addr);
+  core::Byte getByte(const Addr& addr) const;
 
   size_type wholeSize();
 
