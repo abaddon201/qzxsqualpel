@@ -83,6 +83,10 @@ struct Command {
     return *this;
   }
 
+  JumpCmd Command::command2code(const std::string& cmd) const;
+
+  void parse(std::string& src);
+
   ///@brief Возвращает аргументы команды в виде строки
   std::string getArgsString() const;
 

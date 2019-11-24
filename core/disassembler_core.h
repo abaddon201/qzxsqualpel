@@ -50,8 +50,6 @@ public:
 
   void initialParse();
 
-  std::shared_ptr<Chunk> createChunk(const memory::Addr& addr, Chunk::Type type) { return _chunks.createChunk(addr, type); }
-
   ChunkList& chunks() { return _chunks; }
 
   memory::Memory& memory() { return _memory; }
@@ -72,10 +70,6 @@ private:
   DisassemblerCore() {}
 
   bool labelPresent(const memory::Addr& addr) const;
-
-  JumpCmd command2code(const std::string& cmd) const;
-
-  void parseCommand(std::string& src, Command& out_command);
 
   size_t postProcessChunk(std::shared_ptr<Chunk> chunk, size_t len);
 

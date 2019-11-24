@@ -120,7 +120,7 @@ size_t DisassemblerCore::disassembleInstruction(const memory::Addr& addr, std::s
     Command cmd;
     cmd.addr = addr;
     cmd.len += len;
-    parseCommand(buff, cmd);
+    cmd.parse(buff);
     target_chunk->appendCommand(cmd);
     std::cout << "cmd appended" << std::endl;
     len = postProcessChunk(target_chunk, len);
@@ -224,40 +224,6 @@ DisassemblerCore::makeJump(const memory::Addr& from_addr, const memory::Addr& ju
     _labels[jump_addr] = lbl;
   }
   return lbl;
-}
-
-JumpCmd DisassemblerCore::command2code(const std::string& cmd) const {
-  if (cmd == "CALL") {
-    return JumpCmd::CMD_CALL;
-  } else if (cmd == "RST") {
-    return JumpCmd::CMD_RST;
-  } else if (cmd == "RET") {
-    return JumpCmd::CMD_RET;
-  } else if (cmd == "RETI") {
-    return JumpCmd::CMD_RETI;
-  } else if (cmd == "RETN") {
-    return JumpCmd::CMD_RETN;
-  } else if (cmd == "JP") {
-    return JumpCmd::CMD_JP;
-  } else if (cmd == "JR") {
-    return JumpCmd::CMD_JR;
-  } else {
-    return JumpCmd::CMD_NONE;
-  }
-}
-
-void DisassemblerCore::parseCommand(std::string& src, Command& out_command) {
-  std::vector<std::string> strlist = split(src, ' ');
-  out_command.command = strlist[0];
-  out_command.command_code = command2code(out_command.command);
-  if (strlist.size() > 1) {
-    //has args
-    std::vector<std::string> args = split(strlist[1], ',');
-    out_command.arg1 = std::make_shared<ArgDefault>(args[0]);
-    if (args.size() == 2) {
-      out_command.arg2 = std::make_shared<ArgDefault>(args[1]);
-    }
-  }
 }
 
 std::string DisassemblerCore::disassembleInstructionInt(const memory::Addr& addr, size_t& len) {

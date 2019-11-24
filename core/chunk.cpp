@@ -91,7 +91,7 @@ std::shared_ptr<Chunk> Chunk::splitAt(const memory::Addr& addr) {
   _length = len;
   _last_addr = _starting_addr + _length;
   std::cout << "moving commands" << std::endl;
-  std::shared_ptr<Chunk> new_chunk = DisassemblerCore::inst().createChunk(addr, _type);
+  std::shared_ptr<Chunk> new_chunk = DisassemblerCore::inst().chunks().createChunk(addr, _type);
   if (new_chunk == nullptr) {
     std::cerr << "ERROR: Can't create chunk" << std::endl;
     return nullptr;
