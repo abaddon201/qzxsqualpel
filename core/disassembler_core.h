@@ -23,7 +23,7 @@
 #include "memory/memory.h"
 #include "postprocessors/autocommenter.h"
 #include "postprocessors/ipostprocessor.h"
-#include "core/jump_type.h"
+#include "core/cmd_code.h"
 
 #include "gui/gui_updater.h"
 

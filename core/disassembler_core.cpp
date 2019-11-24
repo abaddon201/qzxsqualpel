@@ -235,11 +235,11 @@ std::string DisassemblerCore::disassembleInstructionInt(const memory::Addr& addr
 JumpType DisassemblerCore::getLastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr) {
   ///@bug rst 28 not last command in the chunk
   Command& cmd = chunk->lastCommand();
-  if ((cmd.command_code == JumpCmd::CMD_CALL) || (cmd.command_code == JumpCmd::CMD_RST)) {
+  if ((cmd.command_code == CmdCode::CMD_CALL) || (cmd.command_code == CmdCode::CMD_RST)) {
     jump_addr = cmd.getJmpAddrFromString();
     return dasm::core::JumpType::JT_CALL;
   }
-  if (((cmd.command_code == JumpCmd::CMD_JR) || (cmd.command_code == JumpCmd::CMD_JP)) && (cmd.arg2 == nullptr)) {
+  if (((cmd.command_code == CmdCode::CMD_JR) || (cmd.command_code == CmdCode::CMD_JP)) && (cmd.arg2 == nullptr)) {
     const std::string& arg1 = cmd.arg1->toString();
     if (arg1[0] == '"' || contains(arg1, "IX") || contains(arg1, "IY") || contains(arg1, "HL")) {
       //jump to (HL) or (IX) or (IY). address unknown, so we just break disassembling here
@@ -248,20 +248,20 @@ JumpType DisassemblerCore::getLastCmdJumpType(std::shared_ptr<Chunk> chunk, memo
     jump_addr = cmd.getJmpAddrFromString();
     return dasm::core::JumpType::JT_JUMP;
   }
-  if (((cmd.command_code == JumpCmd::CMD_JR) || (cmd.command_code == JumpCmd::CMD_JP)) && (cmd.arg2 != nullptr)) {
+  if (((cmd.command_code == CmdCode::CMD_JR) || (cmd.command_code == CmdCode::CMD_JP)) && (cmd.arg2 != nullptr)) {
     jump_addr = cmd.getJmpAddrFromString();
     return dasm::core::JumpType::JT_COND_JUMP;
   }
-  if ((cmd.command_code == JumpCmd::CMD_RET) && (cmd.arg1 != nullptr)) {
+  if ((cmd.command_code == CmdCode::CMD_RET) && (cmd.arg1 != nullptr)) {
     return dasm::core::JumpType::JT_COND_RET;
   }
-  if ((cmd.command_code == JumpCmd::CMD_RET) && (cmd.arg1 == nullptr)) {
+  if ((cmd.command_code == CmdCode::CMD_RET) && (cmd.arg1 == nullptr)) {
     return dasm::core::JumpType::JT_RET;
   }
-  if (cmd.command_code == JumpCmd::CMD_RETI) {
+  if (cmd.command_code == CmdCode::CMD_RETI) {
     return dasm::core::JumpType::JT_RET;
   }
-  if (cmd.command_code == JumpCmd::CMD_RETN) {
+  if (cmd.command_code == CmdCode::CMD_RETN) {
     return dasm::core::JumpType::JT_RET;
   }
   return dasm::core::JumpType::JT_NONE;

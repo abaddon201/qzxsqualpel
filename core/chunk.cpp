@@ -62,9 +62,8 @@ std::shared_ptr<Label> Chunk::setLabel(std::shared_ptr<Label> label, memory::Ref
   return _label;
 }
 
-std::shared_ptr<Label> Chunk::setLabel(const std::string& label) {
+void Chunk::setLabel(const std::string& label) {
   _label = std::make_shared<Label>(_starting_addr, label);
-  return _label;
 }
 
 std::shared_ptr<Chunk> Chunk::splitAt(const memory::Addr& addr) {

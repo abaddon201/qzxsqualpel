@@ -72,30 +72,10 @@ Byte Command::opcodes(unsigned long long offs) const {
   return DisassemblerCore::inst().memory().getByte(addr + offs);
 }
 
-JumpCmd Command::command2code(const std::string& cmd) const {
-  if (cmd == "CALL") {
-    return JumpCmd::CMD_CALL;
-  } else if (cmd == "RST") {
-    return JumpCmd::CMD_RST;
-  } else if (cmd == "RET") {
-    return JumpCmd::CMD_RET;
-  } else if (cmd == "RETI") {
-    return JumpCmd::CMD_RETI;
-  } else if (cmd == "RETN") {
-    return JumpCmd::CMD_RETN;
-  } else if (cmd == "JP") {
-    return JumpCmd::CMD_JP;
-  } else if (cmd == "JR") {
-    return JumpCmd::CMD_JR;
-  } else {
-    return JumpCmd::CMD_NONE;
-  }
-}
-
 void Command::parse(std::string& src) {
   std::vector<std::string> strlist = split(src, ' ');
   command = strlist[0];
-  command_code = command2code(command);
+  command_code = CmdCode{ command };
   if (strlist.size() > 1) {
     //has args
     std::vector<std::string> args = split(strlist[1], ',');
