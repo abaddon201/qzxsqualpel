@@ -17,7 +17,7 @@ std::shared_ptr<core::Label> AutoCommenter::getLabelForAddr(const memory::Addr& 
 
 //FIXME: load this data from file
 void AutoCommenter::commentCommand(dasm::core::Command& out_command) {
-  if (out_command.command_code == (int)core::JumpCmd::CMD_RST) {
+  if (out_command.command_code == core::JumpCmd::CMD_RST) {
     //known RST's
     if (out_command.arg1->toString() == "10") {
       out_command.auto_comment = "PRINT_A";
@@ -28,7 +28,7 @@ void AutoCommenter::commentCommand(dasm::core::Command& out_command) {
     } else if (out_command.arg1->toString() == "28") {
       out_command.auto_comment = "FP_CALC";
     }
-  } else if (out_command.command_code == (int)core::JumpCmd::CMD_CALL) {
+  } else if (out_command.command_code == core::JumpCmd::CMD_CALL) {
     //known CALL's
     if (out_command.getJmpAddr() == 0x0556) {
       //Load File

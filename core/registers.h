@@ -19,6 +19,27 @@ public:
   constexpr Register16(Value reg) : value(reg) {}
   operator Value() const { return value; }
 
+  static Register16 getRegister(const std::string& arg) {
+    if (arg.find("AF") != arg.npos) {
+      return Register16::AF;
+    } else if (arg.find("BC") != arg.npos) {
+      return Register16::BC;
+    } else if (arg.find("DE") != arg.npos) {
+      return Register16::DE;
+    } else if (arg.find("HL") != arg.npos) {
+      return Register16::HL;
+    } else if (arg.find("SP") != arg.npos) {
+      return Register16::SP;
+    } else if (arg.find("IX") != arg.npos) {
+      return Register16::IX;
+    } else if (arg.find("IY") != arg.npos) {
+      return Register16::IY;
+    } else {
+      return Register16::None;
+    }
+  }
+
+
   std::string toString() const {
     switch (value) {
       case None:

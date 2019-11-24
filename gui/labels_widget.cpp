@@ -32,7 +32,7 @@ void LabelsWidget::refresh() {
   setHorizontalHeaderLabels(strlist);
   setSortingEnabled(false);
   int i = 0;
-  dasm::core::Labels &my_labels = dasm::core::IDisassemblerCore::inst()->labels();
+  dasm::core::Labels &my_labels = dasm::core::DisassemblerCore::inst()->labels();
   setRowCount((int) my_labels.size());
   for (auto lbl: my_labels) {
     QTableWidgetItem *nameItem = new QTableWidgetItem(QString::fromStdString(lbl.second->name));

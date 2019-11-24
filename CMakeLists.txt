@@ -22,8 +22,6 @@ file(GLOB TGT_SRC  main.cpp
         "postprocessors/*.h"
         "utils/*.cpp"
         "utils/*.h"
-        "zx/*.cpp"
-        "zx/*.h"
         "gui/*.cpp"
         "gui/*.ui"
         "gui/*.h")

@@ -18,7 +18,7 @@ class MainWindow;
 class DisassemblerWidget : public QPlainTextEdit {
 public:
   DisassemblerWidget(MainWindow* mwnd);
-  void setCore(dasm::core::IDisassemblerCore* core) {
+  void setCore(dasm::core::DisassemblerCore* core) {
     _disassembler_core = core;
   }
   void openRAWFile(const QString& fileName);
@@ -81,7 +81,7 @@ private:
   int _references_on_line;
 
   MainWindow* _main_window;
-  dasm::core::IDisassemblerCore* _disassembler_core;
+  dasm::core::DisassemblerCore* _disassembler_core;
 
   GUIChunkList _chunks;
   Q_OBJECT

@@ -63,14 +63,19 @@ std::string Command::getOpcodesString() const {
   auto l1 = len;
   memory::Addr a = addr;
   for (; l1; --l1, ++a) {
-    tmp += " " + IDisassemblerCore::inst()->getMemoryByte(a).toString();
+    tmp += " " + DisassemblerCore::inst()->getMemoryByte(a).toString();
   }
   return tmp;
 }
 
 Byte Command::opcodes(unsigned long long offs) const {
-  return IDisassemblerCore::inst()->getMemoryByte(addr + offs);
+  return DisassemblerCore::inst()->getMemoryByte(addr + offs);
 }
+
+bool Command::isLDICmd() {
+  return (command == "LDI") || (command == "LDIR") || (command == "LDD") || (command == "LDDR");
+}
+
 
 }
 }

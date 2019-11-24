@@ -29,21 +29,24 @@
 namespace dasm {
 namespace core {
 
-class IDisassemblerCore {
+class DisassemblerCore {
 public:
 
-  IDisassemblerCore(IGUIUpdater* updater_, IDisassemblerCore* inst, std::shared_ptr<postprocessors::AutoCommenter> auto_commenter) : updater{ updater_ }, _auto_commenter{ auto_commenter } {
-    _inst = inst;
+  ~DisassemblerCore() = default;
+
+  void init(IGUIUpdater* updater_) {
+    updater = updater_;
+
     _memory = std::make_unique<memory::Memory>();
-  }
+    ///@bug zx 128 have multiple segments 8k size each
+    _memory->createSegment(0, 0xFFFF);
 
-  virtual ~IDisassemblerCore() = default;
-
-  virtual void init() = 0;
+    _auto_commenter = std::make_shared<postprocessors::AutoCommenter>();
+  };
 
   void loadGuessFile(const std::string& fname);
 
-  virtual std::string disassembleInstructionInt(const memory::Addr& addr, size_t& len) = 0;
+  std::string disassembleInstructionInt(const memory::Addr& addr, size_t& len);
 
   ///@bug поменять местами возвращаемые значения, чтобы не было такой вырви-глаз конструкции
   size_t disassembleInstruction(const memory::Addr& addr, std::shared_ptr<Chunk>& out_chunk);
@@ -62,24 +65,32 @@ public:
 
   std::shared_ptr<Label> makeJump(const memory::Addr& from_addr, const memory::Addr& jump_addr, memory::Reference::Type ref_type);
 
-  virtual JumpType getLastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr) = 0;
+  JumpType getLastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr);
 
   Byte getMemoryByte(const memory::Addr& addr) const { return _memory->getByte(addr); }
 
-  static IDisassemblerCore* inst() { return _inst; }
+  static DisassemblerCore* inst() { 
+    static DisassemblerCore* _inst = new DisassemblerCore();
+    return _inst; 
+  }
 
-protected:
+private:
+
+  DisassemblerCore() {}
 
   bool labelPresent(const memory::Addr& addr) const;
 
-  virtual void parseCommand(std::string& src, Command& out_command) = 0;
+  JumpCmd command2code(const std::string& cmd) const;
 
-  virtual size_t postProcessChunk(std::shared_ptr<Chunk> chunk, size_t len) = 0;
+  void parseCommand(std::string& src, Command& out_command);
+
+  size_t postProcessChunk(std::shared_ptr<Chunk> chunk, size_t len);
+  size_t processRST28(std::shared_ptr<core::Chunk> chunk, size_t len, const memory::Addr& addr);
+
+  std::string getRST28AutoComment(unsigned char b, int& args_count);
 
   ///@brief кого оповещать об обновлении состояния
   IGUIUpdater* updater;
-  ///@brief указатель на инстанс
-  static IDisassemblerCore* _inst;
   ///@brief содержимое памяти
   std::unique_ptr<memory::Memory> _memory;
   ///@brief распознаные цепочки

@@ -6,8 +6,6 @@
 #include <QMenuBar>
 #include <QApplication>
 
-#include "zx/disassembler_core_ZX.h"
-
 void MainWindow::updateWidgets() {
   _disassembler_widget->refreshView();
 }
@@ -17,8 +15,8 @@ MainWindow::MainWindow() {
 
   _disassembler_widget = new DisassemblerWidget(this);
 
-  dasm::core::IDisassemblerCore *core = new dasm::DisassemblerCoreZX(this);
-  core->init();
+  dasm::core::DisassemblerCore *core = dasm::core::DisassemblerCore::inst();
+  core->init(this);
   _disassembler_widget->setCore(core);
   QDockWidget *dock = new QDockWidget(tr("Navigation Stack"), this);
   dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -73,7 +71,7 @@ void MainWindow::openFile() {
 void MainWindow::loadGuesses() {
   QString fileName = QFileDialog::getOpenFileName(this, tr("Load Guesses file"), "", "QSqualpel Guess Files (*.qzg)");
   if (!fileName.isEmpty()) {
-    dasm::core::IDisassemblerCore::inst()->loadGuessFile(fileName.toStdString());
+    dasm::core::DisassemblerCore::inst()->loadGuessFile(fileName.toStdString());
   }
 }
 

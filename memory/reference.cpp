@@ -22,7 +22,7 @@ Reference::Reference(const Addr& addr_, Type type_)
 
 std::string Reference::toString() {
   std::string res = "; XRef: ";
-  res += core::IDisassemblerCore::inst()->labels().offsetInLabel(addr);
+  res += core::DisassemblerCore::inst()->labels().offsetInLabel(addr);
   switch (type) {
     case Type::JUMP:
       res += "/j";

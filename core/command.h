@@ -14,6 +14,7 @@
 #define CCOMMAND_H
 
 #include "core/byte.h"
+#include "core/jump_type.h"
 #include "memory/addr.h"
 
 #include <vector>
@@ -30,7 +31,7 @@ struct Command {
   ///@brief символьное представление команды
   std::string command;
   ///@brief числовое представление команды (не обязательно опкод)
-  int command_code;
+  JumpCmd command_code;
   ///@brief символьное представление первого аргумента
   std::shared_ptr<Arg> arg1;
   ///@brief символьное представление второго аргумента
@@ -45,7 +46,7 @@ struct Command {
   ///@brief Длина команды в байтах
   size_t len;
 
-  Command() : command_code{ 0 }, len{ 0 } {}
+  Command() : command_code{ JumpCmd::CMD_NONE }, len{ 0 } {}
 
   Command(const Command& c) {
     addr = c.addr;
@@ -98,6 +99,9 @@ struct Command {
 
   ///@brief Устанавливает метку перехода команды (первый либо второй аргумент)
   void setJmpAddr(const std::shared_ptr<Label> label);
+
+  bool isLDICmd();
+
 };
 
 }
