@@ -7,8 +7,9 @@ namespace dasm {
 namespace postprocessors {
 
 bool Rst28::checkPrecondition(std::shared_ptr<core::Chunk> chunk) {
-  auto cmd = chunk->lastCommand();
-  return ((cmd.command == "RST") && (cmd.arg1->toString() == "28"));
+  auto& cmd = chunk->lastCommand();
+  //FIXME: must get as bin value
+  return ((cmd.command_code == core::CmdCode::RST) && (cmd.getArg(0)->toString() == "0028"));
 }
 
 size_t Rst28::process(std::shared_ptr<core::Chunk> chunk, size_t len) {
@@ -27,7 +28,7 @@ size_t Rst28::process(std::shared_ptr<core::Chunk> chunk, size_t len) {
   /// @bug: Переходы могут осуществляться через куски нормального года, что приводит к возникновению "рваных" цепей
   /// пример такого бага: 2DE3. Там осуществяется серия переходов, цели которых находятся после блока нормального ассемблера
   auto &cmd = chunk->lastCommand();
-  cmd.auto_comment = "FP-CALC";
+  //cmd.auto_comment = "FP-CALC";
   memory::Addr a = cmd.addr + 1;
 
   core::Byte b;
@@ -37,7 +38,7 @@ size_t Rst28::process(std::shared_ptr<core::Chunk> chunk, size_t len) {
     while ((unsigned char)(b = core::DisassemblerCore::inst().memory().getByte(a)) != 0x38) {
       c.addr = a;
       c.command = "DB";
-      c.arg1 = std::make_shared<core::ArgDefault>(b.toString());
+      c.setArg(0, std::make_shared<core::ArgDefault>(b, 1));
       c.auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
       c.len = 1;
 
@@ -49,7 +50,7 @@ size_t Rst28::process(std::shared_ptr<core::Chunk> chunk, size_t len) {
         c.addr = a;
         c.command = "DB";
         b = core::DisassemblerCore::inst().memory().getByte(a);
-        c.arg1 = std::make_shared<core::ArgDefault>(b.toString());
+        c.setArg(0, std::make_shared<core::ArgDefault>(b, 1));
         c.auto_comment = "dest_addr: " + memory::Addr(a + int{ (signed char)(unsigned char)b }).toString();
         c.len = 1;
 
@@ -61,7 +62,7 @@ size_t Rst28::process(std::shared_ptr<core::Chunk> chunk, size_t len) {
     }
     c.addr = a;
     c.command = "DB";
-    c.arg1 = std::make_shared<core::ArgDefault>(b.toString());
+    c.setArg(0, std::make_shared<core::ArgDefault>(b, 1));
     c.len = 1;
     c.auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
 

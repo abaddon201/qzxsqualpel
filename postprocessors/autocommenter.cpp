@@ -17,23 +17,23 @@ std::shared_ptr<core::Label> AutoCommenter::getLabelForAddr(const memory::Addr& 
 
 //FIXME: load this data from file
 void AutoCommenter::commentCommand(dasm::core::Command& out_command) {
-  if (out_command.command_code == core::CmdCode::CMD_RST) {
+  if (out_command.command_code == core::CmdCode::RST) {
     //known RST's
-    if (out_command.arg1->toString() == "10") {
+    if (out_command.getArg(0)->toString() == "0010") {
       out_command.auto_comment = "PRINT_A";
-    } else if (out_command.arg1->toString() == "18") {
+    } else if (out_command.getArg(0)->toString() == "0018") {
       out_command.auto_comment = "NEXT_CHAR";
-    } else if (out_command.arg1->toString() == "20") {
+    } else if (out_command.getArg(0)->toString() == "0020") {
       out_command.auto_comment = "GET_CHAR";
-    } else if (out_command.arg1->toString() == "28") {
+    } else if (out_command.getArg(0)->toString() == "0028") {
       out_command.auto_comment = "FP_CALC";
     }
-  } else if (out_command.command_code == core::CmdCode::CMD_CALL) {
+  } else if (out_command.command_code == core::CmdCode::CALL) {
     //known CALL's
-    if (out_command.getJmpAddr() == 0x0556) {
+    /*if (out_command.getJmpAddr() == 0x0556) {
       //Load File
       out_command.auto_comment = "Load File: IX=dst, DE=len, A=type";
-    }
+    }*/
   }
 }
 

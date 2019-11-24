@@ -32,10 +32,6 @@ struct Command {
   std::string command;
   ///@brief числовое представление команды (не обязательно опкод)
   CmdCode command_code;
-  ///@brief символьное представление первого аргумента
-  std::shared_ptr<Arg> arg1;
-  ///@brief символьное представление второго аргумента
-  std::shared_ptr<Arg> arg2;
   ///@brief комментарий к команде
   std::string comment;
   ///@brief комментарий к команде
@@ -46,28 +42,23 @@ struct Command {
   ///@brief Длина команды в байтах
   size_t len;
 
-  Command() : command_code{ CmdCode::CMD_NONE }, len{ 0 } {}
+  Command() : command_code{ CmdCode::NONE }, len{ 0 } {}
 
-  Command(const Command& c) {
+  void clone(const Command& c) {
     addr = c.addr;
     len = c.len;
     command_code = c.command_code;
     command = c.command;
-    arg1 = c.arg1;
-    arg2 = c.arg2;
+    args = c.args;
     comment = c.comment;
     auto_comment = c.auto_comment;
   }
+  Command(const Command& c) {
+    clone(c);
+  }
 
   Command& operator=(const Command& c) {
-    addr = c.addr;
-    len = c.len;
-    command_code = c.command_code;
-    command = c.command;
-    arg1 = c.arg1;
-    arg2 = c.arg2;
-    comment = c.comment;
-    auto_comment = c.auto_comment;
+    clone(c);
     return *this;
   }
 
@@ -76,8 +67,7 @@ struct Command {
     len = c.len;
     command_code = c.command_code;
     command = c.command;
-    arg1 = c.arg1;
-    arg2 = c.arg2;
+    args = std::move(c.args);
     comment = c.comment;
     auto_comment = c.auto_comment;
     return *this;
@@ -104,6 +94,16 @@ struct Command {
 
   bool isLDICmd();
 
+  ArgPtr getArg(int idx) { return args[idx]; }
+
+  void setArg(int idx, ArgPtr arg) { if (args.size() < idx + 1) { args.resize(idx + 1); } args[idx] = arg; }
+
+  size_t getArgsCount() { return args.size(); }
+
+private:
+  ArgPtr parseArg(const std::string& arg);
+
+  std::vector<ArgPtr> args;
 };
 
 }

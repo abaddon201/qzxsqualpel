@@ -56,6 +56,8 @@ public:
 
   Command& getCommand(int idx);
 
+  Command& getCommand(const memory::Addr& addr);
+
   Command& lastCommand() { return _commands.back(); }
 
   inline size_t commandsCount() const { return _commands.size(); }

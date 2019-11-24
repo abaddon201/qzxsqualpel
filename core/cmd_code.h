@@ -15,36 +15,81 @@ enum class JumpType {
 class CmdCode {
 public:
   enum Value : uint8_t {
-    CMD_NONE = 0,
-    CMD_CALL,
-    CMD_RST,
-    CMD_RET,
-    CMD_RETI,
-    CMD_RETN,
-    CMD_JP,
-    CMD_JR
+    NONE = 0,
+    CALL,
+    RST,
+    RET,
+    RETI,
+    RETN,
+    JP,
+    JR,
+    LD,
+    LDI,
+    LDD,
+    LDIR,
+    LDDR
   };
 
-  CmdCode() : value{ CMD_NONE } {}
+  CmdCode() : value{ NONE } {}
 
   CmdCode(const std::string& cmd) {
     if (cmd == "CALL") {
-      value = CMD_CALL;
+      value = CALL;
     } else if (cmd == "RST") {
-      value = CMD_RST;
+      value = RST;
     } else if (cmd == "RET") {
-      value = CMD_RET;
+      value = RET;
     } else if (cmd == "RETI") {
-      value = CMD_RETI;
+      value = RETI;
     } else if (cmd == "RETN") {
-      value = CMD_RETN;
+      value = RETN;
     } else if (cmd == "JP") {
-      value = CMD_JP;
+      value = JP;
     } else if (cmd == "JR") {
-      value = CMD_JR;
+      value = JR;
+    } else if (cmd == "LD") {
+      value = LD;
+    } else if (cmd == "LDI") {
+      value = LDI;
+    } else if (cmd == "LDD") {
+      value = LDD;
+    } else if (cmd == "LDIR") {
+      value = LDIR;
+    } else if (cmd == "LDDR") {
+      value = LDDR;
     } else {
-      value = CMD_NONE;
+      value = NONE;
     }
+  }
+
+  std::string toString() {
+    switch (value) {
+      case CALL:
+        return "CALL";
+      case RST:
+        return "RST";
+      case RET:
+        return "RET";
+      case RETI:
+        return "RETI";
+      case RETN:
+        return "RETN";
+      case JP:
+        return "JP";
+      case JR:
+        return "JR";
+      case LD:
+        return "LD";
+      case LDI:
+        return "LDI";
+      case LDD:
+        return "LDD";
+      case LDIR:
+        return "LDIR";
+      case LDDR:
+        return "LDDR";
+    }
+    return "";
   }
 
   constexpr CmdCode(Value cmd) : value(cmd) {}

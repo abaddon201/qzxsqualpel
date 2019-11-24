@@ -360,7 +360,8 @@ disassemble_11xxx001( libspectrum_byte b, char* buffer, size_t buflen,
     break;
 
   case 0x05:
-    snprintf( buffer, buflen, "JP %s", hl_ix_iy( use_hl ) );
+    snprintf( buffer, buflen, "JP (%s)", hl_ix_iy( use_hl ) );
+    //FIXME: JP (HL) snprintf(buffer, buflen, "JP %s", hl_ix_iy(use_hl));
     *length = 1;
     break;
 

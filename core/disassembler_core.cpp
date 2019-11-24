@@ -48,7 +48,7 @@ void DisassemblerCore::initialParse() {
     cmd.command = "db";
     cmd.addr = i;
     cmd.len = 1;
-    cmd.arg1 = std::make_shared<ArgDefault>(byte.toString());
+    cmd.setArg(0, std::make_shared<ArgDefault>(byte, 1));
     chunk->appendCommand(cmd);
   }
   updater->updateWidgets();
@@ -119,8 +119,11 @@ size_t DisassemblerCore::disassembleInstruction(const memory::Addr& addr, std::s
 
     Command cmd;
     cmd.addr = addr;
-    cmd.len += len;
+    cmd.len = len;
     cmd.parse(buff);
+    if (_auto_commenter) {
+      _auto_commenter->commentCommand(cmd);
+    }
     target_chunk->appendCommand(cmd);
     std::cout << "cmd appended" << std::endl;
     len = postProcessChunk(target_chunk, len);
@@ -151,45 +154,58 @@ void DisassemblerCore::disassembleBlock(const memory::Addr& st_addr) {
       return;
     }
     switch (getLastCmdJumpType(chunk, jump_addr)) {
-      case JumpType::JT_CALL:
+      case JumpType::JT_CALL: {
         //call
-        std::cout << "call: addr=" << addr.toString() << "to_addr" << jump_addr.toString() << std::endl;
+        std::cout << "!!!! call: addr=" << addr.toString() << " to_addr " << jump_addr.toString() << std::endl;
         std::cout << "st_addr=" << st_addr.toString() << std::endl;
-        chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, memory::Reference::Type::CALL));
+        auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::CALL);
+        auto& ch = _chunks.getChunkContains(addr);
+        ch->lastCommand().setJmpAddr(lbl);
         addr += res;
         break;
-      case JumpType::JT_COND_JUMP:
+      }
+      case JumpType::JT_COND_JUMP: {
         //conditional jump
-        std::cout << "cond jump: addr=" << addr.toString() << "to_addr" << jump_addr.toString() << std::endl;
-        chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, memory::Reference::Type::JUMP));
+        std::cout << "!!!! cond jump: addr=" << addr.toString() << " to_addr " << jump_addr.toString() << std::endl;
+        //auto& lastcmd = chunk->lastCommand();
+        auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::JUMP);
+        auto& ch = _chunks.getChunkContains(addr);
+        ch->getCommand(addr).setJmpAddr(lbl);
+        ;
         addr += res;
         break;
-      case JumpType::JT_JUMP:
-        std::cout << "jump: addr=" << addr.toString() << "to_addr" << jump_addr.toString() << std::endl;
-        chunk->lastCommand().setJmpAddr(makeJump(addr, jump_addr, memory::Reference::Type::JUMP));
+      }
+      case JumpType::JT_JUMP: {
+        std::cout << "!!!! jump: addr=" << addr.toString() << " to_addr " << jump_addr.toString() << std::endl;
+        auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::JUMP);
+        auto& ch = _chunks.getChunkContains(addr);
+        ch->lastCommand().setJmpAddr(lbl);
         res = 0;
         break;
+      }
       case JumpType::JT_COND_RET:
         //conditional ret
-        std::cout << "cond_ret: addr=" << addr.toString() << std::endl;
+        std::cout << "!!!! cond_ret: addr=" << addr.toString() << std::endl;
         addr += res;
         break;
       case JumpType::JT_RET:
-        std::cout << "ret: addr=" << addr.toString() << std::endl;
+        std::cout << "!!!! ret: addr=" << addr.toString() << std::endl;
         res = 0;
         break;
       case JumpType::JT_NONE:
         addr += res;
         break;
     }
-    auto cmd = chunk->lastCommand();
-    if (_auto_commenter) {
-      _auto_commenter->commentCommand(cmd);
-    }
   } while (res);
   std::cout << "finished chunk:st_addr=" << st_addr.toString() << " m_chunks.count=" << _chunks.count() << std::endl;
 }
 
+/*
+ABBY
+0x11a7 (back jump)
+0x2e24 (rst 28)
+0x1276 (index reg) (navigation bug)
+*/
 std::shared_ptr<Label>
 DisassemblerCore::makeJump(const memory::Addr& from_addr, const memory::Addr& jump_addr, memory::Reference::Type ref_type) {
   disassembleBlock(jump_addr);
@@ -235,33 +251,39 @@ std::string DisassemblerCore::disassembleInstructionInt(const memory::Addr& addr
 JumpType DisassemblerCore::getLastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr) {
   ///@bug rst 28 not last command in the chunk
   Command& cmd = chunk->lastCommand();
-  if ((cmd.command_code == CmdCode::CMD_CALL) || (cmd.command_code == CmdCode::CMD_RST)) {
+  if ((cmd.command_code == CmdCode::CALL) || (cmd.command_code == CmdCode::RST)) {
     jump_addr = cmd.getJmpAddrFromString();
     return dasm::core::JumpType::JT_CALL;
   }
-  if (((cmd.command_code == CmdCode::CMD_JR) || (cmd.command_code == CmdCode::CMD_JP)) && (cmd.arg2 == nullptr)) {
-    const std::string& arg1 = cmd.arg1->toString();
-    if (arg1[0] == '"' || contains(arg1, "IX") || contains(arg1, "IY") || contains(arg1, "HL")) {
+  if (((cmd.command_code == CmdCode::JR) || (cmd.command_code == CmdCode::JP)) && (cmd.getArgsCount() == 1)) {
+    const auto& arg1 = cmd.getArg(0);
+    //FIXME: tmp check, must be removed after debug
+    const std::string& arg1str = arg1->toString();
+    if (arg1str[0] == '"') {
+      throw std::runtime_error("unknown argument");
+    }
+    if (arg1->arg_type == ArgType::ARG_REGISTER_REF) {
+      // posybly need to check register: IX, IY, HL
       //jump to (HL) or (IX) or (IY). address unknown, so we just break disassembling here
       return dasm::core::JumpType::JT_RET;
     }
     jump_addr = cmd.getJmpAddrFromString();
     return dasm::core::JumpType::JT_JUMP;
   }
-  if (((cmd.command_code == CmdCode::CMD_JR) || (cmd.command_code == CmdCode::CMD_JP)) && (cmd.arg2 != nullptr)) {
+  if (((cmd.command_code == CmdCode::JR) || (cmd.command_code == CmdCode::JP)) && (cmd.getArgsCount() == 2)) {
     jump_addr = cmd.getJmpAddrFromString();
     return dasm::core::JumpType::JT_COND_JUMP;
   }
-  if ((cmd.command_code == CmdCode::CMD_RET) && (cmd.arg1 != nullptr)) {
+  if ((cmd.command_code == CmdCode::RET) && (cmd.getArgsCount() == 1)) {
     return dasm::core::JumpType::JT_COND_RET;
   }
-  if ((cmd.command_code == CmdCode::CMD_RET) && (cmd.arg1 == nullptr)) {
+  if ((cmd.command_code == CmdCode::RET) && (cmd.getArgsCount() == 0)) {
     return dasm::core::JumpType::JT_RET;
   }
-  if (cmd.command_code == CmdCode::CMD_RETI) {
+  if (cmd.command_code == CmdCode::RETI) {
     return dasm::core::JumpType::JT_RET;
   }
-  if (cmd.command_code == CmdCode::CMD_RETN) {
+  if (cmd.command_code == CmdCode::RETN) {
     return dasm::core::JumpType::JT_RET;
   }
   return dasm::core::JumpType::JT_NONE;

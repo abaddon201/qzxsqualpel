@@ -6,7 +6,7 @@
 int main(int argc, char** argv) {
   QApplication app(argc, argv);
 
-  initHexes();
+  dasm::utils::initHexes();
   MainWindow* mainwnd=new MainWindow();
   mainwnd->show();
   return app.exec();

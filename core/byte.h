@@ -22,11 +22,11 @@ namespace core {
 class Byte {
 public:
   explicit Byte(unsigned char b = 0) : _byte(b) {}
-  inline std::string toString() const { return byte2hex(_byte); }
-  explicit operator unsigned char() const { return _byte; }
+  inline std::string toString() const { return utils::byte2hex(_byte); }
+  explicit operator uint8_t() const { return _byte; }
 
 private:
-  unsigned char _byte;
+  uint8_t _byte;
 };
 
 }

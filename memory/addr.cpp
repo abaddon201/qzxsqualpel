@@ -18,14 +18,14 @@ namespace memory {
 
 const std::string& Addr::toString() const {
   if (_dirty) {
-    _hex_cache = hexify(_segment, 4) + ":" + hexify(_offset, 4);
+    _hex_cache = utils::hexify(_segment, 4) + ":" + utils::hexify(_offset, 4);
     _dirty = false;
   }
   return _hex_cache;
 }
 
 std::string Addr::offsetString() const {
-  return hexify(_offset, 4);
+  return utils::hexify(_offset, 4);
 }
 
 }

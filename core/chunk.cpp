@@ -36,6 +36,20 @@ Command& Chunk::getCommand(int idx) {
   return _commands[idx];
 }
 
+
+Command& Chunk::getCommand(const memory::Addr& addr) {
+  if (_commands.size() == 0) {
+    std::cerr << "No commands here" << std::endl;
+    throw int(666);
+  }
+  for (auto& c : _commands) {
+    if (c.addr == addr) {
+      return c;
+    }
+  }
+  throw std::runtime_error("no command with addr: " + addr.toString());
+}
+
 std::shared_ptr<Label> Chunk::setLabel(std::shared_ptr<Label> label, memory::Reference::Type ref_type) {
   if (label == nullptr) {
     //generate from name

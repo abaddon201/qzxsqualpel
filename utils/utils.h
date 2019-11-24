@@ -8,9 +8,16 @@
 #include <vector>
 #include <iostream>
 
+namespace dasm {
+namespace utils {
+
 extern std::string _hex[256];
 
-inline const std::string &byte2hex(unsigned char b) {
+inline uint16_t hex2int(const std::string& val) {
+  return std::stoul(val, nullptr, 16);
+}
+
+inline const std::string& byte2hex(unsigned char b) {
   return _hex[b];
 }
 
@@ -37,7 +44,7 @@ inline std::string tolowerStd(std::string s) {
   return s;
 }
 
-inline std::vector<std::string> split(const std::string &s, char delim) {
+inline std::vector<std::string> split(const std::string& s, char delim) {
   std::stringstream ss(s);
   std::string item;
   std::vector<std::string> elems;
@@ -47,8 +54,10 @@ inline std::vector<std::string> split(const std::string &s, char delim) {
   return elems;
 }
 
-inline bool contains(const std::string &src, const std::string &f) {
+inline bool contains(const std::string& src, const std::string& f) {
   return src.find(f) != std::string::npos;
 }
 
+}
+}
 #endif
