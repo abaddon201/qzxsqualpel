@@ -13,7 +13,7 @@
 #include "labels.h"
 #include "chunk.h"
 #include "chunk_list.h"
-#include "i_disassembler_core.h"
+#include "disassembler_core.h"
 
 #include "debug_printers.h"
 

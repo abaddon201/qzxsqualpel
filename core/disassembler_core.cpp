@@ -1,4 +1,4 @@
-#include "i_disassembler_core.h"
+#include "disassembler_core.h"
 
 #include "disassemble.h"
 #include "postprocessors/rst28.h"

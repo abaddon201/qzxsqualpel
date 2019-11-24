@@ -11,7 +11,7 @@
 //
 
 #include "chunk.h"
-#include "i_disassembler_core.h"
+#include "disassembler_core.h"
 #include "debug_printers.h"
 
 namespace dasm {

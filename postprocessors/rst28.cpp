@@ -1,7 +1,7 @@
 #include "rst28.h"
 
 #include "core/command.h"
-#include "core/i_disassembler_core.h"
+#include "core/disassembler_core.h"
 
 namespace dasm {
 namespace postprocessors {

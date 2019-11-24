@@ -12,7 +12,7 @@
 
 #include "reference.h"
 #include "core/labels.h"
-#include "core/i_disassembler_core.h"
+#include "core/disassembler_core.h"
 
 namespace dasm {
 namespace memory {

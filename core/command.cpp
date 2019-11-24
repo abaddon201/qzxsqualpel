@@ -11,7 +11,7 @@
 //
 
 #include "command.h"
-#include "i_disassembler_core.h"
+#include "disassembler_core.h"
 
 namespace dasm {
 namespace core {
