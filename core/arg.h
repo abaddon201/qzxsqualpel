@@ -19,7 +19,8 @@ enum class ArgType {
   ARG_REGISTER16,
   ARG_REGISTER_OFFSET,
   ARG_REGISTER_REF,
-  ARG_MEMORY_REF
+  ARG_MEMORY_REF,
+  ARG_PORT
 };
 /*
 enum class ArgType {
@@ -44,15 +45,29 @@ using ArgPtr = std::shared_ptr<Argument>;
 
 class ArgDefault : public Argument {
 public:
-  explicit ArgDefault(Byte& s, uint8_t bytes_length) : value{ (uint8_t)s }, bytes_length{ bytes_length } { arg_type = ArgType::ARG_DEFAULT; }
-  //explicit ArgDefault(uint8_t s, uint8_t bytes_lenth = 1) : value{ s }, bytes_length{ bytes_length } { arg_type = ArgType::ARG_DEFAULT; }
-  explicit ArgDefault(uint16_t s, uint8_t bytes_length) : value{ s }, bytes_length{ bytes_length } { arg_type = ArgType::ARG_DEFAULT; }
+  explicit ArgDefault(Byte& s, uint8_t bytes_length) : value{ (uint8_t)s }, bytes_length{ bytes_length }, is_hex{ true } { arg_type = ArgType::ARG_DEFAULT; }
+  explicit ArgDefault(uint16_t s, uint8_t bytes_length, bool is_hex) : value{ s }, bytes_length{ bytes_length }, is_hex{ is_hex } { arg_type = ArgType::ARG_DEFAULT; }
   virtual ~ArgDefault() = default;
 
-  std::string toString() const override { return utils::hexify(value, bytes_length * 2); }
+  std::string toString() const override { return is_hex ? utils::hexify(value, bytes_length * 2) : std::to_string(value); }
+
+  uint16_t getValue() { return value; }
 private:
   uint16_t value;
   uint8_t bytes_length;
+  bool is_hex;
+};
+
+using ArgDefaultPtr = std::shared_ptr<ArgDefault>;
+
+class ArgPort : public Argument {
+public:
+  explicit ArgPort(uint8_t s) : value{ s } { arg_type = ArgType::ARG_PORT; }
+  virtual ~ArgPort() = default;
+
+  std::string toString() const override { return "(" + utils::hexify(value, 2) + ")"; }
+private:
+  uint16_t value;
 };
 
 class ArgLabel : public Argument {
@@ -99,7 +114,7 @@ class ArgRegisterOffset : public Argument {
 public:
   ArgRegisterOffset(Register16 reg_id, const std::string& offs, bool is_positive) : reg_id{ reg_id }, is_positive{ is_positive } {
     arg_type = ArgType::ARG_REGISTER_OFFSET;
-    offset = utils::hex2int(offs);
+    offset = (uint8_t)utils::hex2int(offs);
   }
   virtual ~ArgRegisterOffset() = default;
 

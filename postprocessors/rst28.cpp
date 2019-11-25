@@ -9,7 +9,7 @@ namespace postprocessors {
 bool Rst28::checkPrecondition(std::shared_ptr<core::Chunk> chunk) {
   auto& cmd = chunk->lastCommand();
   //FIXME: must get as bin value
-  return ((cmd.command_code == core::CmdCode::RST) && (cmd.getArg(0)->toString() == "0028"));
+  return ((cmd.command_code == core::CmdCode::RST) && (std::dynamic_pointer_cast<core::ArgDefault>(cmd.getArg(0))->getValue() == 0x28));
 }
 
 size_t Rst28::process(std::shared_ptr<core::Chunk> chunk, size_t len) {

@@ -205,6 +205,12 @@ ABBY
 0x11a7 (back jump)
 0x2e24 (rst 28)
 0x1276 (index reg) (navigation bug)
+0x2aa9 res 6,(IY+1)
+0x1287 set 1, (IY+1)
+0x12a2 LD (IY+31), 02
+0x122e IM 1
+0x11ce OUT fe, A
+0x007d CP 21
 */
 std::shared_ptr<Label>
 DisassemblerCore::makeJump(const memory::Addr& from_addr, const memory::Addr& jump_addr, memory::Reference::Type ref_type) {

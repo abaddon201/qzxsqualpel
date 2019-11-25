@@ -67,7 +67,7 @@ struct Command {
     len = c.len;
     command_code = c.command_code;
     command = c.command;
-    args = std::move(c.args);
+    args = c.args;
     comment = c.comment;
     auto_comment = c.auto_comment;
     return *this;
@@ -101,6 +101,8 @@ struct Command {
   size_t getArgsCount() { return args.size(); }
 
 private:
+  void updateArgs();
+
   ArgPtr parseArg(const std::string& arg);
 
   std::vector<ArgPtr> args;

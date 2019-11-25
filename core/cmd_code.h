@@ -27,7 +27,13 @@ public:
     LDI,
     LDD,
     LDIR,
-    LDDR
+    LDDR,
+    IN,
+    OUT,
+    SET,
+    RES,
+    BIT,
+    CP
   };
 
   CmdCode() : value{ NONE } {}
@@ -57,6 +63,18 @@ public:
       value = LDIR;
     } else if (cmd == "LDDR") {
       value = LDDR;
+    } else if (cmd == "IN") {
+      value = IN;
+    } else if (cmd == "OUT") {
+      value = OUT;
+    } else if (cmd == "SET") {
+      value = SET;
+    } else if (cmd == "RES") {
+      value = RES;
+    } else if (cmd == "BIT") {
+      value = BIT;
+    } else if (cmd == "CP") {
+      value = CP;
     } else {
       value = NONE;
     }
@@ -88,6 +106,18 @@ public:
         return "LDIR";
       case LDDR:
         return "LDDR";
+      case IN:
+        return "IN";
+      case OUT:
+        return "OUT";
+      case SET:
+        return "SET";
+      case RES:
+        return "RES";
+      case BIT:
+        return "BIT";
+      case CP:
+        return "CP";
     }
     return "";
   }

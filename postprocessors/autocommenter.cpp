@@ -19,13 +19,13 @@ std::shared_ptr<core::Label> AutoCommenter::getLabelForAddr(const memory::Addr& 
 void AutoCommenter::commentCommand(dasm::core::Command& out_command) {
   if (out_command.command_code == core::CmdCode::RST) {
     //known RST's
-    if (out_command.getArg(0)->toString() == "0010") {
+    if (std::dynamic_pointer_cast<core::ArgDefault>(out_command.getArg(0))->getValue() == 0x10) {
       out_command.auto_comment = "PRINT_A";
-    } else if (out_command.getArg(0)->toString() == "0018") {
+    } else if (std::dynamic_pointer_cast<core::ArgDefault>(out_command.getArg(0))->getValue() == 0x18) {
       out_command.auto_comment = "NEXT_CHAR";
-    } else if (out_command.getArg(0)->toString() == "0020") {
+    } else if (std::dynamic_pointer_cast<core::ArgDefault>(out_command.getArg(0))->getValue() == 0x20) {
       out_command.auto_comment = "GET_CHAR";
-    } else if (out_command.getArg(0)->toString() == "0028") {
+    } else if (std::dynamic_pointer_cast<core::ArgDefault>(out_command.getArg(0))->getValue() == 0x28) {
       out_command.auto_comment = "FP_CALC";
     }
   } else if (out_command.command_code == core::CmdCode::CALL) {

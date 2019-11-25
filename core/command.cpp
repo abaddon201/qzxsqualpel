@@ -87,6 +87,7 @@ void Command::parse(std::string& src) {
       this->args.push_back(parseArg(a));
     }
   }
+  updateArgs();
   std::cout << "dcd: " << command_code.toString();
   for (const auto a : args) {
     std::cout << " " << a->toString();
@@ -96,6 +97,10 @@ void Command::parse(std::string& src) {
 
 bool Command::isLDICmd() {
   return (command_code == CmdCode::LDI) || (command_code == CmdCode::LDIR) || (command_code == CmdCode::LDD) || (command_code == CmdCode::LDDR);
+}
+
+void Command::updateArgs() {
+
 }
 
 ArgPtr Command::parseArg(const std::string& arg) {
@@ -112,7 +117,7 @@ ArgPtr Command::parseArg(const std::string& arg) {
       //register with offset -
       auto a = utils::split(arg, '-');
       auto r = Register16::getRegister(a[0].substr(1));
-      return std::make_shared<ArgRegisterOffset>(r, a[1].substr(0, a[1].length()-1), false);
+      return std::make_shared<ArgRegisterOffset>(r, a[1].substr(0, a[1].length() - 1), false);
     } else if (arg.find("+") != arg.npos) {
       //register with offset -
       auto a = utils::split(arg, '+');
@@ -121,7 +126,11 @@ ArgPtr Command::parseArg(const std::string& arg) {
     } else {
       //memory
       auto addr = utils::hex2int(ref_str);
-      return std::make_shared <ArgMemoryReference>(addr);
+      if ((command_code == CmdCode::OUT) || (command_code == CmdCode::IN)) {
+        return std::make_shared <ArgPort>(addr);
+      } else {
+        return std::make_shared <ArgMemoryReference>(addr);
+      }
     }
   }
   // check if it's a 8 bit register
@@ -138,7 +147,13 @@ ArgPtr Command::parseArg(const std::string& arg) {
     return std::make_shared<ArgFlag>(f);
   }
   auto v = utils::hex2int(arg);
-  return std::make_shared<ArgDefault>(v, 2);
+  if ((command_code == CmdCode::RST) || (command_code == CmdCode::CP)) {
+    return std::make_shared<ArgDefault>(v, 1, true);
+  } else if ((command_code == CmdCode::SET) || (command_code == CmdCode::RES) || (command_code == CmdCode::BIT)) {
+    return std::make_shared<ArgDefault>(v, 1, false);
+  } else {
+    return std::make_shared<ArgDefault>(v, 2, true);
+  }
 }
 }
 }
