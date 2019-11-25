@@ -222,6 +222,7 @@ ABBY
 0x0b52 SUB a5
 0x0b56 ADD A,15
 0x0cf4 DJNZ 0x0cf0
+0x0bbd EX AF, AF'
 */
 std::shared_ptr<Label>
 DisassemblerCore::makeJump(const memory::Addr& from_addr, const memory::Addr& jump_addr, memory::Reference::Type ref_type) {

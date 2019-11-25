@@ -8,6 +8,7 @@ public:
   enum Value : uint8_t {
     None,
     AF,
+    AF2,
     BC,
     DE,
     HL,
@@ -22,7 +23,9 @@ public:
   static Register16 getRegister(const std::string& arg) {
     if (arg=="AF") {
       return Register16::AF;
-    } else if (arg=="BC") {
+    } else if (arg == "AF'") {
+      return Register16::AF2;
+    } else if (arg == "BC") {
       return Register16::BC;
     } else if (arg=="DE") {
       return Register16::DE;
@@ -46,6 +49,8 @@ public:
         return "";
       case AF:
         return "AF";
+      case AF2:
+        return "AF'";
       case BC:
         return "BC";
       case DE:

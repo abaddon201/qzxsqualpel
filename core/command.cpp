@@ -100,7 +100,7 @@ bool Command::isLDICmd() {
 }
 
 void Command::updateArgs() {
-  if (command_code == CmdCode::LD) {
+  if ((command_code == CmdCode::LD) || (command_code == CmdCode::SBC) || (command_code == CmdCode::ADD) || (command_code == CmdCode::ADC)) {
     auto& a1 = args[0];
     auto& a2 = args[1];
     switch (a1->arg_type) {
@@ -205,7 +205,7 @@ void Command::updateArgs() {
 }
 
 bool Command::isSingleByteArgCmd() {
-  return ((command_code == CmdCode::AND) || (command_code == CmdCode::OR) || (command_code == CmdCode::XOR) || (command_code == CmdCode::RST) || (command_code == CmdCode::CP));
+  return ((command_code == CmdCode::AND) || (command_code == CmdCode::OR) || (command_code == CmdCode::XOR) || (command_code == CmdCode::RST) || (command_code == CmdCode::CP) || command_code == CmdCode::SUB);
 }
 
 ArgPtr Command::parseArg(const std::string& arg) {
@@ -254,7 +254,7 @@ ArgPtr Command::parseArg(const std::string& arg) {
   auto v = utils::hex2int(arg);
   if (isSingleByteArgCmd()) {
     return std::make_shared<ArgDefault>(v, 1, true);
-  } else if ((command_code == CmdCode::SET) || (command_code == CmdCode::RES) || (command_code == CmdCode::BIT)) {
+  } else if ((command_code == CmdCode::SET) || (command_code == CmdCode::RES) || (command_code == CmdCode::BIT) || (command_code == CmdCode::IM)) {
     return std::make_shared<ArgDefault>(v, 1, false);
   } else {
     return std::make_shared<ArgDefault>(v, 2, true);
