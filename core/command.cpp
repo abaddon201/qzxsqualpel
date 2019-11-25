@@ -100,7 +100,112 @@ bool Command::isLDICmd() {
 }
 
 void Command::updateArgs() {
+  if (command_code == CmdCode::LD) {
+    auto& a1 = args[0];
+    auto& a2 = args[1];
+    switch (a1->arg_type) {
+      case ArgType::ARG_REGISTER16: {
+        if (a2->arg_type == ArgType::ARG_DEFAULT) {
+          std::shared_ptr<ArgDefault> a2ref = std::static_pointer_cast<ArgDefault>(a2);
+          a2ref->setSize(2);
+        }
+        break;
+      }
+      case ArgType::ARG_REGISTER8: {
+        if (a2->arg_type == ArgType::ARG_DEFAULT) {
+          std::shared_ptr<ArgDefault> a2ref = std::static_pointer_cast<ArgDefault>(a2);
+          a2ref->setSize(1);
+        }
+        break;
+      }
+      case ArgType::ARG_MEMORY_REF: {
+        // check and update size
+        switch (a2->arg_type) {
+          case ArgType::ARG_REGISTER8: {
+            std::shared_ptr<ArgMemoryReference> a1ref = std::static_pointer_cast<ArgMemoryReference>(a1);
+            a1ref->setSize(1);
+            break;
+          }
+          case ArgType::ARG_REGISTER16: {
+            std::shared_ptr<ArgMemoryReference> a1ref = std::static_pointer_cast<ArgMemoryReference>(a1);
+            a1ref->setSize(2);
+            break;
+          }
+          default:
+            throw std::runtime_error("can't determine mem pointer size");
+        }
+        break;
+      }
+      case ArgType::ARG_REGISTER_REF: {
+        // check and update size
+        switch (a2->arg_type) {
+          case ArgType::ARG_REGISTER8: {
+            std::shared_ptr<ArgRegisterReference> a1ref = std::static_pointer_cast<ArgRegisterReference>(a1);
+            a1ref->setSize(1);
+            break;
+          }
+          case ArgType::ARG_REGISTER16: {
+            std::shared_ptr<ArgRegisterReference> a1ref = std::static_pointer_cast<ArgRegisterReference>(a1);
+            a1ref->setSize(2);
+            break;
+          }
+          case ArgType::ARG_DEFAULT: {
+            std::shared_ptr<ArgRegisterReference> a1ref = std::static_pointer_cast<ArgRegisterReference>(a1);
+            a1ref->setSize(1);
+            break;
+          }
+          default:
+            throw std::runtime_error("can't determine register pointer size");
+        }
+      }
+    }
+    switch (a2->arg_type) {
+      case ArgType::ARG_MEMORY_REF: {
+        // check and update size
+        switch (a1->arg_type) {
+          case ArgType::ARG_REGISTER8: {
+            std::shared_ptr<ArgMemoryReference> a2ref = std::static_pointer_cast<ArgMemoryReference>(a2);
+            a2ref->setSize(1);
+            break;
+          }
+          case ArgType::ARG_REGISTER16: {
+            std::shared_ptr<ArgMemoryReference> a2ref = std::static_pointer_cast<ArgMemoryReference>(a2);
+            a2ref->setSize(2);
+            break;
+          }
+          default:
+            throw std::runtime_error("can't determine mem pointer size");
+        }
+        break;
+      }
+      case ArgType::ARG_REGISTER_REF: {
+        // check and update size
+        switch (a1->arg_type) {
+          case ArgType::ARG_REGISTER8: {
+            std::shared_ptr<ArgRegisterReference> a2ref = std::static_pointer_cast<ArgRegisterReference>(a2);
+            a2ref->setSize(1);
+            break;
+          }
+          case ArgType::ARG_REGISTER16: {
+            std::shared_ptr<ArgRegisterReference> a2ref = std::static_pointer_cast<ArgRegisterReference>(a2);
+            a2ref->setSize(2);
+            break;
+          }
+          case ArgType::ARG_DEFAULT: {
+            std::shared_ptr<ArgRegisterReference> a2ref = std::static_pointer_cast<ArgRegisterReference>(a2);
+            a2ref->setSize(1);
+            break;
+          }
+          default:
+            throw std::runtime_error("can't determine register pointer size");
+        }
+      }
+    }
+  }
+}
 
+bool Command::isSingleByteArgCmd() {
+  return ((command_code == CmdCode::AND) || (command_code == CmdCode::OR) || (command_code == CmdCode::XOR) || (command_code == CmdCode::RST) || (command_code == CmdCode::CP));
 }
 
 ArgPtr Command::parseArg(const std::string& arg) {
@@ -147,7 +252,7 @@ ArgPtr Command::parseArg(const std::string& arg) {
     return std::make_shared<ArgFlag>(f);
   }
   auto v = utils::hex2int(arg);
-  if ((command_code == CmdCode::RST) || (command_code == CmdCode::CP)) {
+  if (isSingleByteArgCmd()) {
     return std::make_shared<ArgDefault>(v, 1, true);
   } else if ((command_code == CmdCode::SET) || (command_code == CmdCode::RES) || (command_code == CmdCode::BIT)) {
     return std::make_shared<ArgDefault>(v, 1, false);

@@ -103,6 +103,8 @@ struct Command {
 private:
   void updateArgs();
 
+  bool isSingleByteArgCmd();
+
   ArgPtr parseArg(const std::string& arg);
 
   std::vector<ArgPtr> args;

@@ -202,6 +202,13 @@ void DisassemblerCore::disassembleBlock(const memory::Addr& st_addr) {
 
 /*
 ABBY
+0x0008, 0x000b LD HL, (word); LD (word), HL
+0x0c90 LD (byte_5c8c), A
+0x03d9 LD C, 3f
+0x0b9b LD A, (byte_5c91)
+0x0bdf AND 03
+0x0be1 OR 58
+0x0c0b LD H, 00
 0x11a7 (back jump)
 0x2e24 (rst 28)
 0x1276 (index reg) (navigation bug)
@@ -211,6 +218,10 @@ ABBY
 0x122e IM 1
 0x11ce OUT fe, A
 0x007d CP 21
+
+0x0b52 SUB a5
+0x0b56 ADD A,15
+0x0cf4 DJNZ 0x0cf0
 */
 std::shared_ptr<Label>
 DisassemblerCore::makeJump(const memory::Addr& from_addr, const memory::Addr& jump_addr, memory::Reference::Type ref_type) {
@@ -277,6 +288,10 @@ JumpType DisassemblerCore::getLastCmdJumpType(std::shared_ptr<Chunk> chunk, memo
     return dasm::core::JumpType::JT_JUMP;
   }
   if (((cmd.command_code == CmdCode::JR) || (cmd.command_code == CmdCode::JP)) && (cmd.getArgsCount() == 2)) {
+    jump_addr = cmd.getJmpAddrFromString();
+    return dasm::core::JumpType::JT_COND_JUMP;
+  }
+  if (cmd.command_code == CmdCode::DJNZ) {
     jump_addr = cmd.getJmpAddrFromString();
     return dasm::core::JumpType::JT_COND_JUMP;
   }

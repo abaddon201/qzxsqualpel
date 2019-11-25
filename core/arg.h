@@ -51,6 +51,8 @@ public:
 
   std::string toString() const override { return is_hex ? utils::hexify(value, bytes_length * 2) : std::to_string(value); }
 
+  void setSize(int size) { bytes_length = size; }
+
   uint16_t getValue() { return value; }
 private:
   uint16_t value;
@@ -127,25 +129,29 @@ public:
 
 class ArgRegisterReference : public Argument {
 public:
-  ArgRegisterReference(Register16 reg_id) : reg_id{ reg_id } { arg_type = ArgType::ARG_REGISTER_REF; }
+  ArgRegisterReference(Register16 reg_id) : reg_id{ reg_id }, size{ 1 } { arg_type = ArgType::ARG_REGISTER_REF; }
   virtual ~ArgRegisterReference() = default;
 
   std::string toString() const override { if (tstr_cache.empty()) { tstr_cache = "(" + reg_id.toString() + ")"; } return tstr_cache; }
 
-  Register16 reg_id;
+  void setSize(int size) { this->size = size; tstr_cache = ""; }
 
+  Register16 reg_id;
+  int size;
   mutable std::string tstr_cache;
 };
 
 class ArgMemoryReference : public Argument {
 public:
-  ArgMemoryReference(uint16_t addr) : addr{ addr } { arg_type = ArgType::ARG_MEMORY_REF; }
+  ArgMemoryReference(uint16_t addr) : addr{ addr }, size{ 1 } { arg_type = ArgType::ARG_MEMORY_REF; }
   virtual ~ArgMemoryReference() = default;
 
-  std::string toString() const override { if (tstr_cache.empty()) { tstr_cache = "(ptr_" + utils::hexify(addr) + ")"; } return tstr_cache; }
+  std::string toString() const override { if (tstr_cache.empty()) { tstr_cache = std::string("(") + ((size == 1) ? "byte_" : "word_") + utils::hexify(addr) + ")"; } return tstr_cache; }
+
+  void setSize(int size) { this->size = size; tstr_cache = ""; }
 
   uint16_t addr;
-
+  int size;
   mutable std::string tstr_cache;
 };
 

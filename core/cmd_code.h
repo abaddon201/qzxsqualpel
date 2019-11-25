@@ -23,6 +23,7 @@ public:
     RETN,
     JP,
     JR,
+    DJNZ,
     LD,
     LDI,
     LDD,
@@ -33,7 +34,10 @@ public:
     SET,
     RES,
     BIT,
-    CP
+    CP,
+    AND,
+    OR,
+    XOR
   };
 
   CmdCode() : value{ NONE } {}
@@ -53,6 +57,8 @@ public:
       value = JP;
     } else if (cmd == "JR") {
       value = JR;
+    } else if (cmd == "DJNZ") {
+      value = DJNZ;
     } else if (cmd == "LD") {
       value = LD;
     } else if (cmd == "LDI") {
@@ -75,6 +81,12 @@ public:
       value = BIT;
     } else if (cmd == "CP") {
       value = CP;
+    } else if (cmd == "AND") {
+      value = AND;
+    } else if (cmd == "OR") {
+      value = OR;
+    } else if (cmd == "XOR") {
+      value = XOR;
     } else {
       value = NONE;
     }
@@ -96,6 +108,8 @@ public:
         return "JP";
       case JR:
         return "JR";
+      case DJNZ:
+        return "DJNZ";
       case LD:
         return "LD";
       case LDI:
@@ -118,6 +132,12 @@ public:
         return "BIT";
       case CP:
         return "CP";
+      case AND:
+        return "AND";
+      case OR:
+        return "OR";
+      case XOR:
+        return "XOR";
     }
     return "";
   }
