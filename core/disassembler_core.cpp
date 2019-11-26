@@ -232,6 +232,9 @@ ABBY
 
 0x137c LD HL,5C44
 0x137f BIT 7, (HL)
+
+0x0daf LD HL, 0000 // brakes code at start
+0x0dc9 LD HL, (word_5c51) //wrong label (not inited) 0x1615 - address of first initialization
 */
 std::shared_ptr<Label>
 DisassemblerCore::makeJump(const memory::Addr& from_addr, const memory::Addr& jump_addr, memory::Reference::Type ref_type) {
@@ -387,13 +390,14 @@ void DisassemblerCore::updateRegisterSource(ChunkPtr chunk, int idx, ArgPtr arg)
       auto tst_ref = std::static_pointer_cast<ArgRegister16>(cmd.getArg(0));
       if (reg == tst_ref->reg_id) {
         // found register load, need to update right arg (if it's applicable)
-        if ((cmd.command_code == CmdCode::LD) && (cmd.getArg(1)->arg_type == ArgType::ARG_DEFAULT)) {
+        if (cmd.command_code == CmdCode::LD) 
+          if (cmd.getArg(1)->arg_type == ArgType::ARG_DEFAULT) {
           auto src_ref = std::static_pointer_cast<ArgDefault > (cmd.getArg(1))->getValue();
           auto lbl = makeData(cmd.addr, src_ref, memory::Reference::Type::READ_WORD);
           auto src = std::make_shared<ArgMemoryReference>(src_ref);
           src->setLabel(lbl);
-          return;
         }
+        return;
       }
     }
   }
@@ -405,14 +409,17 @@ size_t DisassemblerCore::postProcessChunk(ChunkPtr chunk, size_t len) {
       len = p->process(chunk, len);
     }
   }
-  /*int idx = 0;
+  if (chunk->addr() == 0x0008) {
+    std::cout << "addr";
+  }
+  int idx = 0;
   for (auto& cmd : chunk->commands()) {
     if ((cmd.command_code == CmdCode::LD) || (cmd.command_code == CmdCode::BIT)) {
       updateRegisterSource(chunk, idx, cmd.getArg(0));
       updateRegisterSource(chunk, idx, cmd.getArg(1));
     }
     idx++;
-  }*/
+  }
   /*if (cmd.isLDICmd()) {
     //findAndMarkDEandHL();
     return len;
