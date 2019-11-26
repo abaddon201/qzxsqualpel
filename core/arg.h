@@ -146,12 +146,24 @@ public:
   ArgMemoryReference(uint16_t addr) : addr{ addr }, size{ 1 } { arg_type = ArgType::ARG_MEMORY_REF; }
   virtual ~ArgMemoryReference() = default;
 
-  std::string toString() const override { if (tstr_cache.empty()) { tstr_cache = std::string("(") + ((size == 1) ? "byte_" : "word_") + utils::hexify(addr) + ")"; } return tstr_cache; }
+  std::string toString() const override {
+    if (tstr_cache.empty()) {
+      if (label != nullptr) {
+        tstr_cache = label->name;
+      } else {
+        tstr_cache = std::string("(") + ((size == 1) ? "byte_" : "word_") + utils::hexify(addr) + ")";
+      }
+    }
+    return tstr_cache;
+  }
 
   void setSize(int size) { this->size = size; tstr_cache = ""; }
 
+  void setLabel(LabelPtr label) { this->label = label; tstr_cache = ""; }
+
   uint16_t addr;
   int size;
+  LabelPtr label;
   mutable std::string tstr_cache;
 };
 

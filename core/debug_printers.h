@@ -28,8 +28,11 @@ inline std::ostream &operator<<(std::ostream &out, Chunk::Type t) {
     case Chunk::Type::DATA_WORD:
       out << "DATA_WORD";
       break;
-    case Chunk::Type::DATA_ARRAY:
-      out << "DATA_ARRAY";
+    case Chunk::Type::DATA_BYTE_ARRAY:
+      out << "DATA_BYTE_ARRAY";
+      break;
+    case Chunk::Type::DATA_WORD_ARRAY:
+      out << "DATA_WORD_ARRAY";
       break;
   }
   return out;

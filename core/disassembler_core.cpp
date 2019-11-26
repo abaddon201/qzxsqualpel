@@ -223,6 +223,8 @@ ABBY
 0x0b56 ADD A,15
 0x0cf4 DJNZ 0x0cf0
 0x0bbd EX AF, AF'
+
+0x5c72 DW ffff
 */
 std::shared_ptr<Label>
 DisassemblerCore::makeJump(const memory::Addr& from_addr, const memory::Addr& jump_addr, memory::Reference::Type ref_type) {
@@ -243,21 +245,75 @@ DisassemblerCore::makeJump(const memory::Addr& from_addr, const memory::Addr& ju
       return nullptr;
     }
   }
-  jmp_chunk->addCrossRef(from_addr, ref_type);
-  std::shared_ptr<Label> lbl{ nullptr };
+  return addCrossRef(jmp_chunk, from_addr, jump_addr, ref_type);
+}
+
+LabelPtr DisassemblerCore::addCrossRef(ChunkPtr chunk, const memory::Addr& from_addr, const memory::Addr& dst_addr, memory::Reference::Type ref_type) {
+  chunk->addCrossRef(from_addr, ref_type);
+  LabelPtr lbl{ nullptr };
   if (_auto_commenter) {
-    lbl = _auto_commenter->getLabelForAddr(jump_addr);
+    lbl = _auto_commenter->getLabelForAddr(dst_addr);
   }
-  if (jmp_chunk->label() == nullptr) {
-    lbl = jmp_chunk->setLabel(lbl, ref_type);
+  if (chunk->label() == nullptr) {
+    lbl = chunk->setLabel(lbl, ref_type);
   } else {
-    lbl = jmp_chunk->label();
+    lbl = chunk->label();
   }
-  if (!labelPresent(jump_addr)) {
+  if (!labelPresent(dst_addr)) {
     //CLabel label(jump_addr, lbl);
-    _labels[jump_addr] = lbl;
+    _labels[dst_addr] = lbl;
   }
   return lbl;
+}
+
+std::shared_ptr<Label>
+DisassemblerCore::makeData(const memory::Addr& from_addr, const memory::Addr& data_addr, memory::Reference::Type ref_type) {
+  auto data_chunk = _chunks.getChunk(data_addr);
+  if (data_chunk == nullptr) {
+    std::cout << "Split chunk at data" << std::endl;
+    // split target chunk
+    auto near_chunk = _chunks.getChunkContains(data_addr);
+    if (near_chunk == 0) {
+      std::cout << "Fatal error on split: No target chunk" << std::endl;
+      return nullptr;
+    }
+    if ((near_chunk->type() == Chunk::Type::DATA_BYTE_ARRAY) || (near_chunk->type() == Chunk::Type::DATA_WORD_ARRAY)) {
+      // here is an array
+      // FIXME: here we must show offset for data in the array and check data access type
+      return addCrossRef(near_chunk, from_addr, data_addr, ref_type);
+    } else {
+      // other cases, such as code (self modifying)
+      std::cout << "Fatal error on split: here is a code or other chunk" << std::endl;
+    }
+    return nullptr;
+  } else {
+    if ((ref_type == memory::Reference::Type::WRITE_BYTE) ||
+      (ref_type == memory::Reference::Type::READ_BYTE)) {
+      _chunks.removeChunk(data_addr);
+      data_chunk = _chunks.createChunk(data_addr, Chunk::Type::DATA_BYTE);
+      Byte byte = _memory.getByte(data_addr);
+      Command cmd;
+      cmd.command = "DB";
+      cmd.addr = data_addr;
+      cmd.len = 1;
+      cmd.setArg(0, std::make_shared<ArgDefault>(byte, 1));
+      data_chunk->appendCommand(cmd);
+    } else if ((ref_type == memory::Reference::Type::WRITE_WORD) ||
+      (ref_type == memory::Reference::Type::READ_WORD)) {
+      _chunks.removeChunk(data_addr);
+      _chunks.removeChunk(data_addr + 1);
+      data_chunk = _chunks.createChunk(data_addr, Chunk::Type::DATA_WORD);
+      Byte bl = _memory.getByte(data_addr);
+      Byte bh = _memory.getByte(data_addr + 1);
+      Command cmd;
+      cmd.command = "DW";
+      cmd.addr = data_addr;
+      cmd.len = 2;
+      cmd.setArg(0, std::make_shared<ArgDefault>((((uint16_t)((uint8_t)bh))<<8)|((uint16_t)((uint8_t)bl)), 2, true));
+      data_chunk->appendCommand(cmd);
+    }
+    return addCrossRef(data_chunk, from_addr, data_addr, ref_type);
+  }
 }
 
 std::string DisassemblerCore::disassembleInstructionInt(const memory::Addr& addr, size_t& len) {

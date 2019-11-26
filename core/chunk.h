@@ -34,14 +34,23 @@ public:
     CODE = 1,
     DATA_BYTE = 2,
     DATA_WORD = 3,
-    DATA_ARRAY = 4
+    DATA_BYTE_ARRAY = 4,
+    DATA_WORD_ARRAY = 5
   };
 
   ~Chunk() = default;
 
   Chunk(const Chunk& ch) { makeCopy(ch); }
 
-  explicit Chunk(const memory::Addr& addr, Chunk::Type type = Chunk::Type::UNKNOWN) : _type(type), _starting_addr(addr), _length{ 0 } {}
+  explicit Chunk(const memory::Addr& addr, Chunk::Type type = Chunk::Type::UNKNOWN) : _type(type), _starting_addr(addr) {
+    if (_type == Type::DATA_BYTE) {
+      _length = 1;
+    } else if (_type == Type::DATA_WORD) {
+      _length = 2;
+    } else {
+      _length = 0;
+    }
+  }
 
   Chunk& operator=(const Chunk& ch) {
     makeCopy(ch);
@@ -116,6 +125,8 @@ private:
   ///@brief Длина блока
   size_type _length{};
 };
+
+using ChunkPtr = std::shared_ptr<Chunk>;
 
 }
 }

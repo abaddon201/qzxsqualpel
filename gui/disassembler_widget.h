@@ -46,6 +46,7 @@ private:
   //C++14 atributes -- http://en.cppreference.com/w/cpp/language/attributes
   [[deprecated]] void printChunkUnparsed(QTextCursor& cursor, std::shared_ptr<GUIChunk> chunk);
   void printChunkCode(QTextCursor& cursor, std::shared_ptr<GUIChunk> chunk);
+  void printChunkData(QTextCursor& cursor, std::shared_ptr<GUIChunk> chunk);
 
   void navigateToAddrDlg();
 

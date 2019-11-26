@@ -201,6 +201,11 @@ void Command::updateArgs() {
         }
       }
     }
+    if (a1->arg_type == ArgType::ARG_MEMORY_REF) {
+      std::shared_ptr<ArgMemoryReference> a1ref = std::static_pointer_cast<ArgMemoryReference>(a1);
+      auto lbl = DisassemblerCore::inst().makeData(addr, a1ref->addr, a1ref->size == 1 ? memory::Reference::Type::WRITE_BYTE : memory::Reference::Type::WRITE_WORD);
+      a1ref->setLabel(lbl);
+    }
   }
 }
 
