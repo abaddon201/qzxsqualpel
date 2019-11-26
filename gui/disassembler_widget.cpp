@@ -267,7 +267,7 @@ void DisassemblerWidget::printCommand(QTextCursor& cursor, const Command& cmd) {
   }
   printCell(cursor, cmd.getOpcodesString(), _cell_length_opcodes, _cell_format_opcodes);
   printCell(cursor, std::string(), _cell_length_label, _cell_format_label);
-  printCell(cursor, cmd.command, _cell_length_command, _cell_format_command);
+  printCell(cursor, cmd.command_code.toString(), _cell_length_command, _cell_format_command);
   printCell(cursor, cmd.getArgsString(), _cell_length_args, _cell_format_args);
   if (!cmd.comment.empty()) {
     printCell(cursor, std::string(";") + cmd.comment, _cell_length_cmd_comment, _cell_format_cmd_comment);

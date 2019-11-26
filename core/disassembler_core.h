@@ -75,7 +75,8 @@ private:
 
   bool labelPresent(const memory::Addr& addr) const;
 
-  size_t postProcessChunk(std::shared_ptr<Chunk> chunk, size_t len);
+  void updateRegisterSource(ChunkPtr chunk, int idx, ArgPtr arg);
+  size_t postProcessChunk(ChunkPtr chunk, size_t len);
 
   ///@brief кого оповещать об обновлении состояния
   IGUIUpdater* updater;

@@ -82,7 +82,9 @@ public:
     CPIR,
     CPDR,
     ADD,
-    ADC
+    ADC,
+    DB,
+    DW
   };
 
   CmdCode() : value{ NONE } {}
@@ -222,12 +224,17 @@ public:
       value = ADD;
     } else if (cmd == "ADC") {
       value = ADC;
+    } else if (cmd == "DB") {
+      value = DB;
+    } else if (cmd == "DW") {
+      value = DW;
     } else {
       value = NONE;
+      throw std::runtime_error("Unknown command: " + cmd);
     }
   }
 
-  std::string toString() {
+  std::string toString() const {
     switch (value) {
       case CALL:
         return "CALL";
@@ -363,6 +370,10 @@ public:
         return "ADD";
       case ADC:
         return "ADC";
+      case DB:
+        return "DB";
+      case DW:
+        return "DW";
     }
     return "";
   }

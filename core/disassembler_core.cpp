@@ -45,7 +45,8 @@ void DisassemblerCore::initialParse() {
   for (unsigned long long i = 0; i < _memory.wholeSize(); ++i) {
     std::shared_ptr<Chunk> chunk = _chunks.createChunk(i, Chunk::Type::UNPARSED);
     Byte byte = _memory.getByte(i);
-    cmd.command = "db";
+    //cmd.command = "db";
+    cmd.command_code = CmdCode::NONE;
     cmd.addr = i;
     cmd.len = 1;
     cmd.setArg(0, std::make_shared<ArgDefault>(byte, 1));
@@ -225,6 +226,12 @@ ABBY
 0x0bbd EX AF, AF'
 
 0x5c72 DW ffff
+
+0x1222 LD HL, (word_5cb2)
+0x1225 LD (HL), 3e
+
+0x137c LD HL,5C44
+0x137f BIT 7, (HL)
 */
 std::shared_ptr<Label>
 DisassemblerCore::makeJump(const memory::Addr& from_addr, const memory::Addr& jump_addr, memory::Reference::Type ref_type) {
@@ -293,7 +300,7 @@ DisassemblerCore::makeData(const memory::Addr& from_addr, const memory::Addr& da
       data_chunk = _chunks.createChunk(data_addr, Chunk::Type::DATA_BYTE);
       Byte byte = _memory.getByte(data_addr);
       Command cmd;
-      cmd.command = "DB";
+      cmd.command_code = CmdCode::DB;
       cmd.addr = data_addr;
       cmd.len = 1;
       cmd.setArg(0, std::make_shared<ArgDefault>(byte, 1));
@@ -306,10 +313,10 @@ DisassemblerCore::makeData(const memory::Addr& from_addr, const memory::Addr& da
       Byte bl = _memory.getByte(data_addr);
       Byte bh = _memory.getByte(data_addr + 1);
       Command cmd;
-      cmd.command = "DW";
+      cmd.command_code = CmdCode::DW;
       cmd.addr = data_addr;
       cmd.len = 2;
-      cmd.setArg(0, std::make_shared<ArgDefault>((((uint16_t)((uint8_t)bh))<<8)|((uint16_t)((uint8_t)bl)), 2, true));
+      cmd.setArg(0, std::make_shared<ArgDefault>((((uint16_t)((uint8_t)bh)) << 8) | ((uint16_t)((uint8_t)bl)), 2, true));
       data_chunk->appendCommand(cmd);
     }
     return addCrossRef(data_chunk, from_addr, data_addr, ref_type);
@@ -367,13 +374,45 @@ JumpType DisassemblerCore::getLastCmdJumpType(std::shared_ptr<Chunk> chunk, memo
   return dasm::core::JumpType::JT_NONE;
 }
 
+void DisassemblerCore::updateRegisterSource(ChunkPtr chunk, int idx, ArgPtr arg) {
+  if (arg->arg_type != ArgType::ARG_REGISTER_REF) {
+    return;
+  }
+  auto arg_ref = std::static_pointer_cast<ArgRegisterReference>(arg);
+  auto reg = arg_ref->reg_id;
+  for (int i = idx; i >= 0; i--) {
+    auto& cmd = chunk->commands()[i];
+    //TODO also check register halves
+    if ((cmd.getArgsCount() > 0) && (cmd.getArg(0)->arg_type == ArgType::ARG_REGISTER16)) {
+      auto tst_ref = std::static_pointer_cast<ArgRegister16>(cmd.getArg(0));
+      if (reg == tst_ref->reg_id) {
+        // found register load, need to update right arg (if it's applicable)
+        if ((cmd.command_code == CmdCode::LD) && (cmd.getArg(1)->arg_type == ArgType::ARG_DEFAULT)) {
+          auto src_ref = std::static_pointer_cast<ArgDefault > (cmd.getArg(1))->getValue();
+          auto lbl = makeData(cmd.addr, src_ref, memory::Reference::Type::READ_WORD);
+          auto src = std::make_shared<ArgMemoryReference>(src_ref);
+          src->setLabel(lbl);
+          return;
+        }
+      }
+    }
+  }
+}
 
-size_t DisassemblerCore::postProcessChunk(std::shared_ptr<core::Chunk> chunk, size_t len) {
+size_t DisassemblerCore::postProcessChunk(ChunkPtr chunk, size_t len) {
   for (auto& p : _postprocessors) {
     if (p->checkPrecondition(chunk)) {
       len = p->process(chunk, len);
     }
   }
+  /*int idx = 0;
+  for (auto& cmd : chunk->commands()) {
+    if ((cmd.command_code == CmdCode::LD) || (cmd.command_code == CmdCode::BIT)) {
+      updateRegisterSource(chunk, idx, cmd.getArg(0));
+      updateRegisterSource(chunk, idx, cmd.getArg(1));
+    }
+    idx++;
+  }*/
   /*if (cmd.isLDICmd()) {
     //findAndMarkDEandHL();
     return len;

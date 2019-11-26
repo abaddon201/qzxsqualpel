@@ -29,7 +29,7 @@ namespace core {
 ///@brief Структура описывающая одну команду ассемблера
 struct Command {
   ///@brief символьное представление команды
-  std::string command;
+  //std::string command;
   ///@brief числовое представление команды (не обязательно опкод)
   CmdCode command_code;
   ///@brief комментарий к команде
@@ -48,7 +48,7 @@ struct Command {
     addr = c.addr;
     len = c.len;
     command_code = c.command_code;
-    command = c.command;
+    //command = c.command;
     args = c.args;
     comment = c.comment;
     auto_comment = c.auto_comment;
@@ -66,7 +66,7 @@ struct Command {
     addr = c.addr;
     len = c.len;
     command_code = c.command_code;
-    command = c.command;
+    //command = c.command;
     args = c.args;
     comment = c.comment;
     auto_comment = c.auto_comment;

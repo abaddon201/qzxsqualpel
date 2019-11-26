@@ -77,6 +77,7 @@ public:
   ArgLabel(std::shared_ptr<Label> l) : label{ std::move(l) } { arg_type = ArgType::ARG_LABEL; }
   virtual ~ArgLabel() = default;
 
+  //std::string toString() const override { return "(" + label->name + ")"; }
   std::string toString() const override { return label->name; }
 
   std::shared_ptr<Label> label;
@@ -149,9 +150,9 @@ public:
   std::string toString() const override {
     if (tstr_cache.empty()) {
       if (label != nullptr) {
-        tstr_cache = label->name;
+        tstr_cache = std::string("(") + label->name + ")";
       } else {
-        tstr_cache = std::string("(") + ((size == 1) ? "byte_" : "word_") + utils::hexify(addr) + ")";
+        tstr_cache = std::string("(") + ((size == 1) ? "b_" : "w_") + utils::hexify(addr) + ")";
       }
     }
     return tstr_cache;
