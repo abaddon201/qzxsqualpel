@@ -11,7 +11,13 @@
 namespace dasm {
 namespace core {
 
-enum class ArgType {
+enum class ArgSize : uint8_t {
+  Flag = 0,
+  Byte = 1,
+  Word = 2
+};
+
+enum class ArgType : uint8_t {
   ARG_DEFAULT,
   ARG_LABEL,
   ARG_FLAG,
@@ -36,27 +42,37 @@ enum class ArgType {
 ///@brief базовый класс для аргументов
 class Argument {
 public:
+  explicit Argument(ArgSize size) : size{ size } {}
+
   virtual std::string toString() const = 0;
+  ArgSize getSize() const {
+    return size;
+  }
+
+  void setSize(ArgSize sz) { size = sz; tstr_cache = ""; }
+
+  int getBytesSize() const { return size == ArgSize::Byte ? 1 : 2; }
+
   virtual ~Argument() = default;
+
+  ArgSize size;
   ArgType arg_type;
+  mutable std::string tstr_cache;
 };
 
 using ArgPtr = std::shared_ptr<Argument>;
 
 class ArgDefault : public Argument {
 public:
-  explicit ArgDefault(Byte& s, uint8_t bytes_length) : value{ (uint8_t)s }, bytes_length{ bytes_length }, is_hex{ true } { arg_type = ArgType::ARG_DEFAULT; }
-  explicit ArgDefault(uint16_t s, uint8_t bytes_length, bool is_hex) : value{ s }, bytes_length{ bytes_length }, is_hex{ is_hex } { arg_type = ArgType::ARG_DEFAULT; }
+  explicit ArgDefault(Byte& s) : Argument(ArgSize::Byte), value{ (uint8_t)s }, is_hex{ true } { arg_type = ArgType::ARG_DEFAULT; }
+  explicit ArgDefault(uint16_t s, ArgSize bytes_length, bool is_hex) : Argument(bytes_length), value{ s }, is_hex{ is_hex } { arg_type = ArgType::ARG_DEFAULT; }
   virtual ~ArgDefault() = default;
 
-  std::string toString() const override { return is_hex ? utils::hexify(value, bytes_length * 2) : std::to_string(value); }
-
-  void setSize(int size) { bytes_length = size; }
+  std::string toString() const override { return is_hex ? utils::hexify(value, getBytesSize() * 2) : std::to_string(value); }
 
   uint16_t getValue() { return value; }
 private:
   uint16_t value;
-  uint8_t bytes_length;
   bool is_hex;
 };
 
@@ -64,7 +80,7 @@ using ArgDefaultPtr = std::shared_ptr<ArgDefault>;
 
 class ArgPort : public Argument {
 public:
-  explicit ArgPort(uint8_t s) : value{ s } { arg_type = ArgType::ARG_PORT; }
+  explicit ArgPort(uint8_t s) : Argument(ArgSize::Byte), value{ s } { arg_type = ArgType::ARG_PORT; }
   virtual ~ArgPort() = default;
 
   std::string toString() const override { return "(" + utils::hexify(value, 2) + ")"; }
@@ -72,20 +88,19 @@ private:
   uint16_t value;
 };
 
-class ArgLabel : public Argument {
+/*class ArgLabel : public Argument {
 public:
   ArgLabel(std::shared_ptr<Label> l) : label{ std::move(l) } { arg_type = ArgType::ARG_LABEL; }
   virtual ~ArgLabel() = default;
 
-  //std::string toString() const override { return "(" + label->name + ")"; }
   std::string toString() const override { return label->name; }
 
   std::shared_ptr<Label> label;
-};
+};*/
 
 class ArgFlag : public Argument {
 public:
-  ArgFlag(Flag f) : flag{ f } { arg_type = ArgType::ARG_FLAG; }
+  ArgFlag(Flag f) : Argument(ArgSize::Flag), flag{ f } { arg_type = ArgType::ARG_FLAG; }
   virtual ~ArgFlag() = default;
 
   std::string toString() const override { return flag.toString(); }
@@ -95,7 +110,7 @@ public:
 
 class ArgRegister8 : public Argument {
 public:
-  ArgRegister8(Register8 reg_id) : reg_id{ reg_id } { arg_type = ArgType::ARG_REGISTER8; }
+  ArgRegister8(Register8 reg_id) : Argument(ArgSize::Byte), reg_id{ reg_id } { arg_type = ArgType::ARG_REGISTER8; }
   virtual ~ArgRegister8() = default;
 
   std::string toString() const override { return reg_id.toString(); }
@@ -105,7 +120,7 @@ public:
 
 class ArgRegister16 : public Argument {
 public:
-  ArgRegister16(Register16 reg_id) : reg_id{ reg_id } { arg_type = ArgType::ARG_REGISTER16; }
+  ArgRegister16(Register16 reg_id) : Argument(ArgSize::Word), reg_id{ reg_id } { arg_type = ArgType::ARG_REGISTER16; }
   virtual ~ArgRegister16() = default;
 
   std::string toString() const override { return reg_id.toString(); }
@@ -115,7 +130,7 @@ public:
 
 class ArgRegisterOffset : public Argument {
 public:
-  ArgRegisterOffset(Register16 reg_id, const std::string& offs, bool is_positive) : reg_id{ reg_id }, is_positive{ is_positive } {
+  ArgRegisterOffset(Register16 reg_id, const std::string& offs, bool is_positive) : Argument(ArgSize::Byte), reg_id{ reg_id }, is_positive{ is_positive } {
     arg_type = ArgType::ARG_REGISTER_OFFSET;
     offset = (uint8_t)utils::hex2int(offs);
   }
@@ -130,40 +145,47 @@ public:
 
 class ArgRegisterReference : public Argument {
 public:
-  ArgRegisterReference(Register16 reg_id) : reg_id{ reg_id }, size{ 1 } { arg_type = ArgType::ARG_REGISTER_REF; }
+  ArgRegisterReference(Register16 reg_id) : Argument(ArgSize::Byte), reg_id{ reg_id } { arg_type = ArgType::ARG_REGISTER_REF; }
   virtual ~ArgRegisterReference() = default;
 
   std::string toString() const override { if (tstr_cache.empty()) { tstr_cache = "(" + reg_id.toString() + ")"; } return tstr_cache; }
 
-  void setSize(int size) { this->size = size; tstr_cache = ""; }
-
   Register16 reg_id;
-  int size;
-  mutable std::string tstr_cache;
 };
 
 class ArgMemoryReference : public Argument {
 public:
-  ArgMemoryReference(uint16_t addr) : addr{ addr }, size{ 1 } { arg_type = ArgType::ARG_MEMORY_REF; }
+  ArgMemoryReference(uint16_t addr, bool isReference) : Argument(ArgSize::Byte), addr{ addr }, isReference{ isReference } { arg_type = ArgType::ARG_MEMORY_REF; }
+  ArgMemoryReference(LabelPtr label, bool isReference) : Argument(ArgSize::Byte), label{ label }, isReference{ isReference } {
+    arg_type = ArgType::ARG_MEMORY_REF; 
+    addr = label->addr.offset();
+  }
+
   virtual ~ArgMemoryReference() = default;
 
   std::string toString() const override {
     if (tstr_cache.empty()) {
-      if (label != nullptr) {
-        tstr_cache = std::string("(") + label->name + ")";
+      if (isReference) {
+        if (label != nullptr) {
+          tstr_cache = std::string("(") + label->name + ")";
+        } else {
+          tstr_cache = std::string("(") + ((size == ArgSize::Byte) ? "b_" : "w_") + utils::hexify(addr) + ")";
+        }
       } else {
-        tstr_cache = std::string("(") + ((size == 1) ? "b_" : "w_") + utils::hexify(addr) + ")";
+        if (label != nullptr) {
+          tstr_cache = label->name;
+        } else {
+          tstr_cache = ((size == ArgSize::Byte) ? "b_" : "w_") + utils::hexify(addr);
+        }
       }
     }
     return tstr_cache;
   }
 
-  void setSize(int size) { this->size = size; tstr_cache = ""; }
-
   void setLabel(LabelPtr label) { this->label = label; tstr_cache = ""; }
 
+  bool isReference;
   uint16_t addr;
-  int size;
   LabelPtr label;
   mutable std::string tstr_cache;
 };
