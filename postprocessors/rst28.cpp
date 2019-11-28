@@ -6,13 +6,13 @@
 namespace dasm {
 namespace postprocessors {
 
-bool Rst28::checkPrecondition(std::shared_ptr<core::Chunk> chunk) {
+bool Rst28::checkPrecondition(core::ChunkPtr chunk) {
   auto& cmd = chunk->lastCommand();
   //FIXME: must get as bin value
   return ((cmd.command_code == core::CmdCode::RST) && (std::dynamic_pointer_cast<core::ArgDefault>(cmd.getArg(0))->getValue() == 0x28));
 }
 
-size_t Rst28::process(std::shared_ptr<core::Chunk> chunk, size_t len) {
+size_t Rst28::process(core::ChunkPtr chunk, size_t len) {
   /// RST 28 Нужно анализировать особо... после RST располагается набор инструкций для вычислений (bcalc)
   /// Пример:
   /// 2E24 PF-SMALL RST 0028, FP-CALC

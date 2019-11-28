@@ -75,8 +75,6 @@ private:
 
   bool labelPresent(const memory::Addr& addr) const;
 
-  void updateRegisterSource(ChunkPtr chunk, int idx, ArgPtr arg, ArgSize size);
-  void updateRegisterSource(ChunkPtr chunk, int idx, Register16 reg, ArgSize size);
   size_t postProcessChunk(ChunkPtr chunk, size_t len);
 
   ///@brief кого оповещать об обновлении состояния
