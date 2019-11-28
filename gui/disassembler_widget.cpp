@@ -245,16 +245,16 @@ void DisassemblerWidget::printReferences(QTextCursor& cursor, std::shared_ptr<GU
   int skip_len2 =
     _cell_length_addr + _cell_length_opcodes + _cell_length_label + _cell_length_command + _cell_length_args;
 
-  int l = 0;
-  for (auto ref : chunk->core()->references()) {
-    if (l == 0) {
+  bool is_first = true;
+  for (auto &ref : chunk->core()->references()) {
+    if (is_first) {
       printCell(cursor, std::string(), skip_len);
-      l = 1;
+      is_first = false;
     } else {
+      cursor.insertText("\n");
       printCell(cursor, std::string(), skip_len2);
     }
     printCell(cursor, ref.toString(), _cell_length_reference, _cell_format_reference);
-    cursor.insertText("\n");
   }
 }
 
