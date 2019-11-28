@@ -20,6 +20,7 @@ public:
   DisassemblerWidget(MainWindow* mwnd);
 
   void openRAWFile(const QString& fileName);
+  void saveProjectFile(const QString& fileName);
   void saveASMFile(const QString& fileName);
   void keyPressEvent(QKeyEvent*);
 
@@ -34,6 +35,7 @@ public:
 public slots:
   void changeNameUnderCursor();
   void makeCodeUnderCursor();
+  void makeArrayUnderCursor();
   void commentCommandUnderCursor();
 
 private:

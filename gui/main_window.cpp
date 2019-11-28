@@ -40,7 +40,8 @@ void MainWindow::setupMenu() {
   menuBar()->addMenu(fileMenu);
 
   fileMenu->addAction(tr("&Open..."), this, SLOT(openFile()), QKeySequence(tr("Ctrl+O", "File|Open")));
-  fileMenu->addAction(tr("&Save ASM..."), this, SLOT(saveFile()), QKeySequence(tr("Ctrl+S", "File|Save ASM")));
+  fileMenu->addAction(tr("&Save project..."), this, SLOT(saveProject()), QKeySequence(tr("Ctrl+S", "File|Save")));
+  fileMenu->addAction(tr("&Save ASM..."), this, SLOT(saveAsm()), QKeySequence(tr("Ctrl+D", "File|Save ASM")));
   fileMenu->addAction(tr("E&xit"), qApp, SLOT(quit()), QKeySequence(tr("Ctrl+Q", "File|Exit")));
 
   QMenu *disassmMenu = new QMenu(tr("&Disassm"), this);
@@ -48,6 +49,8 @@ void MainWindow::setupMenu() {
 
   disassmMenu->addAction(tr("&Code"), _disassembler_widget, SLOT(makeCodeUnderCursor()),
                          QKeySequence(tr("C", "Disassm|Code")));
+  disassmMenu->addAction(tr("Array"), _disassembler_widget, SLOT(makeArrayUnderCursor()),
+                         QKeySequence(tr("*", "Disassm|Code")));
   disassmMenu->addSeparator();
   disassmMenu->addAction(tr("Comment command..."), _disassembler_widget, SLOT(commentCommandUnderCursor()),
                          QKeySequence(tr(";", "Disassm|Comment command")));
@@ -74,9 +77,16 @@ void MainWindow::loadGuesses() {
   }
 }
 
-void MainWindow::saveFile() {
-  QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "", "ASM Files (*.asm)");
+void MainWindow::saveAsm() {
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save Asm"), "", "ASM Files (*.asm)");
   if (!fileName.isEmpty()) {
     _disassembler_widget->saveASMFile(fileName);
+  }
+}
+
+void MainWindow::saveProject() {
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save Project"), "", "Project files (*.qzx)");
+  if (!fileName.isEmpty()) {
+    _disassembler_widget->saveProjectFile(fileName);
   }
 }

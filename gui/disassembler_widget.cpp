@@ -5,14 +5,18 @@
 #include "make_array_dlg.h"
 
 #include "disassembler_widget.h"
+#include "files/project.h"
 
 #include <QFile>
 #include <QTextTable>
 #include <QKeyEvent>
 #include <QTextDocumentWriter>
 #include <QPainter>
+#include <QMessageBox>
 
 #include <memory>
+#include <iostream>
+#include <fstream>
 
 #include "main_window.h"
 #include "widget_change_text.h"
@@ -135,6 +139,21 @@ void DisassemblerWidget::makeCodeUnderCursor() {
   }
 }
 
+void DisassemblerWidget::makeArrayUnderCursor() {
+  //make array
+  QTextCursor cursor(textCursor());
+  qDebug() << "GUI: make array:" << cursor.block().text();
+  qDebug() << "GUI: Cursor pos:" << cursor.position();
+  std::shared_ptr<GUIChunk> chunk = _chunks.getChunkByPosition(cursor.position());
+  if (nullptr == chunk) {
+    return;
+  }
+  if (chunk->core()->isEmpty() || chunk->core()->isSimpleData()) {
+    MakeArrayDlg a{ this };
+    a();
+  }
+}
+
 void DisassemblerWidget::makeArray(int size, bool clearMem) {
   QTextCursor cursor(textCursor());
   std::shared_ptr<GUIChunk> chunk = _chunks.getChunkByPosition(cursor.position());
@@ -158,21 +177,9 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
     case Qt::Key_D:
       // must datefi under cursor
       return;
-    case Qt::Key_Asterisk: {
-      //make array
-      QTextCursor cursor(textCursor());
-      qDebug() << "GUI: make array:" << cursor.block().text();
-      qDebug() << "GUI: Cursor pos:" << cursor.position();
-      std::shared_ptr<GUIChunk> chunk = _chunks.getChunkByPosition(cursor.position());
-      if (nullptr == chunk) {
-        return;
-      }
-      if (chunk->core()->isEmpty() || chunk->core()->isSimpleData()) {
-        MakeArrayDlg a{ this };
-        a();
-      }
+    case Qt::Key_Asterisk:
+      makeArrayUnderCursor();
       return;
-    }
     case Qt::Key_U:
       // must uncode and undatefy under cursor
       return;
@@ -228,9 +235,22 @@ void DisassemblerWidget::openRAWFile(const QString& fileName) {
   loaded = fread(buf, 1, 65536, f);
   fclose(f);
   dasm::core::DisassemblerCore::inst().setRawMemory(buf, loaded);
+  dasm::core::DisassemblerCore::inst().setFileName(fileName.toStdString());
   delete[] buf;
   ///@fixme: Add checks
   dasm::core::DisassemblerCore::inst().initialParse();
+}
+
+void DisassemblerWidget::saveProjectFile(const QString& fileName) {
+  std::ofstream file;
+  file.open(fileName.toStdString());
+  if (!file.is_open()) {
+    QMessageBox::information(this, tr("Unable to open file"), fileName);
+    return;
+  }
+  std::string res = dasm::files::project::Serializer::serialize(dasm::core::DisassemblerCore::inst());
+  file << res;
+  file.close();
 }
 
 void DisassemblerWidget::saveASMFile(const QString& fileName) {

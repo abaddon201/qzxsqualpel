@@ -34,7 +34,9 @@ private slots:
 
   void openFile();
 
-  void saveFile();
+  void saveProject();
+
+  void saveAsm();
 };
 
 #endif

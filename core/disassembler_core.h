@@ -66,6 +66,14 @@ public:
 
   JumpType getLastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr);
 
+  std::string getFileName() const { return _file_name; }
+  void setFileName(const std::string& file_name) { _file_name = file_name; }
+
+  memory::AddrPtr getEntryPoint() const { return _entry_point; }
+  void setEntryPoint(memory::AddrPtr entry_point) { _entry_point = entry_point; }
+
+  std::shared_ptr<postprocessors::AutoCommenter> getAutocommenter() const { return _auto_commenter; }
+
   static DisassemblerCore& inst() {
     static DisassemblerCore _inst;
     return _inst;
@@ -88,6 +96,9 @@ private:
   ///@brief метки, собранные в результате дизасма
   Labels _labels;
 
+  std::string _file_name;
+
+  memory::AddrPtr _entry_point;
   std::shared_ptr<postprocessors::AutoCommenter> _auto_commenter;
   std::vector<std::shared_ptr<postprocessors::IPostProcessor>> _postprocessors;
 };
