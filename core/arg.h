@@ -78,6 +78,73 @@ private:
 
 using ArgDefaultPtr = std::shared_ptr<ArgDefault>;
 
+class ArgByteArray : public Argument {
+public:
+  explicit ArgByteArray(int length) : Argument(ArgSize::Byte) {
+    arg_type = ArgType::ARG_DEFAULT;
+  }
+  virtual ~ArgByteArray() = default;
+
+  std::string toString() const override { 
+    if (tstr_cache.empty()) {
+      auto it = bytes.begin();
+      auto p_val = *it;
+      ++it;
+      int count = 1;
+      bool isFirst = true;
+      do {
+        auto v = *it;
+        if (v == p_val) {
+          ++count;
+        } else {
+          if (isFirst) {
+            isFirst = false;
+          } else {
+            tstr_cache += ", ";
+          }
+          if (count != 1) {
+            tstr_cache += p_val.toString() + "(" + std::to_string(count) + ")";
+          } else {
+            tstr_cache += p_val.toString();
+          }
+          count = 1;
+          p_val = v;
+        }
+        ++it;
+      } while (it != bytes.end());
+      if (isFirst) {
+        isFirst = false;
+      } else {
+        tstr_cache += ", ";
+      }
+      if (count != 1) {
+        tstr_cache += p_val.toString() + "(" + std::to_string(count) + ")";
+      } else {
+        tstr_cache += p_val.toString();
+      }
+    }
+    return tstr_cache; 
+  }
+
+  void pushByte(const Byte& b) {
+    if (!bytes.empty()) {
+      const auto& last = bytes.back();
+      if (b == last) {
+        //continue sequence
+      } else {
+        //finish sequence
+      }
+    }
+    bytes.push_back(b);
+
+  }
+
+private:
+  std::vector<Byte> bytes;
+};
+
+using ArgByteArrayPtr = std::shared_ptr<ArgByteArray>;
+
 class ArgPort : public Argument {
 public:
   explicit ArgPort(uint8_t s) : Argument(ArgSize::Byte), value{ s } { arg_type = ArgType::ARG_PORT; }
@@ -157,7 +224,7 @@ class ArgMemoryReference : public Argument {
 public:
   ArgMemoryReference(uint16_t addr, bool isReference) : Argument(ArgSize::Byte), addr{ addr }, isReference{ isReference } { arg_type = ArgType::ARG_MEMORY_REF; }
   ArgMemoryReference(LabelPtr label, bool isReference) : Argument(ArgSize::Byte), label{ label }, isReference{ isReference } {
-    arg_type = ArgType::ARG_MEMORY_REF; 
+    arg_type = ArgType::ARG_MEMORY_REF;
     addr = label->addr.offset();
   }
 

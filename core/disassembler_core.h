@@ -60,6 +60,8 @@ public:
 
   std::shared_ptr<Label> makeData(const memory::Addr& from_addr, const memory::Addr& data_addr, memory::Reference::Type ref_type);
 
+  void makeArray(const memory::Addr& from_addr, int size, bool clearMem);
+
   LabelPtr addCrossRef(ChunkPtr chunk, const memory::Addr& from_addr, const memory::Addr& dst_addr, memory::Reference::Type ref_type);
 
   JumpType getLastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr);

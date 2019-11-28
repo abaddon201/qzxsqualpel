@@ -375,7 +375,7 @@ public:
       case DW:
         return "DW";
     }
-    return "";
+    return "db"; //unknown/unparsed
   }
 
   constexpr CmdCode(Value cmd) : value(cmd) {}

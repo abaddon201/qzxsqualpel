@@ -342,6 +342,31 @@ DisassemblerCore::makeData(const memory::Addr& from_addr, const memory::Addr& da
   }
 }
 
+void DisassemblerCore::makeArray(const memory::Addr& from_addr, int size, bool clearMem) {
+  if (clearMem) {
+    memory::Addr addr = from_addr;
+    int sz = size;
+    for (; sz != 0; sz--, ++addr) {
+      _memory.setByte(addr, Byte(0));
+    }
+  }
+  memory::Addr addr = from_addr;
+  auto chunk = std::make_shared<Chunk>(from_addr, Chunk::Type::DATA_BYTE_ARRAY);
+  Command cmd;
+  cmd.command_code = CmdCode::DB;
+  cmd.addr = from_addr;
+  cmd.len = size;
+  auto arg = std::make_shared<ArgByteArray>(size);
+  for (; size != 0; size--, ++addr) {
+    _chunks.removeChunk(addr);
+    Byte byte = _memory.getByte(addr);
+    arg->pushByte(byte);
+  }
+  cmd.setArg(0, arg);
+  chunk->appendCommand(cmd);
+  _chunks.addChunk(from_addr, chunk);
+}
+
 std::string DisassemblerCore::disassembleInstructionInt(const memory::Addr& addr, size_t& len) {
   char tbuff[128];
   debugger_disassemble(tbuff, 128, &len, (libspectrum_word)addr.offset());

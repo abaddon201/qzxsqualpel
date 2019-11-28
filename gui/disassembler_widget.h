@@ -26,6 +26,8 @@ public:
   ///@brief Показать на экране код с меткой под номером
   void navigateToAddress(const dasm::memory::Addr& addr);
 
+  void makeArray(int size, bool clearMem);
+
   void paintEvent(QPaintEvent* event);
   void refreshView();
 

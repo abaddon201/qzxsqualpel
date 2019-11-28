@@ -36,9 +36,19 @@ public:
   inline size_type dataSize() const { return _dataSize; }
 
   inline core::Byte getByte(size_type offset) const {
-    if (offset < _dataSize)
+    if (offset < _dataSize) {
       return _mem[offset];
-    else throw std::out_of_range("offset:" + std::to_string(offset) + ", max:" + std::to_string(_dataSize));
+    } else {
+      throw std::out_of_range("offset:" + std::to_string(offset) + ", max:" + std::to_string(_dataSize));
+    }
+  }
+
+  inline void setByte(size_type offset, core::Byte& b) {
+    if (offset < _dataSize) {
+      _mem[offset] = b;
+    } else {
+      throw std::out_of_range("offset:" + std::to_string(offset) + ", max:" + std::to_string(_dataSize));
+    }
   }
 
 private:

@@ -1,7 +1,8 @@
 #include <QDebug>
 #include "qt_debug_printers.h"
 
-#include "helper_widgets.h"
+#include "navigate_to_addr_dlg.h"
+#include "make_array_dlg.h"
 
 #include "disassembler_widget.h"
 
@@ -134,6 +135,20 @@ void DisassemblerWidget::makeCodeUnderCursor() {
   }
 }
 
+void DisassemblerWidget::makeArray(int size, bool clearMem) {
+  QTextCursor cursor(textCursor());
+  std::shared_ptr<GUIChunk> chunk = _chunks.getChunkByPosition(cursor.position());
+  if (nullptr == chunk) {
+    return;
+  }
+  if (chunk->core()->isEmpty() || chunk->core()->isSimpleData()) {
+    const auto& ret_addr = chunk->core()->addr();
+    dasm::core::DisassemblerCore::inst().makeArray(ret_addr, size, clearMem);
+    refreshView();
+    navigateToAddress(ret_addr);
+  }
+}
+
 void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
   switch (event->key()) {
     case Qt::Key_C:
@@ -143,6 +158,21 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
     case Qt::Key_D:
       // must datefi under cursor
       return;
+    case Qt::Key_Asterisk: {
+      //make array
+      QTextCursor cursor(textCursor());
+      qDebug() << "GUI: make array:" << cursor.block().text();
+      qDebug() << "GUI: Cursor pos:" << cursor.position();
+      std::shared_ptr<GUIChunk> chunk = _chunks.getChunkByPosition(cursor.position());
+      if (nullptr == chunk) {
+        return;
+      }
+      if (chunk->core()->isEmpty() || chunk->core()->isSimpleData()) {
+        MakeArrayDlg a{ this };
+        a();
+      }
+      return;
+    }
     case Qt::Key_U:
       // must uncode and undatefy under cursor
       return;
