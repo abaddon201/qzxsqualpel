@@ -333,7 +333,6 @@ std::string DisassemblerCore::disassembleInstructionInt(const memory::Addr& addr
 }
 
 JumpType DisassemblerCore::getLastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr) {
-  ///@bug rst 28 not last command in the chunk
   Command& cmd = chunk->lastCommand();
   if ((cmd.command_code == CmdCode::CALL) || (cmd.command_code == CmdCode::RST)) {
     jump_addr = cmd.getJmpAddrFromString();
