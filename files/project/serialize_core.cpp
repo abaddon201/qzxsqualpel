@@ -41,7 +41,6 @@ void serializeAutocommenter(const core::DisassemblerCore& core, rapidjson::Docum
   rapidjson::Value klsj{};
   klsj.SetObject();
 
-
   for (const auto& kl : core.getAutocommenter()->getKnownLabels()) {
     rapidjson::Value klj = serializeKnownLabel(kl, allocator);
     klsj.AddMember("label", klj, allocator);
@@ -50,6 +49,47 @@ void serializeAutocommenter(const core::DisassemblerCore& core, rapidjson::Docum
   ac.AddMember("known_labels", klsj, allocator);
 
   doc.AddMember("auto_commenter", ac, allocator);
+}
+
+std::string segmentTypeToString(memory::Segment::Type type) {
+  switch (type) {
+    case memory::Segment::Type::RAW:
+      return "RAW";
+    case memory::Segment::Type::CODE:
+      return "CODE";
+    case memory::Segment::Type::DATA:
+      return "DATA";
+  }
+  throw std::runtime_error("unknown segment id: " + std::to_string((int)type));
+}
+rapidjson::Value serializeSegment(const memory::SegmentPtr& seg, rapidjson::Document::AllocatorType& allocator) {
+  rapidjson::Value v{};
+  v.SetObject();
+
+  json::add_uint_field(v, "data_size", seg->dataSize(), allocator);
+  json::add_uint_field(v, "size", seg->size(), allocator);
+  json::add_uint_field(v, "id", seg->id(), allocator);
+  json::add_string_field(v, "type", segmentTypeToString(seg->type()), allocator);
+  return v;
+}
+
+
+void serializeMemory(const core::DisassemblerCore& core, rapidjson::Document& doc) {
+  auto& allocator = doc.GetAllocator();
+
+  rapidjson::Value mem{};
+  mem.SetObject();
+
+  rapidjson::Value cont{};
+  cont.SetObject();
+
+  for (const auto &seg : core.getMemory().getSegments()) {
+    rapidjson::Value klj = serializeSegment(seg.second, allocator);
+    cont.AddMember("segment", klj, allocator);
+  }
+  mem.AddMember("segments", cont, allocator);
+
+  doc.AddMember("memory", mem, allocator);
 }
 
 std::string Serializer::serialize(const core::DisassemblerCore& core) {
@@ -70,6 +110,7 @@ std::string Serializer::serialize(const core::DisassemblerCore& core) {
   doc.AddMember("descr", info, allocator);
 
   serializeAutocommenter(core, doc);
+  serializeMemory(core, doc);
   return json::doc_to_string(doc);
 }
 

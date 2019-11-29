@@ -25,15 +25,19 @@ public:
     DATA
   };
 
-  Segment() : _size{ 0 }, _dataSize{ 0 }, _id{ 0 } {}
+  Segment() : _size{ 0 }, _dataSize{ 0 }, _id{ 0 }, _type{ Type::RAW } {}
 
-  Segment(IdType id, size_type sz) : _size{ sz }, _dataSize{ 0 }, _id{ id } {}
+  Segment(IdType id, size_type sz) : _size{ sz }, _dataSize{ 0 }, _id{ id }, _type{ Type::RAW } {}
 
   void fill(unsigned char buff[], size_type size);
 
   inline IdType id() const { return _id; }
 
   inline size_type dataSize() const { return _dataSize; }
+
+  inline size_type size() const { return _size; }
+
+  inline Type type() const { return _type; }
 
   inline core::Byte getByte(size_type offset) const {
     if (offset < _dataSize) {
@@ -64,6 +68,7 @@ private:
   std::vector<core::Byte> _mem;
 };
 
+using SegmentPtr = std::shared_ptr<Segment>;
 }
 }
 

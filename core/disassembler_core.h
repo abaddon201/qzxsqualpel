@@ -74,6 +74,7 @@ public:
 
   std::shared_ptr<postprocessors::AutoCommenter> getAutocommenter() const { return _auto_commenter; }
 
+  const memory::Memory& getMemory() const { return _memory; }
   static DisassemblerCore& inst() {
     static DisassemblerCore _inst;
     return _inst;
