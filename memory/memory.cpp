@@ -25,6 +25,14 @@ core::Byte Memory::getByte(const Addr& addr) const {
   return seg->second->getByte(addr.offset());
 }
 
+void Memory::setByte(const Addr& addr, core::Byte& b) {
+  const auto& seg = _segments.find(addr.segment());
+  if (seg == _segments.cend()) {
+    throw std::runtime_error("wrong segment");
+  }
+  return seg->second->setByte(addr.offset(), b);
+}
+
 Memory::size_type Memory::wholeSize() {
   size_type res = 0;
 

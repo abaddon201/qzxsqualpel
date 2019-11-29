@@ -57,6 +57,8 @@ public:
     return *this;
   }
 
+  bool isSimpleData() { return _type == Type::DATA_BYTE || _type == Type::DATA_WORD; }
+
   std::shared_ptr<Chunk> splitAt(const memory::Addr& addr);
 
   void addCrossRef(const memory::Addr& addr, memory::Reference::Type type);

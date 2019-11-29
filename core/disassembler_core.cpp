@@ -2,6 +2,7 @@
 
 #include "disassemble.h"
 #include "postprocessors/rst28.h"
+#include "postprocessors/register_reference_scan.h"
 
 #include <memory>
 #include <fstream>
@@ -23,6 +24,7 @@ void DisassemblerCore::init(IGUIUpdater* updater_) {
 
   _auto_commenter = std::make_shared<postprocessors::AutoCommenter>();
   _postprocessors.push_back(std::make_shared<postprocessors::Rst28>());
+  _postprocessors.push_back(std::make_shared<postprocessors::RegisterReferenceScan>());
 };
 
 void DisassemblerCore::loadGuessFile(const std::string& fname) {
@@ -49,7 +51,7 @@ void DisassemblerCore::initialParse() {
     cmd.command_code = CmdCode::NONE;
     cmd.addr = i;
     cmd.len = 1;
-    cmd.setArg(0, std::make_shared<ArgDefault>(byte, 1));
+    cmd.setArg(0, std::make_shared<ArgDefault>(byte));
     chunk->appendCommand(cmd);
   }
   updater->updateWidgets();
@@ -230,11 +232,16 @@ ABBY
 0x1222 LD HL, (word_5cb2)
 0x1225 LD (HL), 3e
 
+0x120a LDDR
+
 0x137c LD HL,5C44
 0x137f BIT 7, (HL)
 
 0x0daf LD HL, 0000 // brakes code at start
 0x0dc9 LD HL, (word_5c51) //wrong label (not inited) 0x1615 - address of first initialization
+
+0x0edf LD HL, byte_5b00
+0x0ee7 LD (HL), A
 */
 std::shared_ptr<Label>
 DisassemblerCore::makeJump(const memory::Addr& from_addr, const memory::Addr& jump_addr, memory::Reference::Type ref_type) {
@@ -299,31 +306,65 @@ DisassemblerCore::makeData(const memory::Addr& from_addr, const memory::Addr& da
   } else {
     if ((ref_type == memory::Reference::Type::WRITE_BYTE) ||
       (ref_type == memory::Reference::Type::READ_BYTE)) {
-      _chunks.removeChunk(data_addr);
-      data_chunk = _chunks.createChunk(data_addr, Chunk::Type::DATA_BYTE);
-      Byte byte = _memory.getByte(data_addr);
-      Command cmd;
-      cmd.command_code = CmdCode::DB;
-      cmd.addr = data_addr;
-      cmd.len = 1;
-      cmd.setArg(0, std::make_shared<ArgDefault>(byte, 1));
-      data_chunk->appendCommand(cmd);
-    } else if ((ref_type == memory::Reference::Type::WRITE_WORD) ||
-      (ref_type == memory::Reference::Type::READ_WORD)) {
-      _chunks.removeChunk(data_addr);
-      _chunks.removeChunk(data_addr + 1);
-      data_chunk = _chunks.createChunk(data_addr, Chunk::Type::DATA_WORD);
-      Byte bl = _memory.getByte(data_addr);
-      Byte bh = _memory.getByte(data_addr + 1);
-      Command cmd;
-      cmd.command_code = CmdCode::DW;
-      cmd.addr = data_addr;
-      cmd.len = 2;
-      cmd.setArg(0, std::make_shared<ArgDefault>((((uint16_t)((uint8_t)bh)) << 8) | ((uint16_t)((uint8_t)bl)), 2, true));
-      data_chunk->appendCommand(cmd);
+      if (data_chunk->type() == Chunk::Type::CODE) {
+        return nullptr;
+      }
+      if (data_chunk->type() == Chunk::Type::UNPARSED) {
+        _chunks.removeChunk(data_addr);
+        data_chunk = _chunks.createChunk(data_addr, Chunk::Type::DATA_BYTE);
+        Byte byte = _memory.getByte(data_addr);
+        Command cmd;
+        cmd.command_code = CmdCode::DB;
+        cmd.addr = data_addr;
+        cmd.len = 1;
+        cmd.setArg(0, std::make_shared<ArgDefault>(byte));
+        data_chunk->appendCommand(cmd);
+      }
+    } else if ((ref_type == memory::Reference::Type::WRITE_WORD) || (ref_type == memory::Reference::Type::READ_WORD)) {
+      if (data_chunk->type() == Chunk::Type::CODE) {
+        return nullptr;
+      }
+      if (data_chunk->type() == Chunk::Type::UNPARSED) {
+        _chunks.removeChunk(data_addr);
+        _chunks.removeChunk(data_addr + 1);
+        data_chunk = _chunks.createChunk(data_addr, Chunk::Type::DATA_WORD);
+        Byte bl = _memory.getByte(data_addr);
+        Byte bh = _memory.getByte(data_addr + 1);
+        Command cmd;
+        cmd.command_code = CmdCode::DW;
+        cmd.addr = data_addr;
+        cmd.len = 2;
+        cmd.setArg(0, std::make_shared<ArgDefault>((((uint16_t)((uint8_t)bh)) << 8) | ((uint16_t)((uint8_t)bl)), ArgSize::Word, true));
+        data_chunk->appendCommand(cmd);
+      }
     }
     return addCrossRef(data_chunk, from_addr, data_addr, ref_type);
   }
+}
+
+void DisassemblerCore::makeArray(const memory::Addr& from_addr, int size, bool clearMem) {
+  if (clearMem) {
+    memory::Addr addr = from_addr;
+    int sz = size;
+    for (; sz != 0; sz--, ++addr) {
+      _memory.setByte(addr, Byte(0));
+    }
+  }
+  memory::Addr addr = from_addr;
+  auto chunk = std::make_shared<Chunk>(from_addr, Chunk::Type::DATA_BYTE_ARRAY);
+  Command cmd;
+  cmd.command_code = CmdCode::DB;
+  cmd.addr = from_addr;
+  cmd.len = size;
+  auto arg = std::make_shared<ArgByteArray>(size);
+  for (; size != 0; size--, ++addr) {
+    _chunks.removeChunk(addr);
+    Byte byte = _memory.getByte(addr);
+    arg->pushByte(byte);
+  }
+  cmd.setArg(0, arg);
+  chunk->appendCommand(cmd);
+  _chunks.addChunk(from_addr, chunk);
 }
 
 std::string DisassemblerCore::disassembleInstructionInt(const memory::Addr& addr, size_t& len) {
@@ -376,75 +417,14 @@ JumpType DisassemblerCore::getLastCmdJumpType(std::shared_ptr<Chunk> chunk, memo
   return dasm::core::JumpType::JT_NONE;
 }
 
-void DisassemblerCore::updateRegisterSource(ChunkPtr chunk, int idx, ArgPtr arg) {
-  if (arg->arg_type != ArgType::ARG_REGISTER_REF) {
-    return;
-  }
-  auto arg_ref = std::static_pointer_cast<ArgRegisterReference>(arg);
-  auto reg = arg_ref->reg_id;
-  for (int i = idx; i >= 0; i--) {
-    auto& cmd = chunk->commands()[i];
-    //TODO also check register halves
-    if ((cmd.getArgsCount() > 0) && (cmd.getArg(0)->arg_type == ArgType::ARG_REGISTER16)) {
-      auto tst_ref = std::static_pointer_cast<ArgRegister16>(cmd.getArg(0));
-      if (reg == tst_ref->reg_id) {
-        // found register load, need to update right arg (if it's applicable)
-        if (cmd.command_code == CmdCode::LD) 
-          if (cmd.getArg(1)->arg_type == ArgType::ARG_DEFAULT) {
-          auto src_ref = std::static_pointer_cast<ArgDefault > (cmd.getArg(1))->getValue();
-          auto lbl = makeData(cmd.addr, src_ref, memory::Reference::Type::READ_WORD);
-          auto src = std::make_shared<ArgMemoryReference>(src_ref);
-          src->setLabel(lbl);
-        }
-        return;
-      }
-    }
-  }
-}
-
 size_t DisassemblerCore::postProcessChunk(ChunkPtr chunk, size_t len) {
   for (auto& p : _postprocessors) {
     if (p->checkPrecondition(chunk)) {
       len = p->process(chunk, len);
     }
   }
-  if (chunk->addr() == 0x0008) {
-    std::cout << "addr";
-  }
-  int idx = 0;
-  for (auto& cmd : chunk->commands()) {
-    if ((cmd.command_code == CmdCode::LD) || (cmd.command_code == CmdCode::BIT)) {
-      updateRegisterSource(chunk, idx, cmd.getArg(0));
-      updateRegisterSource(chunk, idx, cmd.getArg(1));
-    }
-    idx++;
-  }
-  /*if (cmd.isLDICmd()) {
-    //findAndMarkDEandHL();
-    return len;
-  } else if (cmd.command == "LD") {
-    //check if it's accessed to memory
-    std::string& arg1str = cmd.arg1->toString();
-    if (arg1str.find("(") != arg1str.npos) {
-      if (Register16::getRegister(arg1str) != Register16::None) {
-        //need to find register fill
-      } else {
-        //it's memory address need to create memory label and replace arg with it
-      }
-    } else {
-      std::string& arg2str = cmd.arg2->toString();
-      if (arg2str.find("(") != arg2str.npos) {
-        if (Register16::getRegister(arg2str) != Register16::None) {
-          //need to find register fill
-        } else {
-          //it's memory address need to create memory label and replace arg with it
-        }
-      }
-    }
-  }*/
   return len;
 }
-
 
 }
 }

@@ -16,6 +16,8 @@ file(GLOB TGT_SRC  main.cpp
         "core/*.h"
         "files/*.cpp"
         "files/*.h"
+        "files/project/*.cpp"
+        "files/project/*.h"
         "memory/*.cpp"
         "memory/*.h"
         "postprocessors/*.cpp"

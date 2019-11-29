@@ -63,8 +63,8 @@ public:
     INDR,
     OUTI,
     OUTD,
-    OUTIR,
-    OUTDR,
+    OTIR,
+    OTDR,
     NOP,
     NEG,
     INC,
@@ -184,10 +184,10 @@ public:
       value = OUTI;
     } else if (cmd == "OUTD") {
       value = OUTD;
-    } else if (cmd == "OUTIR") {
-      value = OUTIR;
-    } else if (cmd == "OUTDR") {
-      value = OUTDR;
+    } else if (cmd == "OTIR") {
+      value = OTIR;
+    } else if (cmd == "OTDR") {
+      value = OTDR;
     } else if (cmd == "NOP") {
       value = NOP;
     } else if (cmd == "NEG") {
@@ -322,10 +322,10 @@ public:
         return "OUTI";
       case OUTD:
         return "OUTD";
-      case OUTIR:
-        return "OUTIR";
-      case OUTDR:
-        return "OUTDR";
+      case OTIR:
+        return "OTIR";
+      case OTDR:
+        return "OTDR";
       case INI:
         return "INI";
       case IND:
@@ -375,7 +375,7 @@ public:
       case DW:
         return "DW";
     }
-    return "";
+    return "db"; //unknown/unparsed
   }
 
   constexpr CmdCode(Value cmd) : value(cmd) {}

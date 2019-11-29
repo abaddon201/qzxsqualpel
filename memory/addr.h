@@ -14,6 +14,7 @@
 #define CADDR_H
 
 #include <string>
+#include <memory>
 
 namespace dasm {
 namespace memory {
@@ -148,6 +149,7 @@ inline Addr operator+(Addr lhs, const Addr& rhs) {
   return lhs;
 }
 
+using AddrPtr = std::shared_ptr<Addr>;
 }
 }
 #endif

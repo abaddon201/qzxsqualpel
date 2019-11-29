@@ -29,6 +29,8 @@ public:
 
   core::Byte getByte(const Addr& addr) const;
 
+  void setByte(const Addr& addr, core::Byte& b);
+
   size_type wholeSize();
 
 private:

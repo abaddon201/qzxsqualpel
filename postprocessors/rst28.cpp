@@ -6,12 +6,12 @@
 namespace dasm {
 namespace postprocessors {
 
-bool Rst28::checkPrecondition(std::shared_ptr<core::Chunk> chunk) {
+bool Rst28::checkPrecondition(core::ChunkPtr chunk) {
   auto& cmd = chunk->lastCommand();
   return ((cmd.command_code == core::CmdCode::RST) && (std::dynamic_pointer_cast<core::ArgDefault>(cmd.getArg(0))->getValue() == 0x28));
 }
 
-size_t Rst28::process(std::shared_ptr<core::Chunk> chunk, size_t len) {
+size_t Rst28::process(core::ChunkPtr chunk, size_t len) {
   /// RST 28 Нужно анализировать особо... после RST располагается набор инструкций для вычислений (bcalc)
   /// Пример:
   /// 2E24 PF-SMALL RST 0028, FP-CALC
@@ -37,7 +37,7 @@ size_t Rst28::process(std::shared_ptr<core::Chunk> chunk, size_t len) {
     while ((unsigned char)(b = core::DisassemblerCore::inst().memory().getByte(a)) != 0x38) {
       c.addr = a;
       c.command_code = core::CmdCode::DB;
-      c.setArg(0, std::make_shared<core::ArgDefault>(b, 1));
+      c.setArg(0, std::make_shared<core::ArgDefault>(b));
       c.auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
       c.len = 1;
 
@@ -49,7 +49,7 @@ size_t Rst28::process(std::shared_ptr<core::Chunk> chunk, size_t len) {
         c.addr = a;
         c.command_code = core::CmdCode::DB;
         b = core::DisassemblerCore::inst().memory().getByte(a);
-        c.setArg(0, std::make_shared<core::ArgDefault>(b, 1));
+        c.setArg(0, std::make_shared<core::ArgDefault>(b));
         c.auto_comment = "dest_addr: " + memory::Addr(a + int{ (signed char)(unsigned char)b }).toString();
         c.len = 1;
 
@@ -61,7 +61,7 @@ size_t Rst28::process(std::shared_ptr<core::Chunk> chunk, size_t len) {
     }
     c.addr = a;
     c.command_code = core::CmdCode::DB;
-    c.setArg(0, std::make_shared<core::ArgDefault>(b, 1));
+    c.setArg(0, std::make_shared<core::ArgDefault>(b));
     c.len = 1;
     c.auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
 

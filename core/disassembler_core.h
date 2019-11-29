@@ -60,9 +60,19 @@ public:
 
   std::shared_ptr<Label> makeData(const memory::Addr& from_addr, const memory::Addr& data_addr, memory::Reference::Type ref_type);
 
+  void makeArray(const memory::Addr& from_addr, int size, bool clearMem);
+
   LabelPtr addCrossRef(ChunkPtr chunk, const memory::Addr& from_addr, const memory::Addr& dst_addr, memory::Reference::Type ref_type);
 
   JumpType getLastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr);
+
+  std::string getFileName() const { return _file_name; }
+  void setFileName(const std::string& file_name) { _file_name = file_name; }
+
+  memory::AddrPtr getEntryPoint() const { return _entry_point; }
+  void setEntryPoint(memory::AddrPtr entry_point) { _entry_point = entry_point; }
+
+  std::shared_ptr<postprocessors::AutoCommenter> getAutocommenter() const { return _auto_commenter; }
 
   static DisassemblerCore& inst() {
     static DisassemblerCore _inst;
@@ -75,7 +85,6 @@ private:
 
   bool labelPresent(const memory::Addr& addr) const;
 
-  void updateRegisterSource(ChunkPtr chunk, int idx, ArgPtr arg);
   size_t postProcessChunk(ChunkPtr chunk, size_t len);
 
   ///@brief кого оповещать об обновлении состояния
@@ -87,6 +96,9 @@ private:
   ///@brief метки, собранные в результате дизасма
   Labels _labels;
 
+  std::string _file_name;
+
+  memory::AddrPtr _entry_point;
   std::shared_ptr<postprocessors::AutoCommenter> _auto_commenter;
   std::vector<std::shared_ptr<postprocessors::IPostProcessor>> _postprocessors;
 };

@@ -1,17 +1,22 @@
 #include <QDebug>
 #include "qt_debug_printers.h"
 
-#include "helper_widgets.h"
+#include "navigate_to_addr_dlg.h"
+#include "make_array_dlg.h"
 
 #include "disassembler_widget.h"
+#include "files/project.h"
 
 #include <QFile>
 #include <QTextTable>
 #include <QKeyEvent>
 #include <QTextDocumentWriter>
 #include <QPainter>
+#include <QMessageBox>
 
 #include <memory>
+#include <iostream>
+#include <fstream>
 
 #include "main_window.h"
 #include "widget_change_text.h"
@@ -134,6 +139,35 @@ void DisassemblerWidget::makeCodeUnderCursor() {
   }
 }
 
+void DisassemblerWidget::makeArrayUnderCursor() {
+  //make array
+  QTextCursor cursor(textCursor());
+  qDebug() << "GUI: make array:" << cursor.block().text();
+  qDebug() << "GUI: Cursor pos:" << cursor.position();
+  std::shared_ptr<GUIChunk> chunk = _chunks.getChunkByPosition(cursor.position());
+  if (nullptr == chunk) {
+    return;
+  }
+  if (chunk->core()->isEmpty() || chunk->core()->isSimpleData()) {
+    MakeArrayDlg a{ this };
+    a();
+  }
+}
+
+void DisassemblerWidget::makeArray(int size, bool clearMem) {
+  QTextCursor cursor(textCursor());
+  std::shared_ptr<GUIChunk> chunk = _chunks.getChunkByPosition(cursor.position());
+  if (nullptr == chunk) {
+    return;
+  }
+  if (chunk->core()->isEmpty() || chunk->core()->isSimpleData()) {
+    const auto& ret_addr = chunk->core()->addr();
+    dasm::core::DisassemblerCore::inst().makeArray(ret_addr, size, clearMem);
+    refreshView();
+    navigateToAddress(ret_addr);
+  }
+}
+
 void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
   switch (event->key()) {
     case Qt::Key_C:
@@ -142,6 +176,9 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
       return;
     case Qt::Key_D:
       // must datefi under cursor
+      return;
+    case Qt::Key_Asterisk:
+      makeArrayUnderCursor();
       return;
     case Qt::Key_U:
       // must uncode and undatefy under cursor
@@ -198,9 +235,22 @@ void DisassemblerWidget::openRAWFile(const QString& fileName) {
   loaded = fread(buf, 1, 65536, f);
   fclose(f);
   dasm::core::DisassemblerCore::inst().setRawMemory(buf, loaded);
+  dasm::core::DisassemblerCore::inst().setFileName(fileName.toStdString());
   delete[] buf;
   ///@fixme: Add checks
   dasm::core::DisassemblerCore::inst().initialParse();
+}
+
+void DisassemblerWidget::saveProjectFile(const QString& fileName) {
+  std::ofstream file;
+  file.open(fileName.toStdString());
+  if (!file.is_open()) {
+    QMessageBox::information(this, tr("Unable to open file"), fileName);
+    return;
+  }
+  std::string res = dasm::files::project::Serializer::serialize(dasm::core::DisassemblerCore::inst());
+  file << res;
+  file.close();
 }
 
 void DisassemblerWidget::saveASMFile(const QString& fileName) {
@@ -242,19 +292,18 @@ void DisassemblerWidget::printReferences(QTextCursor& cursor, std::shared_ptr<GU
     return;
   }
   int skip_len = _cell_length_command + _cell_length_args;
-  int skip_len2 =
-    _cell_length_addr + _cell_length_opcodes + _cell_length_label + _cell_length_command + _cell_length_args;
+  int skip_len2 = _cell_length_addr + _cell_length_opcodes + _cell_length_label + _cell_length_command + _cell_length_args;
 
-  int l = 0;
-  for (auto ref : chunk->core()->references()) {
-    if (l == 0) {
+  bool is_first = true;
+  for (auto& ref : chunk->core()->references()) {
+    if (is_first) {
       printCell(cursor, std::string(), skip_len);
-      l = 1;
+      is_first = false;
     } else {
+      cursor.insertText("\n");
       printCell(cursor, std::string(), skip_len2);
     }
     printCell(cursor, ref.toString(), _cell_length_reference, _cell_format_reference);
-    cursor.insertText("\n");
   }
 }
 
@@ -304,33 +353,33 @@ void DisassemblerWidget::printChunkCode(QTextCursor& cursor, std::shared_ptr<GUI
 }
 
 void DisassemblerWidget::printChunkData(QTextCursor& cursor, std::shared_ptr<GUIChunk> chunk) {
-/*  if (chunk->core()->label() != nullptr) {
-    cursor.insertBlock();
-    if (!chunk->core()->comment().empty()) {
+  /*  if (chunk->core()->label() != nullptr) {
+      cursor.insertBlock();
+      if (!chunk->core()->comment().empty()) {
+        printCell(cursor, chunk->core()->addr().toString(), _cell_length_addr, _cell_format_addr);
+        printCell(cursor, std::string(), _cell_length_opcodes, _cell_format_opcodes);
+        printCell(cursor, std::string(";") + chunk->core()->comment(), _cell_length_label, _cell_format_chunk_comment);
+      }
       printCell(cursor, chunk->core()->addr().toString(), _cell_length_addr, _cell_format_addr);
       printCell(cursor, std::string(), _cell_length_opcodes, _cell_format_opcodes);
-      printCell(cursor, std::string(";") + chunk->core()->comment(), _cell_length_label, _cell_format_chunk_comment);
+      printCell(cursor, chunk->core()->label()->name + ":", _cell_length_label, _cell_format_label);
+      printReferences(cursor, chunk);
     }
-    printCell(cursor, chunk->core()->addr().toString(), _cell_length_addr, _cell_format_addr);
-    printCell(cursor, std::string(), _cell_length_opcodes, _cell_format_opcodes);
-    printCell(cursor, chunk->core()->label()->name + ":", _cell_length_label, _cell_format_label);
-    printReferences(cursor, chunk);
-  }
-  switch (chunk->core()->type()) {
-    case dasm::core::Chunk::Type::DATA_BYTE:
-      printByte(cursor, chunk);
-      break;
-    case dasm::core::Chunk::Type::DATA_WORD:
-      printWord(cursor, chunk);
-      break;
-  }
-  for (Command& cmd : chunk->core()->commands()) {
-    printCommand(cursor, cmd);
-    cursor.block().setUserData(new GUITextBlockUserData(chunk->core(), &cmd));
-    //    cursor.movePosition(QTextCursor::End);
-  }
-  //  cursor.movePosition(QTextCursor::End);
-  */
+    switch (chunk->core()->type()) {
+      case dasm::core::Chunk::Type::DATA_BYTE:
+        printByte(cursor, chunk);
+        break;
+      case dasm::core::Chunk::Type::DATA_WORD:
+        printWord(cursor, chunk);
+        break;
+    }
+    for (Command& cmd : chunk->core()->commands()) {
+      printCommand(cursor, cmd);
+      cursor.block().setUserData(new GUITextBlockUserData(chunk->core(), &cmd));
+      //    cursor.movePosition(QTextCursor::End);
+    }
+    //  cursor.movePosition(QTextCursor::End);
+    */
 }
 
 void DisassemblerWidget::refreshView() {

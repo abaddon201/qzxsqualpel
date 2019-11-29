@@ -31,10 +31,10 @@ memory::Addr Command::getJmpAddrFromString() const {
 memory::Addr Command::getJmpAddr() const {
   if (args.size() == 1) {
     //get from arg1
-    return dynamic_cast<ArgLabel*>(args[0].get())->label->addr;
+    return dynamic_cast<ArgMemoryReference*>(args[0].get())->label->addr;
   } else {
     //get from arg2
-    return dynamic_cast<ArgLabel*>(args[1].get())->label->addr;
+    return dynamic_cast<ArgMemoryReference*>(args[1].get())->label->addr;
   }
 }
 
@@ -42,9 +42,9 @@ void Command::setJmpAddr(const std::shared_ptr<Label> label) {
   // if label is nullptr, we can't change default type arg to the label (we don't know about it)
   if (label != nullptr) {
     if (args.size() == 1) {
-      args[0] = std::make_shared<ArgLabel>(label);
+      args[0] = std::make_shared<ArgMemoryReference>(label, false);
     } else {
-      args[1] = std::make_shared<ArgLabel>(label);
+      args[1] = std::make_shared<ArgMemoryReference>(label, false);
     }
   }
 }
@@ -107,107 +107,48 @@ void Command::updateArgs() {
     auto& a1 = args[0];
     auto& a2 = args[1];
     switch (a1->arg_type) {
-      case ArgType::ARG_REGISTER16: {
-        if (a2->arg_type == ArgType::ARG_DEFAULT) {
-          std::shared_ptr<ArgDefault> a2ref = std::static_pointer_cast<ArgDefault>(a2);
-          a2ref->setSize(2);
-        }
+      case ArgType::ARG_REGISTER16:
+        a2->setSize(ArgSize::Word);
         break;
-      }
-      case ArgType::ARG_REGISTER8: {
-        if (a2->arg_type == ArgType::ARG_DEFAULT) {
-          std::shared_ptr<ArgDefault> a2ref = std::static_pointer_cast<ArgDefault>(a2);
-          a2ref->setSize(1);
-        }
+      case ArgType::ARG_REGISTER8:
+        a2->setSize(ArgSize::Byte);
+      case ArgType::ARG_MEMORY_REF:
+        a1->setSize(a2->getSize());
         break;
-      }
-      case ArgType::ARG_MEMORY_REF: {
-        // check and update size
-        switch (a2->arg_type) {
-          case ArgType::ARG_REGISTER8: {
-            std::shared_ptr<ArgMemoryReference> a1ref = std::static_pointer_cast<ArgMemoryReference>(a1);
-            a1ref->setSize(1);
-            break;
-          }
-          case ArgType::ARG_REGISTER16: {
-            std::shared_ptr<ArgMemoryReference> a1ref = std::static_pointer_cast<ArgMemoryReference>(a1);
-            a1ref->setSize(2);
-            break;
-          }
-          default:
-            throw std::runtime_error("can't determine mem pointer size");
-        }
-        break;
-      }
-      case ArgType::ARG_REGISTER_REF: {
-        // check and update size
-        switch (a2->arg_type) {
-          case ArgType::ARG_REGISTER8: {
-            std::shared_ptr<ArgRegisterReference> a1ref = std::static_pointer_cast<ArgRegisterReference>(a1);
-            a1ref->setSize(1);
-            break;
-          }
-          case ArgType::ARG_REGISTER16: {
-            std::shared_ptr<ArgRegisterReference> a1ref = std::static_pointer_cast<ArgRegisterReference>(a1);
-            a1ref->setSize(2);
-            break;
-          }
-          case ArgType::ARG_DEFAULT: {
-            std::shared_ptr<ArgRegisterReference> a1ref = std::static_pointer_cast<ArgRegisterReference>(a1);
-            a1ref->setSize(1);
-            break;
-          }
-          default:
-            throw std::runtime_error("can't determine register pointer size");
-        }
-      }
+      case ArgType::ARG_REGISTER_REF:
+        a1->setSize(a2->getSize());
     }
     switch (a2->arg_type) {
-      case ArgType::ARG_MEMORY_REF: {
-        // check and update size
-        switch (a1->arg_type) {
-          case ArgType::ARG_REGISTER8: {
-            std::shared_ptr<ArgMemoryReference> a2ref = std::static_pointer_cast<ArgMemoryReference>(a2);
-            a2ref->setSize(1);
-            break;
-          }
-          case ArgType::ARG_REGISTER16: {
-            std::shared_ptr<ArgMemoryReference> a2ref = std::static_pointer_cast<ArgMemoryReference>(a2);
-            a2ref->setSize(2);
-            break;
-          }
-          default:
-            throw std::runtime_error("can't determine mem pointer size");
-        }
+      case ArgType::ARG_REGISTER16:
+        a1->setSize(a2->getSize());
         break;
-      }
-      case ArgType::ARG_REGISTER_REF: {
-        // check and update size
-        switch (a1->arg_type) {
-          case ArgType::ARG_REGISTER8: {
-            std::shared_ptr<ArgRegisterReference> a2ref = std::static_pointer_cast<ArgRegisterReference>(a2);
-            a2ref->setSize(1);
-            break;
-          }
-          case ArgType::ARG_REGISTER16: {
-            std::shared_ptr<ArgRegisterReference> a2ref = std::static_pointer_cast<ArgRegisterReference>(a2);
-            a2ref->setSize(2);
-            break;
-          }
-          case ArgType::ARG_DEFAULT: {
-            std::shared_ptr<ArgRegisterReference> a2ref = std::static_pointer_cast<ArgRegisterReference>(a2);
-            a2ref->setSize(1);
-            break;
-          }
-          default:
-            throw std::runtime_error("can't determine register pointer size");
-        }
-      }
+      case ArgType::ARG_REGISTER8:
+        a1->setSize(a2->getSize());
+        break;
+      case ArgType::ARG_MEMORY_REF:
+        a2->setSize(a1->getSize());
+        break;
+      case ArgType::ARG_REGISTER_REF:
+        a2->setSize(a1->getSize());
+        break;
+        /*          case ArgType::ARG_DEFAULT: {
+                    std::shared_ptr<ArgRegisterReference> a2ref = std::static_pointer_cast<ArgRegisterReference>(a2);
+                    a2ref->setSize(ArgSize::Byte);
+                    break;
+                  }*/
+                  /*default:
+                    throw std::runtime_error("can't determine register pointer size");*/
     }
+
     if (a1->arg_type == ArgType::ARG_MEMORY_REF) {
       std::shared_ptr<ArgMemoryReference> a1ref = std::static_pointer_cast<ArgMemoryReference>(a1);
-      auto lbl = DisassemblerCore::inst().makeData(addr, a1ref->addr, a1ref->size == 1 ? memory::Reference::Type::WRITE_BYTE : memory::Reference::Type::WRITE_WORD);
+      auto lbl = DisassemblerCore::inst().makeData(addr, a1ref->addr, a1ref->size == ArgSize::Byte ? memory::Reference::Type::WRITE_BYTE : memory::Reference::Type::WRITE_WORD);
       a1ref->setLabel(lbl);
+    }
+    if (a2->arg_type == ArgType::ARG_MEMORY_REF) {
+      std::shared_ptr<ArgMemoryReference> a2ref = std::static_pointer_cast<ArgMemoryReference>(a2);
+      auto lbl = DisassemblerCore::inst().makeData(addr, a2ref->addr, a2ref->size == ArgSize::Byte ? memory::Reference::Type::WRITE_BYTE : memory::Reference::Type::WRITE_WORD);
+      a2ref->setLabel(lbl);
     }
   }
 }
@@ -242,7 +183,7 @@ ArgPtr Command::parseArg(const std::string& arg) {
       if ((command_code == CmdCode::OUT) || (command_code == CmdCode::IN)) {
         return std::make_shared <ArgPort>(addr);
       } else {
-        return std::make_shared <ArgMemoryReference>(addr);
+        return std::make_shared <ArgMemoryReference>(addr, true);
       }
     }
   }
@@ -261,11 +202,11 @@ ArgPtr Command::parseArg(const std::string& arg) {
   }
   auto v = utils::hex2int(arg);
   if (isSingleByteArgCmd()) {
-    return std::make_shared<ArgDefault>(v, 1, true);
+    return std::make_shared<ArgDefault>(v, ArgSize::Byte, true);
   } else if ((command_code == CmdCode::SET) || (command_code == CmdCode::RES) || (command_code == CmdCode::BIT) || (command_code == CmdCode::IM)) {
-    return std::make_shared<ArgDefault>(v, 1, false);
+    return std::make_shared<ArgDefault>(v, ArgSize::Byte, false);
   } else {
-    return std::make_shared<ArgDefault>(v, 2, true);
+    return std::make_shared<ArgDefault>(v, ArgSize::Word, true);
   }
 }
 }

@@ -20,11 +20,14 @@ public:
   DisassemblerWidget(MainWindow* mwnd);
 
   void openRAWFile(const QString& fileName);
+  void saveProjectFile(const QString& fileName);
   void saveASMFile(const QString& fileName);
   void keyPressEvent(QKeyEvent*);
 
   ///@brief Показать на экране код с меткой под номером
   void navigateToAddress(const dasm::memory::Addr& addr);
+
+  void makeArray(int size, bool clearMem);
 
   void paintEvent(QPaintEvent* event);
   void refreshView();
@@ -32,6 +35,7 @@ public:
 public slots:
   void changeNameUnderCursor();
   void makeCodeUnderCursor();
+  void makeArrayUnderCursor();
   void commentCommandUnderCursor();
 
 private:
