@@ -39,6 +39,8 @@ public:
 
   inline Type type() const { return _type; }
 
+  const std::vector<core::Byte> bytes() const { return _mem; }
+
   inline core::Byte getByte(size_type offset) const {
     if (offset < _dataSize) {
       return _mem[offset];

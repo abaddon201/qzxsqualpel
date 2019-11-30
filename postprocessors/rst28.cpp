@@ -34,7 +34,7 @@ size_t Rst28::process(core::ChunkPtr chunk, size_t len) {
   core::Command c;
   int args_cnt;
   try {
-    while ((unsigned char)(b = core::DisassemblerCore::inst().memory().getByte(a)) != 0x38) {
+    while ((unsigned char)(b = core::DisassemblerCore::inst().memory().byte(a)) != 0x38) {
       c.addr = a;
       c.command_code = core::CmdCode::DB;
       c.setArg(0, std::make_shared<core::ArgDefault>(b));
@@ -48,7 +48,7 @@ size_t Rst28::process(core::ChunkPtr chunk, size_t len) {
       if (args_cnt) {
         c.addr = a;
         c.command_code = core::CmdCode::DB;
-        b = core::DisassemblerCore::inst().memory().getByte(a);
+        b = core::DisassemblerCore::inst().memory().byte(a);
         c.setArg(0, std::make_shared<core::ArgDefault>(b));
         c.auto_comment = "dest_addr: " + memory::Addr(a + int{ (signed char)(unsigned char)b }).toString();
         c.len = 1;

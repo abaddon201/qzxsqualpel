@@ -30,7 +30,7 @@ rapidjson::Value serializeKnownLabel(std::pair < memory::Addr, core::LabelPtr> l
 }
 
 void serializeAutocommenter(const core::DisassemblerCore& core, rapidjson::Document& doc) {
-  if (core.getAutocommenter() == nullptr || core.getAutocommenter()->getKnownLabels().empty()) {
+  if (core.autocommenter() == nullptr || core.autocommenter()->getKnownLabels().empty()) {
     return;
   }
   auto& allocator = doc.GetAllocator();
@@ -39,11 +39,10 @@ void serializeAutocommenter(const core::DisassemblerCore& core, rapidjson::Docum
   ac.SetObject();
 
   rapidjson::Value klsj{};
-  klsj.SetObject();
+  klsj.SetArray();
 
-  for (const auto& kl : core.getAutocommenter()->getKnownLabels()) {
-    rapidjson::Value klj = serializeKnownLabel(kl, allocator);
-    klsj.AddMember("label", klj, allocator);
+  for (const auto& kl : core.autocommenter()->getKnownLabels()) {
+    json::push_object(klsj, serializeKnownLabel(kl, allocator), allocator);
   }
 
   ac.AddMember("known_labels", klsj, allocator);
@@ -70,6 +69,13 @@ rapidjson::Value serializeSegment(const memory::SegmentPtr& seg, rapidjson::Docu
   json::add_uint_field(v, "size", seg->size(), allocator);
   json::add_uint_field(v, "id", seg->id(), allocator);
   json::add_string_field(v, "type", segmentTypeToString(seg->type()), allocator);
+
+  rapidjson::Value bj{};
+  bj.SetArray();
+  for (const auto& b : seg->bytes()) {
+    json::push_uint(bj, (uint8_t)b, allocator);
+  }
+  v.AddMember("bytes", bj, allocator);
   return v;
 }
 
@@ -81,15 +87,34 @@ void serializeMemory(const core::DisassemblerCore& core, rapidjson::Document& do
   mem.SetObject();
 
   rapidjson::Value cont{};
-  cont.SetObject();
+  cont.SetArray();
 
-  for (const auto &seg : core.getMemory().getSegments()) {
-    rapidjson::Value klj = serializeSegment(seg.second, allocator);
-    cont.AddMember("segment", klj, allocator);
+  for (const auto& seg : core.memory().segments()) {
+    json::push_object(cont, serializeSegment(seg.second, allocator), allocator);
   }
   mem.AddMember("segments", cont, allocator);
 
   doc.AddMember("memory", mem, allocator);
+}
+
+void serializeChunk(core::ChunkPtr chunk, rapidjson::Document::AllocatorType& allocator) {
+
+}
+
+void serializeChunks(const core::DisassemblerCore& core, rapidjson::Document& doc) {
+  auto& allocator = doc.GetAllocator();
+
+  rapidjson::Value chunks{};
+  chunks.SetObject();
+
+  rapidjson::Value cont{};
+  cont.SetArray();
+
+  for (const auto& chunk : core.chunks().chunks()) {
+    json::push_object(cont, serializeChunk(chunk.second, allocator), allocator);
+  }
+
+  doc.AddMember("chunks", chunks, allocator);
 }
 
 std::string Serializer::serialize(const core::DisassemblerCore& core) {
@@ -102,14 +127,15 @@ std::string Serializer::serialize(const core::DisassemblerCore& core) {
 
   json::add_string_field(info, "version", "0.2", allocator);
   json::add_string_field(info, "arch", "z80", allocator);
-  json::add_string_field(info, "file_name", core.getFileName(), allocator);
-  if (core.getEntryPoint() != nullptr) {
-    json::add_string_field(info, "entry_point", core.getEntryPoint()->toString(), allocator);
+  json::add_string_field(info, "file_name", core.fileName(), allocator);
+  if (core.entryPoint() != nullptr) {
+    json::add_string_field(info, "entry_point", core.entryPoint()->toString(), allocator);
   }
 
   doc.AddMember("descr", info, allocator);
 
   serializeAutocommenter(core, doc);
+  serializeChunks(core, doc);
   serializeMemory(core, doc);
   return json::doc_to_string(doc);
 }

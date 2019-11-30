@@ -65,13 +65,13 @@ std::string Command::getOpcodesString() const {
   auto l1 = len;
   memory::Addr a = addr;
   for (; l1; --l1, ++a) {
-    tmp += " " + DisassemblerCore::inst().memory().getByte(a).toString();
+    tmp += " " + DisassemblerCore::inst().memory().byte(a).toString();
   }
   return tmp;
 }
 
 Byte Command::opcodes(unsigned long long offs) const {
-  return DisassemblerCore::inst().memory().getByte(addr + offs);
+  return DisassemblerCore::inst().memory().byte(addr + offs);
 }
 
 void Command::parse(std::string& src) {

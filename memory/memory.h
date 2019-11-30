@@ -23,7 +23,7 @@ public:
 
   void switchSegment(Segment::IdType src, Segment::IdType dst);
 
-  std::shared_ptr<Segment> getSegment(Segment::IdType id) const {
+  std::shared_ptr<Segment> segment(Segment::IdType id) const {
     auto seg_it = _segments.find(id);
     if (seg_it != _segments.end()) {
       return seg_it->second;
@@ -31,11 +31,11 @@ public:
     throw std::runtime_error("unknown segment: " + std::to_string(id));
   }
 
-  const std::map<Segment::IdType, std::shared_ptr<Segment>>& getSegments() const { return _segments; }
+  const std::map<Segment::IdType, std::shared_ptr<Segment>>& segments() const { return _segments; }
 
-  Addr getMaxAddr() const { return _segments.rbegin()->second->dataSize(); }
+  Addr maxAddr() const { return _segments.rbegin()->second->dataSize(); }
 
-  core::Byte getByte(const Addr& addr) const;
+  core::Byte byte(const Addr& addr) const;
 
   void setByte(const Addr& addr, core::Byte& b);
 

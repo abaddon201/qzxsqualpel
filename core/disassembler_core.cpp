@@ -9,7 +9,7 @@
 
 //compatibility hack for fuse disassembler
 unsigned char readbyte_internal(unsigned short addr) {
-  return (unsigned char)dasm::core::DisassemblerCore::inst().memory().getByte(addr);
+  return (unsigned char)dasm::core::DisassemblerCore::inst().memory().byte(addr);
 }
 
 namespace dasm {
@@ -38,7 +38,7 @@ bool DisassemblerCore::labelPresent(const memory::Addr& addr) const {
 }
 
 void DisassemblerCore::setRawMemory(unsigned char* buf, size_t size) {
-  _memory.getSegment(0)->fill(buf, size);
+  _memory.segment(0)->fill(buf, size);
 }
 
 void DisassemblerCore::initialParse() {
@@ -46,7 +46,7 @@ void DisassemblerCore::initialParse() {
   Command cmd;
   for (unsigned long long i = 0; i < _memory.wholeSize(); ++i) {
     std::shared_ptr<Chunk> chunk = _chunks.createChunk(i, Chunk::Type::UNPARSED);
-    Byte byte = _memory.getByte(i);
+    Byte byte = _memory.byte(i);
     //cmd.command = "db";
     cmd.command_code = CmdCode::NONE;
     cmd.addr = i;
@@ -59,14 +59,14 @@ void DisassemblerCore::initialParse() {
 
 size_t DisassemblerCore::disassembleInstruction(const memory::Addr& addr, std::shared_ptr<Chunk>& out_chunk) {
   size_t len = 0;
-  if (addr >= _memory.getMaxAddr()) {
+  if (addr >= _memory.maxAddr()) {
     std::cerr << "address out of range" << addr.toString();
     return 0;
   }
   std::string buff = disassembleInstructionInt(addr, len);
 
   if (len) {
-    if (addr + len >= _memory.getMaxAddr()) {
+    if (addr + len >= _memory.maxAddr()) {
       std::cout << "instruction out of mem block" << std::endl;
       return -3;
     }
@@ -156,7 +156,7 @@ void DisassemblerCore::disassembleBlock(const memory::Addr& st_addr) {
       std::cout << "No chunk after disassemble instruction, addr:" << addr.toString() << std::endl;
       return;
     }
-    switch (getLastCmdJumpType(chunk, jump_addr)) {
+    switch (lastCmdJumpType(chunk, jump_addr)) {
       case JumpType::JT_CALL: {
         //call
         std::cout << "!!!! call: addr=" << addr.toString() << " to_addr " << jump_addr.toString() << std::endl;
@@ -312,7 +312,7 @@ DisassemblerCore::makeData(const memory::Addr& from_addr, const memory::Addr& da
       if (data_chunk->type() == Chunk::Type::UNPARSED) {
         _chunks.removeChunk(data_addr);
         data_chunk = _chunks.createChunk(data_addr, Chunk::Type::DATA_BYTE);
-        Byte byte = _memory.getByte(data_addr);
+        Byte byte = _memory.byte(data_addr);
         Command cmd;
         cmd.command_code = CmdCode::DB;
         cmd.addr = data_addr;
@@ -328,8 +328,8 @@ DisassemblerCore::makeData(const memory::Addr& from_addr, const memory::Addr& da
         _chunks.removeChunk(data_addr);
         _chunks.removeChunk(data_addr + 1);
         data_chunk = _chunks.createChunk(data_addr, Chunk::Type::DATA_WORD);
-        Byte bl = _memory.getByte(data_addr);
-        Byte bh = _memory.getByte(data_addr + 1);
+        Byte bl = _memory.byte(data_addr);
+        Byte bh = _memory.byte(data_addr + 1);
         Command cmd;
         cmd.command_code = CmdCode::DW;
         cmd.addr = data_addr;
@@ -359,7 +359,7 @@ void DisassemblerCore::makeArray(const memory::Addr& from_addr, int size, bool c
   auto arg = std::make_shared<ArgByteArray>(size);
   for (; size != 0; size--, ++addr) {
     _chunks.removeChunk(addr);
-    Byte byte = _memory.getByte(addr);
+    Byte byte = _memory.byte(addr);
     arg->pushByte(byte);
   }
   cmd.setArg(0, arg);
@@ -373,7 +373,7 @@ std::string DisassemblerCore::disassembleInstructionInt(const memory::Addr& addr
   return std::string(tbuff);
 }
 
-JumpType DisassemblerCore::getLastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr) {
+JumpType DisassemblerCore::lastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr) {
   Command& cmd = chunk->lastCommand();
   if ((cmd.command_code == CmdCode::CALL) || (cmd.command_code == CmdCode::RST)) {
     jump_addr = cmd.getJmpAddrFromString();

@@ -64,17 +64,20 @@ public:
 
   LabelPtr addCrossRef(ChunkPtr chunk, const memory::Addr& from_addr, const memory::Addr& dst_addr, memory::Reference::Type ref_type);
 
-  JumpType getLastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr);
+  JumpType lastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr);
 
-  std::string getFileName() const { return _file_name; }
+  std::string fileName() const { return _file_name; }
   void setFileName(const std::string& file_name) { _file_name = file_name; }
 
-  memory::AddrPtr getEntryPoint() const { return _entry_point; }
+  memory::AddrPtr entryPoint() const { return _entry_point; }
   void setEntryPoint(memory::AddrPtr entry_point) { _entry_point = entry_point; }
 
-  std::shared_ptr<postprocessors::AutoCommenter> getAutocommenter() const { return _auto_commenter; }
+  std::shared_ptr<postprocessors::AutoCommenter> autocommenter() const { return _auto_commenter; }
 
-  const memory::Memory& getMemory() const { return _memory; }
+  const memory::Memory& memory() const { return _memory; }
+
+  const ChunkList& chunks() const { return _chunks; }
+
   static DisassemblerCore& inst() {
     static DisassemblerCore _inst;
     return _inst;
