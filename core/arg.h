@@ -19,7 +19,7 @@ enum class ArgSize : uint8_t {
 
 enum class ArgType : uint8_t {
   ARG_DEFAULT,
-  ARG_LABEL,
+  //  ARG_LABEL,
   ARG_FLAG,
   ARG_REGISTER8,
   ARG_REGISTER16,
@@ -62,18 +62,26 @@ public:
 
 using ArgPtr = std::shared_ptr<Argument>;
 
+template<typename T>
+std::shared_ptr<T> argConvert(ArgPtr ptr) {
+  return std::static_pointer_cast<T>(ptr);
+}
+
 class ArgDefault : public Argument {
 public:
-  explicit ArgDefault(Byte& s) : Argument(ArgSize::Byte), value{ (uint8_t)s }, is_hex{ true } { arg_type = ArgType::ARG_DEFAULT; }
-  explicit ArgDefault(uint16_t s, ArgSize bytes_length, bool is_hex) : Argument(bytes_length), value{ s }, is_hex{ is_hex } { arg_type = ArgType::ARG_DEFAULT; }
+  explicit ArgDefault(Byte& s) : Argument(ArgSize::Byte), _value{ (uint8_t)s }, _is_hex{ true } { arg_type = ArgType::ARG_DEFAULT; }
+  explicit ArgDefault(uint16_t s, ArgSize bytes_length, bool is_hex) : Argument(bytes_length), _value{ s }, _is_hex{ _is_hex } { arg_type = ArgType::ARG_DEFAULT; }
   virtual ~ArgDefault() = default;
 
-  std::string toString() const override { return is_hex ? utils::hexify(value, getBytesSize() * 2) : std::to_string(value); }
+  std::string toString() const override { return _is_hex ? utils::hexify(_value, getBytesSize() * 2) : std::to_string(_value); }
 
-  uint16_t getValue() { return value; }
+  uint16_t value() const { return _value; }
+
+  bool is_hex() const { return _is_hex; }
+
 private:
-  uint16_t value;
-  bool is_hex;
+  uint16_t _value;
+  bool _is_hex;
 };
 
 using ArgDefaultPtr = std::shared_ptr<ArgDefault>;
@@ -85,7 +93,7 @@ public:
   }
   virtual ~ArgByteArray() = default;
 
-  std::string toString() const override { 
+  std::string toString() const override {
     if (tstr_cache.empty()) {
       auto it = bytes.begin();
       auto p_val = *it;
@@ -123,7 +131,7 @@ public:
         tstr_cache += p_val.toString();
       }
     }
-    return tstr_cache; 
+    return tstr_cache;
   }
 
   void pushByte(const Byte& b) {
@@ -147,12 +155,15 @@ using ArgByteArrayPtr = std::shared_ptr<ArgByteArray>;
 
 class ArgPort : public Argument {
 public:
-  explicit ArgPort(uint8_t s) : Argument(ArgSize::Byte), value{ s } { arg_type = ArgType::ARG_PORT; }
+  explicit ArgPort(uint8_t s) : Argument(ArgSize::Byte), _value{ s } { arg_type = ArgType::ARG_PORT; }
   virtual ~ArgPort() = default;
 
-  std::string toString() const override { return "(" + utils::hexify(value, 2) + ")"; }
+  std::string toString() const override { return "(" + utils::hexify(_value, 2) + ")"; }
+
+  uint16_t value() const { return _value; }
+
 private:
-  uint16_t value;
+  uint16_t _value;
 };
 
 /*class ArgLabel : public Argument {

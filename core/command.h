@@ -49,7 +49,7 @@ struct Command {
     len = c.len;
     command_code = c.command_code;
     //command = c.command;
-    args = c.args;
+    _args = c._args;
     comment = c.comment;
     auto_comment = c.auto_comment;
   }
@@ -67,7 +67,7 @@ struct Command {
     len = c.len;
     command_code = c.command_code;
     //command = c.command;
-    args = c.args;
+    _args = c._args;
     comment = c.comment;
     auto_comment = c.auto_comment;
     return *this;
@@ -94,11 +94,13 @@ struct Command {
 
   bool isLDICmd();
 
-  ArgPtr getArg(int idx) { return args[idx]; }
+  ArgPtr getArg(int idx) { return _args[idx]; }
 
-  void setArg(int idx, ArgPtr arg) { if (args.size() < idx + 1) { args.resize(idx + 1); } args[idx] = arg; }
+  void setArg(int idx, ArgPtr arg) { if (_args.size() < idx + 1) { _args.resize(idx + 1); } _args[idx] = arg; }
 
-  size_t getArgsCount() { return args.size(); }
+  size_t getArgsCount() const { return _args.size(); }
+
+  const std::vector<ArgPtr>& args() const { return _args; }
 
 private:
   void updateArgs();
@@ -107,7 +109,7 @@ private:
 
   ArgPtr parseArg(const std::string& arg);
 
-  std::vector<ArgPtr> args;
+  std::vector<ArgPtr> _args;
 };
 
 }

@@ -27,7 +27,7 @@ void RegisterReferenceScan::updateRegisterSource(ChunkPtr chunk, int idx, Regist
           // found register load, need to update right arg (if it's applicable)
           if (cmd.command_code == CmdCode::LD) {
             if (cmd.getArg(1)->arg_type == ArgType::ARG_DEFAULT) {
-              auto src_ref = std::static_pointer_cast<ArgDefault> (cmd.getArg(1))->getValue();
+              auto src_ref = std::static_pointer_cast<ArgDefault> (cmd.getArg(1))->value();
               auto lbl = DisassemblerCore::inst().makeData(cmd.addr, src_ref, size == ArgSize::Word ? memory::Reference::Type::READ_WORD : memory::Reference::Type::READ_BYTE);
               auto src = std::make_shared<ArgMemoryReference>(src_ref, false);
               src->setLabel(lbl);

@@ -6,7 +6,7 @@ namespace dasm {
 namespace files {
 namespace project {
 
-rapidjson::Value serializeAddr(memory::Addr& addr, rapidjson::Document::AllocatorType& allocator) {
+rapidjson::Value serializeAddr(const memory::Addr& addr, rapidjson::Document::AllocatorType& allocator) {
   rapidjson::Value v{};
   v.SetObject();
 
@@ -97,15 +97,168 @@ void serializeMemory(const core::DisassemblerCore& core, rapidjson::Document& do
   doc.AddMember("memory", mem, allocator);
 }
 
-void serializeChunk(core::ChunkPtr chunk, rapidjson::Document::AllocatorType& allocator) {
+std::string chunkTypeToString(core::Chunk::Type type) {
+  switch (type) {
+    case core::Chunk::Type::UNKNOWN: return "UNKNOWN";
+    case core::Chunk::Type::UNPARSED: return "UNPARSED";
+    case core::Chunk::Type::CODE: return "CODE";
+    case core::Chunk::Type::DATA_BYTE: return "DATA_BYTE";
+    case core::Chunk::Type::DATA_WORD: return "DATA_WORD";
+    case core::Chunk::Type::DATA_BYTE_ARRAY: return "DATA_BYTE_ARRAY";
+    case core::Chunk::Type::DATA_WORD_ARRAY: return "DATA_WORD_ARRAY";
+  }
+  throw std::runtime_error("Wrong chunk type: " + std::to_string((int)type));
+}
 
+std::string referenceTypeToString(const memory::Reference::Type type) {
+  switch (type) {
+    case memory::Reference::Type::UNKNOWN: return "UNKNOWN";
+    case memory::Reference::Type::JUMP: return "JUMP";
+    case memory::Reference::Type::CALL: return "CALL";
+    case memory::Reference::Type::READ_BYTE: return "READ_BYTE";
+    case memory::Reference::Type::WRITE_BYTE: return "WRITE_BYTE";
+    case memory::Reference::Type::READ_WORD:return "READ_WORD";
+    case memory::Reference::Type::WRITE_WORD: return "WRITE_WORD";
+  }
+  throw std::runtime_error("unknown reference type: " + std::to_string((int)type));
+}
+
+rapidjson::Value serializeReference(const memory::Reference& ref, rapidjson::Document::AllocatorType& allocator) {
+  rapidjson::Value v{};
+  v.SetObject();
+
+  json::add_object(v, "addr", serializeAddr(ref.addr, allocator), allocator);
+  json::add_string_field(v, "type", referenceTypeToString(ref.type), allocator);
+  return v;
+}
+
+std::string argumentTypeToString(core::ArgType type) {
+  switch (type) {
+    case core::ArgType::ARG_DEFAULT: return "DEFAULT";
+    case core::ArgType::ARG_FLAG: return "FLAG";
+    case core::ArgType::ARG_REGISTER8: return "REGISTER8";
+    case core::ArgType::ARG_REGISTER16: return "REGISTER16";
+    case core::ArgType::ARG_REGISTER_OFFSET: return "REGISTER_OFFSET";
+    case core::ArgType::ARG_REGISTER_REF: return "REGISTER_REF";
+    case core::ArgType::ARG_MEMORY_REF: return "MEMORY_REF";
+    case core::ArgType::ARG_PORT: return "PORT";
+  }
+  throw std::runtime_error("Unknown argument type: " + std::to_string((int)type));
+}
+
+std::string argumentSizeToString(core::ArgSize size) {
+  switch (size) {
+    case core::ArgSize::Flag: return "FLAG";
+    case core::ArgSize::Byte: return "BYTE";
+    case core::ArgSize::Word: return "WORD";
+  }
+  throw std::runtime_error("Unknown argument size: " + std::to_string((int)size));
+}
+
+rapidjson::Value serializeArgument(const core::ArgPtr arg, rapidjson::Document::AllocatorType& allocator) {
+  rapidjson::Value v{};
+  v.SetObject();
+
+  json::add_string_field(v, "type", argumentTypeToString(arg->arg_type), allocator);
+  json::add_string_field(v, "size", argumentSizeToString(arg->size), allocator);
+
+  switch (arg->arg_type) {
+    case core::ArgType::ARG_DEFAULT:
+      json::add_bool_field(v, "is_hex", core::argConvert<core::ArgDefault>(arg)->is_hex(), allocator);
+      json::add_uint_field(v, "value", core::argConvert<core::ArgDefault>(arg)->value(), allocator);
+      break;
+    case core::ArgType::ARG_FLAG:
+      json::add_string_field(v, "flag", core::argConvert<core::ArgFlag>(arg)->flag.toString(), allocator);
+      break;
+    case core::ArgType::ARG_REGISTER8:
+      json::add_string_field(v, "reg8", core::argConvert<core::ArgRegister8>(arg)->reg_id.toString(), allocator);
+      break;
+    case core::ArgType::ARG_REGISTER16:
+      json::add_string_field(v, "reg16", core::argConvert<core::ArgRegister16>(arg)->reg_id.toString(), allocator);
+      break;
+    case core::ArgType::ARG_REGISTER_OFFSET:
+      json::add_string_field(v, "reg16", core::argConvert<core::ArgRegisterOffset>(arg)->reg_id.toString(), allocator);
+      json::add_bool_field(v, "is_positive", core::argConvert<core::ArgRegisterOffset>(arg)->is_positive, allocator);
+      json::add_uint_field(v, "offset", core::argConvert<core::ArgRegisterOffset>(arg)->offset, allocator);
+      break;
+    case core::ArgType::ARG_REGISTER_REF:
+      json::add_string_field(v, "reg16", core::argConvert<core::ArgRegisterReference>(arg)->reg_id.toString(), allocator);
+      break;
+    case core::ArgType::ARG_MEMORY_REF:
+      json::add_bool_field(v, "is_ref", core::argConvert<core::ArgMemoryReference>(arg)->isReference, allocator);
+      json::add_uint_field(v, "addr", core::argConvert<core::ArgMemoryReference>(arg)->addr, allocator);
+      if (core::argConvert<core::ArgMemoryReference>(arg)->label != nullptr) {
+        json::add_object(v, "label", serializeLabel(core::argConvert<core::ArgMemoryReference>(arg)->label, allocator), allocator);
+      }
+      break;
+    case core::ArgType::ARG_PORT:
+      json::add_uint_field(v, "port", core::argConvert<core::ArgPort>(arg)->value(), allocator);
+      break;
+    default:
+      throw std::runtime_error("Unknown argument type: " + std::to_string((int)arg->arg_type));
+  }
+  return v;
+}
+
+rapidjson::Value serializeCommand(const core::Command& cmd, rapidjson::Document::AllocatorType& allocator) {
+  rapidjson::Value v{};
+  v.SetObject();
+
+  json::add_string_field(v, "code", cmd.command_code.toString(), allocator);
+  json::add_string_field(v, "comment", cmd.comment, allocator);
+  json::add_string_field(v, "auto_comment", cmd.auto_comment, allocator);
+  json::add_object(v, "addr", serializeAddr(cmd.addr, allocator), allocator);
+  json::add_uint_field(v, "len", cmd.len, allocator);
+
+  if (cmd.getArgsCount() != 0) {
+    rapidjson::Value args{};
+    args.SetArray();
+    for (const auto& arg : cmd.args()) {
+      json::push_object(args, serializeArgument(arg, allocator), allocator);
+    }
+    json::add_object(v, "arguments", args, allocator);
+
+  }
+  return v;
+}
+
+rapidjson::Value serializeChunk(const core::ChunkPtr chunk, rapidjson::Document::AllocatorType& allocator) {
+  rapidjson::Value v{};
+  v.SetObject();
+
+  if (!chunk->comment().empty()) {
+    json::add_string_field(v, "comment", chunk->comment(), allocator);
+  }
+  if (chunk->label() != nullptr) {
+    json::add_object(v, "label", serializeLabel(chunk->label(), allocator), allocator);
+  }
+  json::add_uint_field(v, "length", chunk->length(), allocator);
+  json::add_string_field(v, "type", chunkTypeToString(chunk->type()), allocator);
+  json::add_object(v, "start_addr", serializeAddr(chunk->addr(), allocator), allocator);
+  json::add_object(v, "last_addr", serializeAddr(chunk->lastAddr(), allocator), allocator);
+  //References
+  if (!chunk->references().empty()) {
+    rapidjson::Value refs{};
+    refs.SetArray();
+    for (const auto& ref : chunk->references()) {
+      json::push_object(refs, serializeReference(ref, allocator), allocator);
+    }
+    json::add_object(v, "references", refs, allocator);
+  }
+  //commands
+  if (!chunk->commands().empty()) {
+    rapidjson::Value cmds{};
+    cmds.SetArray();
+    for (const auto& cmd : chunk->commands()) {
+      json::push_object(cmds, serializeCommand(cmd, allocator), allocator);
+    }
+    json::add_object(v, "commands", cmds, allocator);
+  }
+  return v;
 }
 
 void serializeChunks(const core::DisassemblerCore& core, rapidjson::Document& doc) {
   auto& allocator = doc.GetAllocator();
-
-  rapidjson::Value chunks{};
-  chunks.SetObject();
 
   rapidjson::Value cont{};
   cont.SetArray();
@@ -113,8 +266,7 @@ void serializeChunks(const core::DisassemblerCore& core, rapidjson::Document& do
   for (const auto& chunk : core.chunks().chunks()) {
     json::push_object(cont, serializeChunk(chunk.second, allocator), allocator);
   }
-
-  doc.AddMember("chunks", chunks, allocator);
+  doc.AddMember("chunks", cont, allocator);
 }
 
 std::string Serializer::serialize(const core::DisassemblerCore& core) {

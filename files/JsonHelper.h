@@ -53,6 +53,9 @@ public:
 
 namespace json {
 
+void add_object(rapidjson::Value& res, const std::string& field_name, rapidjson::Value& value,
+                rapidjson::Document::AllocatorType& allocator);
+
 void add_string_field(rapidjson::Value& res, const std::string& field_name, const std::string& str,
                       rapidjson::Document::AllocatorType& allocator);
 

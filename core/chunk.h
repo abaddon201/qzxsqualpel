@@ -77,6 +77,8 @@ public:
 
   inline const memory::Addr& addr() const { return _starting_addr; }
 
+  inline const memory::Addr& lastAddr() const { return _last_addr; }
+
   inline bool containsAddr(const memory::Addr& addr) const { return (addr >= _starting_addr) && (addr < _last_addr); }
 
   inline size_type length() const { return _length; }

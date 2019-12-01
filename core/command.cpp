@@ -19,45 +19,45 @@ namespace dasm {
 namespace core {
 
 memory::Addr Command::getJmpAddrFromString() const {
-  if (args.size() == 1) {
+  if (_args.size() == 1) {
     //get from arg1
-    return std::stoi(args[0]->toString(), nullptr, 16);
+    return std::stoi(_args[0]->toString(), nullptr, 16);
   } else {
     //get from arg2
-    return std::stoi(args[1]->toString(), nullptr, 16);
+    return std::stoi(_args[1]->toString(), nullptr, 16);
   }
 }
 
 memory::Addr Command::getJmpAddr() const {
-  if (args.size() == 1) {
+  if (_args.size() == 1) {
     //get from arg1
-    return dynamic_cast<ArgMemoryReference*>(args[0].get())->label->addr;
+    return dynamic_cast<ArgMemoryReference*>(_args[0].get())->label->addr;
   } else {
     //get from arg2
-    return dynamic_cast<ArgMemoryReference*>(args[1].get())->label->addr;
+    return dynamic_cast<ArgMemoryReference*>(_args[1].get())->label->addr;
   }
 }
 
 void Command::setJmpAddr(const std::shared_ptr<Label> label) {
   // if label is nullptr, we can't change default type arg to the label (we don't know about it)
   if (label != nullptr) {
-    if (args.size() == 1) {
-      args[0] = std::make_shared<ArgMemoryReference>(label, false);
+    if (_args.size() == 1) {
+      _args[0] = std::make_shared<ArgMemoryReference>(label, false);
     } else {
-      args[1] = std::make_shared<ArgMemoryReference>(label, false);
+      _args[1] = std::make_shared<ArgMemoryReference>(label, false);
     }
   }
 }
 
 std::string Command::getArgsString() const {
-  if (args.size() == 0) {
+  if (_args.size() == 0) {
     return std::string();
   }
-  if (args.size() == 1) {
-    return args[0]->toString(); //std::toupper(arg1);
+  if (_args.size() == 1) {
+    return _args[0]->toString(); //std::toupper(arg1);
   }
   //  return arg1.toUpper()+", "+arg2.toUpper();
-  return args[0]->toString() + ", " + args[1]->toString();
+  return _args[0]->toString() + ", " + _args[1]->toString();
 }
 
 std::string Command::getOpcodesString() const {
@@ -87,12 +87,12 @@ void Command::parse(std::string& src) {
     //has args
     std::vector<std::string> args = utils::split(strlist[1], ',');
     for (const auto& a : args) {
-      this->args.push_back(parseArg(a));
+      this->_args.push_back(parseArg(a));
     }
   }
   updateArgs();
   std::cout << "dcd: " << command_code.toString();
-  for (const auto a : args) {
+  for (const auto a : _args) {
     std::cout << " " << a->toString();
   }
   std::cout << std::endl;
@@ -104,8 +104,8 @@ bool Command::isLDICmd() {
 
 void Command::updateArgs() {
   if ((command_code == CmdCode::LD) || (command_code == CmdCode::SBC) || (command_code == CmdCode::ADD) || (command_code == CmdCode::ADC)) {
-    auto& a1 = args[0];
-    auto& a2 = args[1];
+    auto& a1 = _args[0];
+    auto& a2 = _args[1];
     switch (a1->arg_type) {
       case ArgType::ARG_REGISTER16:
         a2->setSize(ArgSize::Word);
