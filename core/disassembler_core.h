@@ -69,7 +69,7 @@ public:
   std::string fileName() const { return _file_name; }
   void setFileName(const std::string& file_name) { _file_name = file_name; }
 
-  memory::AddrPtr entryPoint() const { return _entry_point; }
+  const memory::AddrPtr entryPoint() const { return _entry_point; }
   void setEntryPoint(memory::AddrPtr entry_point) { _entry_point = entry_point; }
 
   std::shared_ptr<postprocessors::AutoCommenter> autocommenter() const { return _auto_commenter; }

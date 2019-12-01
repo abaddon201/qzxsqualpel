@@ -281,7 +281,7 @@ std::string Serializer::serialize(const core::DisassemblerCore& core) {
   json::add_string_field(info, "arch", "z80", allocator);
   json::add_string_field(info, "file_name", core.fileName(), allocator);
   if (core.entryPoint() != nullptr) {
-    json::add_string_field(info, "entry_point", core.entryPoint()->toString(), allocator);
+    json::add_object(info, "entry_point", serializeAddr(*core.entryPoint(), allocator), allocator);
   }
 
   doc.AddMember("descr", info, allocator);
