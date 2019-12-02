@@ -60,13 +60,27 @@ std::string Command::getArgsString() const {
   return _args[0]->toString() + ", " + _args[1]->toString();
 }
 
-std::string Command::getOpcodesString() const {
+std::string Command::getOpcodesString(size_t opcodes_count) const {
   std::string tmp;
   auto l1 = len;
-  memory::Addr a = addr;
-  for (; l1; --l1, ++a) {
-    tmp += " " + DisassemblerCore::inst().memory().byte(a).toString();
+  std::string suffix = "";
+  if (opcodes_count != -1) {
+    l1 = std::min(l1, opcodes_count);
+    if (l1 < len) {
+      suffix = " ...";
+    }
   }
+  memory::Addr a = addr;
+  bool first = true;
+  for (; l1; --l1, ++a) {
+    if (first) {
+      first = false;
+    } else {
+      tmp += " ";
+    }
+    tmp += DisassemblerCore::inst().memory().byte(a).toString();
+  }
+  tmp += suffix;
   return tmp;
 }
 

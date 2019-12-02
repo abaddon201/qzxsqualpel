@@ -80,7 +80,7 @@ struct Command {
 
   ///@brief Возвращает опкоды команды в виде строки
   /// @todo стоит добавить ограничение на кол-во опкодов
-  std::string getOpcodesString() const;
+  std::string getOpcodesString(size_t opcodes_count = -1) const;
 
   Byte opcodes(unsigned long long offs) const;
 

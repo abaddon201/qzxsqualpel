@@ -71,15 +71,18 @@ private:
   int _cell_length_command;
   int _cell_length_args;
   int _cell_length_cmd_comment;
+  int _cell_length_chunk_comment;
   int _cell_length_reference;
 
-  static const int CELL_LENGTH_ADDR = 7;
-  static const int CELL_LENGTH_OPCODES = 13;
-  static const int CELL_LENGTH_LABEL = 10;
+  static const int CELL_LENGTH_ADDR = 10;
+  static const int CELL_LENGTH_OPCODES = 19;
+  static const int CELL_LENGTH_LABEL = 19;
   static const int CELL_LENGTH_COMMAND = 5;
   static const int CELL_LENGTH_ARGS = 10;
+  static const int CELL_LENGTH_CHUNK_COMMENT = 0;
   static const int CELL_LENGTH_CMD_COMMENT = 0;
   static const int CELL_LENGTH_REFERENCE = 0;
+  static const size_t MAX_OPCODES_COUNT = 5;
 
   int _references_on_line;
 

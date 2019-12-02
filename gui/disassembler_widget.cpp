@@ -60,6 +60,7 @@ void DisassemblerWidget::init() {
   _cell_length_args = CELL_LENGTH_ARGS;
   _cell_length_cmd_comment = CELL_LENGTH_CMD_COMMENT;
   _cell_length_reference = CELL_LENGTH_REFERENCE;
+  _cell_length_chunk_comment = CELL_LENGTH_CHUNK_COMMENT;
 
   _references_on_line = 3;
   setMinimumWidth(600);
@@ -291,17 +292,14 @@ void DisassemblerWidget::printReferences(QTextCursor& cursor, std::shared_ptr<GU
   if (chunk->core()->references().size() == 0) {
     return;
   }
-  int skip_len = _cell_length_command + _cell_length_args;
-  int skip_len2 = _cell_length_addr + _cell_length_opcodes + _cell_length_label + _cell_length_command + _cell_length_args;
-
   bool is_first = true;
+  std::string empty{ "" };
   for (auto& ref : chunk->core()->references()) {
     if (is_first) {
-      printCell(cursor, std::string(), skip_len);
       is_first = false;
     } else {
       cursor.insertText("\n");
-      printCell(cursor, std::string(), skip_len2);
+      printCell(cursor, empty, _cell_length_addr + _cell_length_label, _cell_format_addr_rom);
     }
     printCell(cursor, ref.toString(), _cell_length_reference, _cell_format_reference);
   }
@@ -314,8 +312,8 @@ void DisassemblerWidget::printCommand(QTextCursor& cursor, const Command& cmd) {
   } else {
     printCell(cursor, cmd.addr.toString(), _cell_length_addr, _cell_format_addr);
   }
-  printCell(cursor, cmd.getOpcodesString(), _cell_length_opcodes, _cell_format_opcodes);
-  printCell(cursor, std::string(), _cell_length_label, _cell_format_label);
+  printCell(cursor, cmd.getOpcodesString(MAX_OPCODES_COUNT), _cell_length_opcodes, _cell_format_opcodes);
+  //printCell(cursor, std::string(), _cell_length_label, _cell_format_label);
   printCell(cursor, cmd.command_code.toString(), _cell_length_command, _cell_format_command);
   printCell(cursor, cmd.getArgsString(), _cell_length_args, _cell_format_args);
   if (!cmd.comment.empty()) {
@@ -336,11 +334,12 @@ void DisassemblerWidget::printChunkCode(QTextCursor& cursor, std::shared_ptr<GUI
     cursor.insertBlock();
     if (!chunk->core()->comment().empty()) {
       printCell(cursor, chunk->core()->addr().toString(), _cell_length_addr, _cell_format_addr);
-      printCell(cursor, std::string(), _cell_length_opcodes, _cell_format_opcodes);
-      printCell(cursor, std::string(";") + chunk->core()->comment(), _cell_length_label, _cell_format_chunk_comment);
+      //printCell(cursor, std::string(), _cell_length_opcodes, _cell_format_opcodes);
+      printCell(cursor, std::string(";") + chunk->core()->comment(), _cell_length_chunk_comment, _cell_format_chunk_comment);
+      cursor.insertBlock();
     }
     printCell(cursor, chunk->core()->addr().toString(), _cell_length_addr, _cell_format_addr);
-    printCell(cursor, std::string(), _cell_length_opcodes, _cell_format_opcodes);
+    //printCell(cursor, std::string(), _cell_length_opcodes, _cell_format_opcodes);
     printCell(cursor, chunk->core()->label()->name + ":", _cell_length_label, _cell_format_label);
     printReferences(cursor, chunk);
   }
@@ -350,36 +349,6 @@ void DisassemblerWidget::printChunkCode(QTextCursor& cursor, std::shared_ptr<GUI
     //    cursor.movePosition(QTextCursor::End);
   }
   //  cursor.movePosition(QTextCursor::End);
-}
-
-void DisassemblerWidget::printChunkData(QTextCursor& cursor, std::shared_ptr<GUIChunk> chunk) {
-  /*  if (chunk->core()->label() != nullptr) {
-      cursor.insertBlock();
-      if (!chunk->core()->comment().empty()) {
-        printCell(cursor, chunk->core()->addr().toString(), _cell_length_addr, _cell_format_addr);
-        printCell(cursor, std::string(), _cell_length_opcodes, _cell_format_opcodes);
-        printCell(cursor, std::string(";") + chunk->core()->comment(), _cell_length_label, _cell_format_chunk_comment);
-      }
-      printCell(cursor, chunk->core()->addr().toString(), _cell_length_addr, _cell_format_addr);
-      printCell(cursor, std::string(), _cell_length_opcodes, _cell_format_opcodes);
-      printCell(cursor, chunk->core()->label()->name + ":", _cell_length_label, _cell_format_label);
-      printReferences(cursor, chunk);
-    }
-    switch (chunk->core()->type()) {
-      case dasm::core::Chunk::Type::DATA_BYTE:
-        printByte(cursor, chunk);
-        break;
-      case dasm::core::Chunk::Type::DATA_WORD:
-        printWord(cursor, chunk);
-        break;
-    }
-    for (Command& cmd : chunk->core()->commands()) {
-      printCommand(cursor, cmd);
-      cursor.block().setUserData(new GUITextBlockUserData(chunk->core(), &cmd));
-      //    cursor.movePosition(QTextCursor::End);
-    }
-    //  cursor.movePosition(QTextCursor::End);
-    */
 }
 
 void DisassemblerWidget::refreshView() {
