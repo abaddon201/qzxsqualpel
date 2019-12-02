@@ -5,6 +5,7 @@
 #ifndef JSONHELPER_H
 #define JSONHELPER_H
 
+#include <optional>
 #include <string>
 #include <list>
 #include <stdexcept>
@@ -157,6 +158,19 @@ get_optional_array(const rapidjson::Value& json_node, const std::string& field_n
     result.push_back(function(*it));
   }
   return result;
+}
+
+inline const rapidjson::Value& get_object(const rapidjson::Value& node, const std::string& field_name) {
+  const auto& obj = node.FindMember(field_name);
+  if (obj == node.MemberEnd()) {
+    throw std::runtime_error(field_name + " section not found");
+  }
+  return obj->value;
+}
+
+inline const rapidjson::Value::ConstMemberIterator get_optional_object(const rapidjson::Value& node, const std::string& field_name) {
+  const auto obj = node.FindMember(field_name);
+  return obj;
 }
 
 inline void push_uint(rapidjson::Value& node, uint32_t val, rapidjson::Document::AllocatorType& allocator) {

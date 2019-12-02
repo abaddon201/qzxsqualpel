@@ -83,6 +83,13 @@ public:
     return _inst;
   }
 
+  void clear() {
+    _memory.clear();
+    _chunks.clear();
+    _labels.clear();
+    _entry_point = nullptr;
+    _auto_commenter = nullptr;
+  }
 private:
 
   DisassemblerCore() {}

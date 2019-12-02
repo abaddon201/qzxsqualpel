@@ -41,6 +41,10 @@ public:
 
   size_type wholeSize();
 
+  void clear() {
+    _segments.clear();
+  }
+
 private:
   std::map<Segment::IdType, std::shared_ptr<Segment>> _segments;
 };
