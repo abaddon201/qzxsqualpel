@@ -17,7 +17,7 @@ MainWindow::MainWindow() {
 
   dasm::core::DisassemblerCore::inst().init(this);
 
-  QDockWidget *dock = new QDockWidget(tr("Navigation Stack"), this);
+  QDockWidget* dock = new QDockWidget(tr("Navigation Stack"), this);
   dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
   _navigation_stack = new QListWidget(dock);
   dock->setWidget(_navigation_stack);
@@ -36,15 +36,16 @@ MainWindow::MainWindow() {
 }
 
 void MainWindow::setupMenu() {
-  QMenu *fileMenu = new QMenu(tr("&File"), this);
+  QMenu* fileMenu = new QMenu(tr("&File"), this);
   menuBar()->addMenu(fileMenu);
 
-  fileMenu->addAction(tr("&Open..."), this, SLOT(openFile()), QKeySequence(tr("Ctrl+O", "File|Open")));
+  fileMenu->addAction(tr("Open &Bin..."), this, SLOT(openFile()), QKeySequence(tr("Ctrl+B", "File|Open")));
+  fileMenu->addAction(tr("&Open project..."), this, SLOT(openProject()), QKeySequence(tr("Ctrl+O", "File|Open")));
   fileMenu->addAction(tr("&Save project..."), this, SLOT(saveProject()), QKeySequence(tr("Ctrl+S", "File|Save")));
   fileMenu->addAction(tr("&Save ASM..."), this, SLOT(saveAsm()), QKeySequence(tr("Ctrl+D", "File|Save ASM")));
   fileMenu->addAction(tr("E&xit"), qApp, SLOT(quit()), QKeySequence(tr("Ctrl+Q", "File|Exit")));
 
-  QMenu *disassmMenu = new QMenu(tr("&Disassm"), this);
+  QMenu* disassmMenu = new QMenu(tr("&Disassm"), this);
   menuBar()->addMenu(disassmMenu);
 
   disassmMenu->addAction(tr("&Code"), _disassembler_widget, SLOT(makeCodeUnderCursor()),
@@ -57,7 +58,7 @@ void MainWindow::setupMenu() {
   disassmMenu->addAction(tr("change &Name..."), _disassembler_widget, SLOT(changeNameUnderCursor()),
                          QKeySequence(tr("N", "Disassm|change Name")));
 
-  QMenu *toolsMenu = new QMenu(tr("&Tools"), this);
+  QMenu* toolsMenu = new QMenu(tr("&Tools"), this);
   menuBar()->addMenu(toolsMenu);
 
   toolsMenu->addAction(tr("&Load guesses..."), this, SLOT(loadGuesses()), QKeySequence(tr("Ctrl+L", "File|Load")));
@@ -90,3 +91,11 @@ void MainWindow::saveProject() {
     _disassembler_widget->saveProjectFile(fileName);
   }
 }
+
+void MainWindow::openProject() {
+  QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "", "Project Files (*.qzx)");
+  if (!fileName.isEmpty()) {
+    _disassembler_widget->openProjectFile(fileName);
+  }
+}
+

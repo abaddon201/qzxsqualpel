@@ -21,6 +21,7 @@ public:
 
   void openRAWFile(const QString& fileName);
   void saveProjectFile(const QString& fileName);
+  void openProjectFile(const QString& fileName);
   void saveASMFile(const QString& fileName);
   void keyPressEvent(QKeyEvent*);
 

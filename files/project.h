@@ -10,7 +10,7 @@ class Serializer {
 public:
   static std::string serialize(const core::DisassemblerCore& core);
 
-  static void deserialize(const std::string& src, core::DisassemblerCore& core);
+  static void deserialize_file(const std::string& file_name, core::DisassemblerCore& core);
 };
 
 }

@@ -9,11 +9,11 @@
 
 
 class MainWindow : public QMainWindow, public IGUIUpdater {
-Q_OBJECT
+  Q_OBJECT
 public:
   MainWindow();
 
-  LabelsWidget *labelsWidget() {
+  LabelsWidget* labelsWidget() {
     return _labels_widget;
   }
 
@@ -21,10 +21,10 @@ public:
 
 private:
   //Ui::CMainWindow ui;
-  QListWidget *_navigation_stack;
-//  Highlighter* m_Highlighter;
-  DisassemblerWidget *_disassembler_widget;
-  LabelsWidget *_labels_widget;
+  QListWidget* _navigation_stack;
+  //  Highlighter* m_Highlighter;
+  DisassemblerWidget* _disassembler_widget;
+  LabelsWidget* _labels_widget;
 
   void setupMenu();
 
@@ -35,6 +35,7 @@ private slots:
   void openFile();
 
   void saveProject();
+  void openProject();
 
   void saveAsm();
 };

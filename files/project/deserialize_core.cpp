@@ -6,11 +6,11 @@ namespace dasm {
 namespace files {
 namespace project {
 
-void deserialize(const std::string& src, core::DisassemblerCore& core) {
+void Serializer::deserialize_file(const std::string& file_name, core::DisassemblerCore& core) {
   rapidjson::Document doc{};
   auto& allocator = doc.GetAllocator();
 
-  json::parse_string(src, doc);
+  json::parse_file(file_name, doc);
 
   const auto& descr = doc.FindMember("descr");
   if (descr == doc.MemberEnd()) {

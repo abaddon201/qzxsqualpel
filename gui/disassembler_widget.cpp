@@ -254,6 +254,10 @@ void DisassemblerWidget::saveProjectFile(const QString& fileName) {
   file.close();
 }
 
+void DisassemblerWidget::openProjectFile(const QString& fileName) {
+  dasm::files::project::Serializer::deserialize_file(fileName.toStdString(), dasm::core::DisassemblerCore::inst());
+}
+
 void DisassemblerWidget::saveASMFile(const QString& fileName) {
 #if QT_VERSION >= 0x040500
   QTextDocumentWriter writer(fileName);
