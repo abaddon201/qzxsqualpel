@@ -72,7 +72,8 @@ public:
   const memory::AddrPtr entryPoint() const { return _entry_point; }
   void setEntryPoint(memory::AddrPtr entry_point) { _entry_point = entry_point; }
 
-  std::shared_ptr<postprocessors::AutoCommenter> autocommenter() const { return _auto_commenter; }
+  std::shared_ptr<postprocessors::AutoCommenter> autoCommenter() const { return _auto_commenter; }
+  void setAutoCommenter(std::shared_ptr<postprocessors::AutoCommenter> ac) { _auto_commenter = ac; }
 
   const memory::Memory& memory() const { return _memory; }
 

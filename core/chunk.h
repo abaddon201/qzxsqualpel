@@ -76,14 +76,18 @@ public:
   inline CommandsList& commands() { return _commands; }
 
   inline const memory::Addr& addr() const { return _starting_addr; }
+  inline void setStartAddr(memory::Addr& addr) { _starting_addr = addr; }
 
   inline const memory::Addr& lastAddr() const { return _last_addr; }
+  inline void setLastAddr(memory::Addr& addr) { _last_addr = addr; }
 
   inline bool containsAddr(const memory::Addr& addr) const { return (addr >= _starting_addr) && (addr < _last_addr); }
 
   inline size_type length() const { return _length; }
+  inline void setLength(size_type len) { _length = len; }
 
   inline Type type() const { return _type; }
+  inline void setType(Type type) { _type = type; }
 
   std::shared_ptr<Label> label() const { return _label; }
 
@@ -94,6 +98,7 @@ public:
   ReferencesList& references() { return _references; }
 
   std::string comment() const { return _comment; }
+  void setComment(const std::string& cm) { _comment = cm; }
 
   bool isEmpty() const { return !((type() != Chunk::Type::UNPARSED) && (type() != Chunk::Type::UNKNOWN)); }
 

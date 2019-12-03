@@ -63,7 +63,8 @@ void DisassemblerWidget::init() {
   _cell_length_chunk_comment = CELL_LENGTH_CHUNK_COMMENT;
 
   _references_on_line = 3;
-  setMinimumWidth(600);
+  setMinimumWidth(1200);
+  setMinimumHeight(800);
 }
 
 void DisassemblerWidget::navigateToAddress(const dasm::memory::Addr& addr) {
@@ -256,6 +257,7 @@ void DisassemblerWidget::saveProjectFile(const QString& fileName) {
 
 void DisassemblerWidget::openProjectFile(const QString& fileName) {
   dasm::files::project::Serializer::deserialize_file(fileName.toStdString(), dasm::core::DisassemblerCore::inst());
+  refreshView();
 }
 
 void DisassemblerWidget::saveASMFile(const QString& fileName) {

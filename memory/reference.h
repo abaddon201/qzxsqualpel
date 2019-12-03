@@ -29,6 +29,7 @@ struct Reference {
     WRITE_WORD
   };
 
+  Reference() : type{ Type::UNKNOWN } {}
   Reference(const Addr& addr_, Type type_);
 
   std::string toString();

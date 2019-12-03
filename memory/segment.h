@@ -32,14 +32,19 @@ public:
   void fill(unsigned char buff[], size_type size);
 
   inline IdType id() const { return _id; }
+  inline void setId(IdType id) { _id = id; }
 
   inline size_type dataSize() const { return _dataSize; }
+  inline void setDataSize(size_type sz) { _dataSize = sz; }
 
   inline size_type size() const { return _size; }
+  inline void setSize(size_type sz) { _size = sz; }
 
   inline Type type() const { return _type; }
+  inline void setType(Type type) { _type = type; }
 
-  const std::vector<core::Byte> bytes() const { return _mem; }
+  const std::vector<core::Byte>& bytes() const { return _mem; }
+  std::vector<core::Byte>& bytes() { return _mem; }
 
   inline core::Byte getByte(size_type offset) const {
     if (offset < _dataSize) {

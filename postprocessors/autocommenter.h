@@ -15,7 +15,9 @@ public:
 
   core::LabelPtr getLabelForAddr(const memory::Addr& addr);
 
-  const core::Labels& getKnownLabels() { return _known_labels; }
+  const core::Labels& getKnownLabels() const { return _known_labels; }
+
+  core::Labels& knownLabels() { return _known_labels; }
 
   virtual ~AutoCommenter() = default;
 private:

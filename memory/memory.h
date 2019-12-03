@@ -23,6 +23,10 @@ public:
 
   void switchSegment(Segment::IdType src, Segment::IdType dst);
 
+  void placeSegment(SegmentPtr seg) {
+    _segments[seg->id()] = seg;
+  }
+
   std::shared_ptr<Segment> segment(Segment::IdType id) const {
     auto seg_it = _segments.find(id);
     if (seg_it != _segments.end()) {

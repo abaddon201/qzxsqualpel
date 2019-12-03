@@ -30,7 +30,7 @@ rapidjson::Value serializeKnownLabel(std::pair < memory::Addr, core::LabelPtr> l
 }
 
 void serializeAutocommenter(const core::DisassemblerCore& core, rapidjson::Document& doc) {
-  if (core.autocommenter() == nullptr || core.autocommenter()->getKnownLabels().empty()) {
+  if (core.autoCommenter() == nullptr || core.autoCommenter()->getKnownLabels().empty()) {
     return;
   }
   auto& allocator = doc.GetAllocator();
@@ -41,7 +41,7 @@ void serializeAutocommenter(const core::DisassemblerCore& core, rapidjson::Docum
   rapidjson::Value klsj{};
   klsj.SetArray();
 
-  for (const auto& kl : core.autocommenter()->getKnownLabels()) {
+  for (const auto& kl : core.autoCommenter()->getKnownLabels()) {
     json::push_object(klsj, serializeKnownLabel(kl, allocator), allocator);
   }
 
@@ -205,8 +205,12 @@ rapidjson::Value serializeCommand(const core::Command& cmd, rapidjson::Document:
   v.SetObject();
 
   json::add_string_field(v, "code", cmd.command_code.toString(), allocator);
-  json::add_string_field(v, "comment", cmd.comment, allocator);
-  json::add_string_field(v, "auto_comment", cmd.auto_comment, allocator);
+  if (!cmd.comment.empty()) {
+    json::add_string_field(v, "comment", cmd.comment, allocator);
+  }
+  if (!cmd.auto_comment.empty()) {
+    json::add_string_field(v, "auto_comment", cmd.auto_comment, allocator);
+  }
   json::add_object(v, "addr", serializeAddr(cmd.addr, allocator), allocator);
   json::add_uint_field(v, "len", cmd.len, allocator);
 

@@ -76,8 +76,10 @@ public:
   std::string toString() const override { return _is_hex ? utils::hexify(_value, getBytesSize() * 2) : std::to_string(_value); }
 
   uint16_t value() const { return _value; }
+  void setValue(uint16_t v) { _value = v; }
 
   bool is_hex() const { return _is_hex; }
+  void setIsHex(bool ih) { _is_hex = ih; }
 
 private:
   uint16_t _value;
@@ -161,7 +163,7 @@ public:
   std::string toString() const override { return "(" + utils::hexify(_value, 2) + ")"; }
 
   uint16_t value() const { return _value; }
-
+  void setPort(uint16_t p) { _value = p; }
 private:
   uint16_t _value;
 };

@@ -101,7 +101,11 @@ struct Command {
   size_t getArgsCount() const { return _args.size(); }
 
   const std::vector<ArgPtr>& args() const { return _args; }
+  std::vector<ArgPtr>& args() { return _args; }
+  void setArgs(std::vector<ArgPtr>& args) { _args = args; }
 
+  void setComment(const std::string& comm) { comment = comm; }
+  void setAutoComment(const std::string& comm) { auto_comment = comm; }
 private:
   void updateArgs();
 
