@@ -40,6 +40,8 @@ public:
 
   ~Chunk() = default;
 
+  Chunk() {}
+
   Chunk(const Chunk& ch) { makeCopy(ch); }
 
   explicit Chunk(const memory::Addr& addr, Chunk::Type type = Chunk::Type::UNKNOWN) : _type(type), _starting_addr(addr) {
@@ -103,9 +105,6 @@ public:
   bool isEmpty() const { return !((type() != Chunk::Type::UNPARSED) && (type() != Chunk::Type::UNKNOWN)); }
 
 private:
-  //  friend class CChunkList;
-
-  Chunk() : _length(0) {}
 
   virtual void makeCopy(const Chunk& ch) {
     _starting_addr = ch._starting_addr;

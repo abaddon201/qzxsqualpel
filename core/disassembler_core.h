@@ -54,6 +54,7 @@ public:
 
   memory::Memory& memory() { return _memory; }
 
+  const Labels& labels() const { return _labels; }
   Labels& labels() { return _labels; }
 
   std::shared_ptr<Label> makeJump(const memory::Addr& from_addr, const memory::Addr& jump_addr, memory::Reference::Type ref_type);

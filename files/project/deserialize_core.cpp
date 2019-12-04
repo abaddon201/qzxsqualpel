@@ -147,6 +147,8 @@ core::ArgType argumentTypeFromString(const std::string& type) {
     return core::ArgType::ARG_MEMORY_REF;
   } else if (type == "PORT") {
     return core::ArgType::ARG_PORT;
+  } else if (type == "BYTE_ARRAY") {
+    return core::ArgType::ARG_BYTE_ARRAY;
   }
   throw std::runtime_error("Unknown argument type: " + type);
 }
@@ -210,6 +212,16 @@ core::ArgPtr deserializeArgument(const rapidjson::Value& node) {
       arg = std::make_shared<core::ArgPort>();
       core::argConvert<core::ArgPort>(arg)->setPort(json::get_uint(node, "port"));
       break;
+    case core::ArgType::ARG_BYTE_ARRAY: {
+      arg = std::make_shared<core::ArgByteArray>();
+      //FIXME: unneeded copy of bytes
+      json::get_array<uint8_t>(node, "bytes", [&](const rapidjson::Value& v)->uint8_t {
+        auto b = (uint8_t)v.GetUint();
+        core::argConvert<core::ArgByteArray>(arg)->pushByte(core::Byte(b));
+        return b;
+      });
+      break;
+    }
     default:
       throw std::runtime_error("Unknown argument type: " + std::to_string((int)arg->arg_type));
   }
@@ -284,6 +296,16 @@ void deserializeChunks(const rapidjson::Value& node, core::DisassemblerCore& cor
   }
 }
 
+void deserializeLabels(const rapidjson::Value& node, core::DisassemblerCore& core) {
+  auto arr = json::get_array<core::LabelPtr>(node, "labels", [](const rapidjson::Value& v)->core::LabelPtr {
+    return deserializeLabel(v);
+  });
+
+  for (auto& s : arr) {
+    core.labels()[s->addr] = s;
+  }
+}
+
 void Serializer::deserialize_file(const std::string& file_name, core::DisassemblerCore& core) {
   rapidjson::Document doc{};
   auto& allocator = doc.GetAllocator();
@@ -308,6 +330,7 @@ void Serializer::deserialize_file(const std::string& file_name, core::Disassembl
   core.setAutoCommenter(autoc);
 
   deserializeMemory(doc, core);
+  deserializeLabels(doc, core);
   deserializeChunks(doc, core);
 }
 

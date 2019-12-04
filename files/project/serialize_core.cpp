@@ -142,6 +142,7 @@ std::string argumentTypeToString(core::ArgType type) {
     case core::ArgType::ARG_REGISTER_REF: return "REGISTER_REF";
     case core::ArgType::ARG_MEMORY_REF: return "MEMORY_REF";
     case core::ArgType::ARG_PORT: return "PORT";
+    case core::ArgType::ARG_BYTE_ARRAY: return "BYTE_ARRAY";
   }
   throw std::runtime_error("Unknown argument type: " + std::to_string((int)type));
 }
@@ -194,6 +195,15 @@ rapidjson::Value serializeArgument(const core::ArgPtr arg, rapidjson::Document::
     case core::ArgType::ARG_PORT:
       json::add_uint_field(v, "port", core::argConvert<core::ArgPort>(arg)->value(), allocator);
       break;
+    case core::ArgType::ARG_BYTE_ARRAY: {
+      rapidjson::Value args{};
+      args.SetArray();
+      for (const auto& b : core::argConvert<core::ArgByteArray>(arg)->bytes()) {
+        json::push_uint(args, (uint8_t)b, allocator);
+      }
+      json::add_object(v, "bytes", args, allocator);
+      break;
+    }
     default:
       throw std::runtime_error("Unknown argument type: " + std::to_string((int)arg->arg_type));
   }
@@ -273,6 +283,18 @@ void serializeChunks(const core::DisassemblerCore& core, rapidjson::Document& do
   doc.AddMember("chunks", cont, allocator);
 }
 
+void serializeLabels(const core::DisassemblerCore& core, rapidjson::Document& doc) {
+  auto& allocator = doc.GetAllocator();
+
+  rapidjson::Value cont{};
+  cont.SetArray();
+
+  for (const auto& lbl : core.labels()) {
+    json::push_object(cont, serializeLabel(lbl.second, allocator), allocator);
+  }
+  doc.AddMember("labels", cont, allocator);
+}
+
 std::string Serializer::serialize(const core::DisassemblerCore& core) {
   rapidjson::Document doc{};
   auto& allocator = doc.GetAllocator();
@@ -293,6 +315,7 @@ std::string Serializer::serialize(const core::DisassemblerCore& core) {
   serializeAutocommenter(core, doc);
   serializeChunks(core, doc);
   serializeMemory(core, doc);
+  serializeLabels(core, doc);
   return json::doc_to_string(doc);
 }
 

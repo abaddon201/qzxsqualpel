@@ -228,6 +228,8 @@ public:
       value = DB;
     } else if (cmd == "DW") {
       value = DW;
+    } else if (cmd == "db") {
+      value = NONE;
     } else {
       value = NONE;
       throw std::runtime_error("Unknown command: " + cmd);
