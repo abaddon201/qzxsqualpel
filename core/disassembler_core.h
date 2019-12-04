@@ -80,6 +80,8 @@ public:
 
   const ChunkList& chunks() const { return _chunks; }
 
+  bool extractAddrFromRef(const std::string& ref, memory::Addr& add_out);
+
   static DisassemblerCore& inst() {
     static DisassemblerCore _inst;
     return _inst;

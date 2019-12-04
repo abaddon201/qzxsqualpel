@@ -33,6 +33,7 @@ public:
   virtual ~Addr() = default;
 
   addr_t offset() const { return _offset; }
+  void setOffset(addr_t offs) { _offset = offs; }
 
   addr_t segment() const { return _segment; }
 

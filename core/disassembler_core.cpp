@@ -426,5 +426,75 @@ size_t DisassemblerCore::postProcessChunk(ChunkPtr chunk, size_t len) {
   return len;
 }
 
+bool DisassemblerCore::extractAddrFromRef(const std::string& ref, memory::Addr& add_out) {
+  //sub_0008: //ignore
+  //(word_5c5d)
+  //(word_5c5f),
+  //jmp_1bd1+27/c
+  //sub_0c3b+2/c
+  //jmp_0c86/c
+  //jmp_0053
+  //ffff
+
+  if (ref.find(':') != ref.npos) {
+    return false;
+  }
+  if (ref.find('(') != ref.npos) {
+    //data ref
+    std::string refnc = ref;
+    refnc.erase(std::remove(refnc.begin(), refnc.end(), '('), refnc.end());
+    refnc.erase(std::remove(refnc.begin(), refnc.end(), ')'), refnc.end());
+    refnc.erase(std::remove(refnc.begin(), refnc.end(), ','), refnc.end());
+    auto splited = utils::split(refnc, '_');
+    if (splited.size() != 2) {
+      std::cerr << "unable to process reference : " << ref << std::endl;
+      return false;
+      //throw std::runtime_error("unable to process reference: " + ref);
+    }
+    auto offs = utils::hex2int(splited[1]);
+    add_out.setOffset(offs);
+    return true;
+  }
+  if (ref.find('+') != ref.npos) {
+    //ref with offset
+    std::string refnc = ref;
+    auto spl1 = utils::split(refnc, '/');
+    auto spl2 = utils::split(spl1[0], '_');
+    auto spl3 = utils::split(spl2[1], '+');
+    auto addr = utils::hex2int(spl3[0]);
+    auto offs = std::atoi(spl3[1].c_str());
+    add_out.setOffset(addr + offs);
+    return true;
+  }
+  if (ref.find('/') != ref.npos) {
+    //ref with offset
+    std::string refnc = ref;
+    auto spl1 = utils::split(refnc, '/');
+    auto spl2 = utils::split(spl1[0], '_');
+    auto offs = utils::hex2int(spl2[1]);
+    add_out.setOffset(offs);
+    return true;
+  }
+  if (ref.find('_') != ref.npos) {
+    //ref with offset
+    std::string refnc = ref;
+    auto spl1 = utils::split(refnc, '_');
+    auto offs = utils::hex2int(spl1[1]);
+    add_out.setOffset(offs);
+    return true;
+  }
+  if (ref.size() == 4) {
+    //value
+    try {
+      auto offs = utils::hex2int(ref);
+      add_out.setOffset(offs);
+      return true;
+    } catch (...) {
+      std::cerr << "unable to process reference : " << ref << std::endl;
+      return false;
+    }
+  }
+  return false;
+}
 }
 }

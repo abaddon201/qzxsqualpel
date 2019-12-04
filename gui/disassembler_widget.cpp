@@ -170,7 +170,39 @@ void DisassemblerWidget::makeArray(int size, bool clearMem) {
   }
 }
 
+void DisassemblerWidget::navigateToReference() {
+  QTextCursor cursor(textCursor());
+  cursor.select(QTextCursor::WordUnderCursor);
+  auto txt = cursor.selectedText();
+  auto sel_strt = cursor.selectionStart() - 1;
+  auto sel_end = cursor.selectionEnd();
+  while (sel_strt >= 0 && !document()->characterAt(sel_strt).isSpace()) {
+    //check syms left
+    auto c = document()->characterAt(sel_strt);
+    txt = c + txt;
+    sel_strt--;
+  }
+  auto fin = sel_end + 30;
+  while (sel_end < fin && !document()->characterAt(sel_end).isSpace()) {
+    //check syms left
+    auto c = document()->characterAt(sel_end);
+    txt += c;
+    ++sel_end;
+  }
+  qDebug() << "GUI: navigate to reference:" << cursor.block().text();
+  qDebug() << "GUI: text:" << txt.toStdString();
+  qDebug() << "GUI: Cursor pos:" << cursor.position();
+  dasm::memory::Addr addr;
+  if (dasm::core::DisassemblerCore::inst().extractAddrFromRef(txt.toStdString(), addr)) {
+    //navigating to addr
+    qDebug() << "navigating to addr: " << addr.toString();
+  } else {
+    qDebug() << "Unable to parse!!!";
+  }
+}
+
 void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
+  //std::cout << "key: " << std::to_string(event->key()) << std::endl;
   switch (event->key()) {
     case Qt::Key_C:
       // must codefi under cursor
@@ -204,7 +236,9 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
       return;
     }
     case Qt::Key_Enter:
+    case Qt::Key_Return:
       // follow
+      navigateToReference();
       return;
     case Qt::Key_Escape:
       // follow back
