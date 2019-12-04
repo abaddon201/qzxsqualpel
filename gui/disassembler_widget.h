@@ -17,6 +17,9 @@ class MainWindow;
 
 class DisassemblerWidget : public QPlainTextEdit {
 public:
+  using GUIChunkPtr = std::shared_ptr<GUIBlock<dasm::core::Chunk>>;
+  using GUICommandPtr = std::shared_ptr<GUIBlock<dasm::core::Command>>;
+
   DisassemblerWidget(MainWindow* mwnd);
 
   void openRAWFile(const QString& fileName);
@@ -26,9 +29,11 @@ public:
   void keyPressEvent(QKeyEvent*);
 
   ///@brief Показать на экране код с меткой под номером
+  void navigateToAddress(const dasm::memory::Addr& from_addr, const dasm::memory::Addr& addr);
   void navigateToAddress(const dasm::memory::Addr& addr);
   void navigateToReference();
-  
+  dasm::memory::Addr getCurrentAddr() const;
+
   void makeArray(int size, bool clearMem);
 
   void paintEvent(QPaintEvent* event);
@@ -44,15 +49,16 @@ private:
   DisassemblerWidget();
   void init();
 
+  std::string getString(int pos, int count) const;
   void printCell(QTextCursor& cursor, const std::string& text, int length, const QTextCharFormat& fmt);
   void printCell(QTextCursor& cursor, const std::string& text, int length);
 
-  void printReferences(QTextCursor& cursor, std::shared_ptr<GUIChunk> chunk);
+  void printReferences(QTextCursor& cursor, GUIChunkPtr chunk);
   void printCommand(QTextCursor& cursor, const dasm::core::Command& cmd);
   //C++14 atributes -- http://en.cppreference.com/w/cpp/language/attributes
-  [[deprecated]] void printChunkUnparsed(QTextCursor& cursor, std::shared_ptr<GUIChunk> chunk);
-  void printChunkCode(QTextCursor& cursor, std::shared_ptr<GUIChunk> chunk);
-  void printChunkData(QTextCursor& cursor, std::shared_ptr<GUIChunk> chunk);
+  [[deprecated]] void printChunkUnparsed(QTextCursor& cursor, GUIChunkPtr chunk);
+  void printChunkCode(QTextCursor& cursor, GUIChunkPtr chunk);
+  void printChunkData(QTextCursor& cursor, GUIChunkPtr chunk);
 
   void navigateToAddrDlg();
 
@@ -90,7 +96,8 @@ private:
 
   MainWindow* _main_window;
 
-  GUIChunkList _chunks;
+  GUIBlockList<dasm::core::Chunk> _chunks;
+  GUIBlockList<dasm::core::Command> _commands;
   Q_OBJECT
 };
 

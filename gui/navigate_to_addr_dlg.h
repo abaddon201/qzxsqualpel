@@ -23,7 +23,8 @@ public:
 public slots:
 
   void accept() override {
-    _wdg->navigateToAddress(dasm::memory::Addr(_ui.addr->text().toInt(0, 16)));
+    auto from = _wdg->getCurrentAddr();
+    _wdg->navigateToAddress(from, dasm::memory::Addr(_ui.addr->text().toInt(0, 16)));
     close();
   }
 

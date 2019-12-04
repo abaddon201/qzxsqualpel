@@ -23,6 +23,7 @@
 #include "gui_text_block_user_data.h"
 #include "guichunk.h"
 #include "core/debug_printers.h"
+#include "navigation_stack.h"
 
 DisassemblerWidget::DisassemblerWidget()
   : QPlainTextEdit() {
@@ -67,9 +68,16 @@ void DisassemblerWidget::init() {
   setMinimumHeight(800);
 }
 
+void DisassemblerWidget::navigateToAddress(const dasm::memory::Addr& from_addr, const dasm::memory::Addr& addr) {
+  qDebug() << "GUI: navigate to address:" << addr.toString() << " from: " << from_addr.toString();
+  dasm::gui::NavigationStack::inst().push(from_addr);
+  navigateToAddress(addr);
+}
+
 void DisassemblerWidget::navigateToAddress(const dasm::memory::Addr& addr) {
   qDebug() << "GUI: navigate to address:" << addr.toString();
-  auto chunk = _chunks.getChunkContains(addr);
+  //auto chunk = _chunks.getChunkContains(addr);
+  auto chunk = _commands.getChunkContains(addr);
   if (nullptr != chunk) {
     QTextCursor cursor(textCursor());
     cursor.setPosition(chunk->cursorStartPosition() + 1);
@@ -82,7 +90,7 @@ void DisassemblerWidget::commentCommandUnderCursor() {
   QTextCursor cursor(textCursor());
   qDebug() << "GUI: commentCommand:" << cursor.block().text();
   qDebug() << "GUI: Cursor pos:" << cursor.position();
-  std::shared_ptr<GUIChunk> chunk = _chunks.getChunkByPosition(cursor.position());
+  auto chunk = _chunks.getChunkByPosition(cursor.position());
   if (nullptr == chunk) {
     return;
   }
@@ -105,7 +113,7 @@ void DisassemblerWidget::changeNameUnderCursor() {
   QTextCursor cursor(textCursor());
   qDebug() << "GUI: changeName:" << cursor.block().text();
   qDebug() << "GUI: Cursor pos:" << cursor.position();
-  std::shared_ptr<GUIChunk> chunk = _chunks.getChunkByPosition(cursor.position());
+  auto chunk = _chunks.getChunkByPosition(cursor.position());
   if (nullptr == chunk) {
     return;
   }
@@ -129,7 +137,7 @@ void DisassemblerWidget::makeCodeUnderCursor() {
   QTextCursor cursor(textCursor());
   qDebug() << "GUI: make code:" << cursor.block().text();
   qDebug() << "GUI: Cursor pos:" << cursor.position();
-  std::shared_ptr<GUIChunk> chunk = _chunks.getChunkByPosition(cursor.position());
+  auto chunk = _chunks.getChunkByPosition(cursor.position());
   if (nullptr == chunk) {
     return;
   }
@@ -146,7 +154,7 @@ void DisassemblerWidget::makeArrayUnderCursor() {
   QTextCursor cursor(textCursor());
   qDebug() << "GUI: make array:" << cursor.block().text();
   qDebug() << "GUI: Cursor pos:" << cursor.position();
-  std::shared_ptr<GUIChunk> chunk = _chunks.getChunkByPosition(cursor.position());
+  auto chunk = _chunks.getChunkByPosition(cursor.position());
   if (nullptr == chunk) {
     return;
   }
@@ -158,7 +166,7 @@ void DisassemblerWidget::makeArrayUnderCursor() {
 
 void DisassemblerWidget::makeArray(int size, bool clearMem) {
   QTextCursor cursor(textCursor());
-  std::shared_ptr<GUIChunk> chunk = _chunks.getChunkByPosition(cursor.position());
+  auto chunk = _chunks.getChunkByPosition(cursor.position());
   if (nullptr == chunk) {
     return;
   }
@@ -196,8 +204,37 @@ void DisassemblerWidget::navigateToReference() {
   if (dasm::core::DisassemblerCore::inst().extractAddrFromRef(txt.toStdString(), addr)) {
     //navigating to addr
     qDebug() << "navigating to addr: " << addr.toString();
+    try {
+      navigateToAddress(getCurrentAddr(), addr);
+    } catch (...) {
+      std::cerr << "unable to navigate, source addr unknown" << std::endl;
+    }
   } else {
     qDebug() << "Unable to parse!!!";
+  }
+}
+
+std::string DisassemblerWidget::getString(int pos, int count) const {
+  QString res{};
+  for (int i = 0; i < count; ++i) {
+    res += document()->characterAt(pos + i);
+  }
+  return res.toStdString();
+}
+
+dasm::memory::Addr DisassemblerWidget::getCurrentAddr() const {
+  QTextCursor cursor(textCursor());
+  cursor.movePosition(QTextCursor::StartOfLine);
+  auto pos = cursor.position();
+  std::string segs = getString(pos, 4);
+  std::string offss = getString(pos + 5, 4);
+  try {
+    auto seg = dasm::utils::hex2int(segs);
+    auto offs = dasm::utils::hex2int(offss);
+    return dasm::memory::Addr(offs, seg);
+  } catch (...) {
+    //unable to decode
+    throw;
   }
 }
 
@@ -242,6 +279,9 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
       return;
     case Qt::Key_Escape:
       // follow back
+      if (dasm::gui::NavigationStack::inst().hasAddr()) {
+        navigateToAddress(dasm::gui::NavigationStack::inst().pop());
+      }
       return;
   }
   //PageUp, PageDown, Up, Down, Left, and Right
@@ -328,7 +368,7 @@ void DisassemblerWidget::printCell(QTextCursor& cursor, const std::string& text,
   cursor.insertText(QString::fromStdString(text + spcline));
 }
 
-void DisassemblerWidget::printReferences(QTextCursor& cursor, std::shared_ptr<GUIChunk> chunk) {
+void DisassemblerWidget::printReferences(QTextCursor& cursor, GUIChunkPtr chunk) {
   if (chunk->core()->references().size() == 0) {
     return;
   }
@@ -363,13 +403,13 @@ void DisassemblerWidget::printCommand(QTextCursor& cursor, const Command& cmd) {
   }
 }
 
-void DisassemblerWidget::printChunkUnparsed(QTextCursor& cursor, std::shared_ptr<GUIChunk> chunk) {
+void DisassemblerWidget::printChunkUnparsed(QTextCursor& cursor, GUIChunkPtr chunk) {
   printCommand(cursor, chunk->core()->getCommand(0));
   ///@bug В профайлере - это самая дорогая операция... Стоит пересмотеть способ вывода
     //cursor.movePosition(QTextCursor::End);
 }
 
-void DisassemblerWidget::printChunkCode(QTextCursor& cursor, std::shared_ptr<GUIChunk> chunk) {
+void DisassemblerWidget::printChunkCode(QTextCursor& cursor, GUIChunkPtr chunk) {
   if (chunk->core()->label() != nullptr) {
     cursor.insertBlock();
     if (!chunk->core()->comment().empty()) {
@@ -384,7 +424,11 @@ void DisassemblerWidget::printChunkCode(QTextCursor& cursor, std::shared_ptr<GUI
     printReferences(cursor, chunk);
   }
   for (Command& cmd : chunk->core()->commands()) {
+    auto gui_cmd = std::make_shared< GUIBlock<dasm::core::Command>>(std::shared_ptr<dasm::core::Command>(&cmd));
+    gui_cmd->setCursorStartPosition(cursor.position());
+    _commands.push(gui_cmd);
     printCommand(cursor, cmd);
+    gui_cmd->setCursorEndPosition(cursor.position());
     cursor.block().setUserData(new GUITextBlockUserData(chunk->core(), &cmd));
     //    cursor.movePosition(QTextCursor::End);
   }
@@ -392,7 +436,13 @@ void DisassemblerWidget::printChunkCode(QTextCursor& cursor, std::shared_ptr<GUI
 }
 
 void DisassemblerWidget::refreshView() {
-  _chunks.update(dasm::core::DisassemblerCore::inst().chunks());
+  auto chunks = dasm::core::DisassemblerCore::inst().chunks().chunks();
+  _chunks.clear();
+  _chunks.update<const dasm::memory::Addr>(chunks);
+  _commands.clear();
+  /*for (auto &chunk : chunks) {
+    _commands.update(chunk.second->commands());
+  }*/
   clear();
   QTextCursor cursor(textCursor());
   cursor.beginEditBlock();

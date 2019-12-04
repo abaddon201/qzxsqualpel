@@ -87,6 +87,10 @@ struct Command {
   ///@brief Возвращает адрес перехода команды (первый либо второй аргумент)
   memory::Addr getJmpAddr() const;
 
+  bool containsAddr(const memory::Addr& a) const {
+    return a >= addr && a < addr + len;
+  }
+
   memory::Addr getJmpAddrFromString() const;
 
   ///@brief Устанавливает метку перехода команды (первый либо второй аргумент)
