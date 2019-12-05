@@ -42,9 +42,9 @@ void DisassemblerCore::setRawMemory(unsigned char* buf, size_t size) {
 }
 
 void DisassemblerCore::initialParse() {
-  _chunks.clear();
+  _commands_map.clear();
+  _commands_map.reset(_memory.wholeSize());
   for (unsigned long long i = 0; i < _memory.wholeSize(); ++i) {
-    std::shared_ptr<Chunk> chunk = _chunks.createChunk(i, Chunk::Type::UNPARSED);
     CommandPtr cmd = std::make_shared<Command>();
     Byte byte = _memory.byte(i);
     //cmd.command = "db";
@@ -52,12 +52,12 @@ void DisassemblerCore::initialParse() {
     cmd->addr = i;
     cmd->len = 1;
     cmd->setArg(0, std::make_shared<ArgDefault>(byte));
-    chunk->appendCommand(cmd);
+    _commands_map.put(i, 1, cmd);
   }
   updater->updateWidgets();
 }
 
-size_t DisassemblerCore::disassembleInstruction(const memory::Addr& addr, std::shared_ptr<Chunk>& out_chunk) {
+size_t DisassemblerCore::disassembleInstruction(const memory::Addr& addr, CommandPtr& out_cmd) {
   size_t len = 0;
   if (addr >= _memory.maxAddr()) {
     std::cerr << "address out of range" << addr.toString();
@@ -71,13 +71,13 @@ size_t DisassemblerCore::disassembleInstruction(const memory::Addr& addr, std::s
       return -3;
     }
     //check address can be disassembled
-    std::shared_ptr<Chunk> chunk_i = _chunks.getChunk(addr);
-    if (chunk_i == nullptr) {
+    auto cmd_i = _commands_map.get(addr.offset());
+    if (cmd_i == nullptr) {
       // address is not loaded
       std::cout << "no instruction here: " << addr.toString() << std::endl;
       return 0;
     }
-    if (!chunk_i->isEmpty()) {
+    if ((cmd_i->command_code != CmdCode::NONE) || (cmd_i->addr.offset() != addr.offset())) {
       // address allready disassembled
       std::cout << "allready parsed: " << addr.toString() << std::endl;
       return 0;
@@ -86,37 +86,17 @@ size_t DisassemblerCore::disassembleInstruction(const memory::Addr& addr, std::s
     if (len > 1) {
       // check that all bytes for the command are not parsed, if so, remove their chunks, if not, don't do anything
       for (size_t i = 1; i < len; i++) {
-        auto ch = _chunks.getChunk(addr + i);
-        if ((ch == nullptr) || (ch->type() != Chunk::Type::UNPARSED)) {
+        auto ch = _commands_map.get(addr.offset() + i);
+        if ((ch == nullptr) || (ch->command_code != CmdCode::NONE)) {
           std::cout << "Instrunction longer than unparsed block" << std::endl;
           return -4;
         }
       }
     }
-    // found not disassembled chunk, remove it (we will replace it with code chunk)
-    for (size_t i = 0; i < len; i++) {
-      _chunks.removeChunk(addr + i);
-    }
-    std::shared_ptr<Chunk> target_chunk;
-    if (addr.compare(0)) {
-      //parse from memory start, there are no previous chunks present, so just say that it's now a code chunk
-      target_chunk = _chunks.createChunk(addr, Chunk::Type::CODE);
-    } else {
-      // not at start of memory, possibly we have some code chunk before this address, check it
-      target_chunk = _chunks.getChunkContains(addr - 1);
-      LabelPtr klbl{ nullptr };
-      if (_auto_commenter) {
-        klbl = _auto_commenter->getLabelForAddr(addr);
-      }
-      if ((target_chunk == nullptr) || (target_chunk->type() != Chunk::Type::CODE) || (nullptr != klbl)) {
-        // no code chunk before this address, create new one
-        // or we found address with known label, start new chunk from it
-        std::cout << "No CODE chunk before this address" << std::endl;
-        target_chunk = _chunks.createChunk(addr, Chunk::Type::CODE);
-        if (nullptr != klbl) {
-          target_chunk->setLabel(klbl->name);
-        }
-      }
+    // not at start of memory, possibly we have some code chunk before this address, check it
+    LabelPtr klbl{ nullptr };
+    if (_auto_commenter) {
+      klbl = _auto_commenter->getLabelForAddr(addr);
     }
     std::cout << "addr=" << addr.toString() << "command=" << buff << "len=" << len << std::endl;
 
@@ -127,10 +107,13 @@ size_t DisassemblerCore::disassembleInstruction(const memory::Addr& addr, std::s
     if (_auto_commenter) {
       _auto_commenter->commentCommand(cmd);
     }
-    target_chunk->appendCommand(cmd);
+    if (klbl != nullptr) {
+      cmd->setLabel(klbl->name);
+    }
+    _commands_map.put(addr.offset(), len, cmd);
     std::cout << "cmd appended" << std::endl;
-    len = postProcessChunk(target_chunk, len);
-    out_chunk = target_chunk;
+    len = postProcessCmd(cmd, len);
+    out_cmd = cmd;
   }
   return len;
 }
@@ -140,8 +123,8 @@ void DisassemblerCore::disassembleBlock(const memory::Addr& st_addr) {
   memory::Addr addr = st_addr;
   std::cout << "disassembleBlock(): addr" << addr.toString() << std::endl;
   do {
-    std::shared_ptr<Chunk> chunk;
-    res = disassembleInstruction(addr, chunk);
+    CommandPtr last_cmd;
+    res = disassembleInstruction(addr, last_cmd);
     if (res == 0) {
       //end of block
       break;
@@ -151,19 +134,13 @@ void DisassemblerCore::disassembleBlock(const memory::Addr& st_addr) {
       return;
     }
     memory::Addr jump_addr;
-    //std::shared_ptr<CChunk> chunk=m_Chunks.getChunkContains(addr);
-    if (chunk == nullptr) {
-      std::cout << "No chunk after disassemble instruction, addr:" << addr.toString() << std::endl;
-      return;
-    }
-    switch (lastCmdJumpType(chunk, jump_addr)) {
+    switch (lastCmdJumpType(last_cmd, jump_addr)) {
       case JumpType::JT_CALL: {
         //call
         std::cout << "!!!! call: addr=" << addr.toString() << " to_addr " << jump_addr.toString() << std::endl;
         std::cout << "st_addr=" << st_addr.toString() << std::endl;
         auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::CALL);
-        auto& ch = _chunks.getChunkContains(addr);
-        ch->lastCommand()->setJmpAddr(lbl);
+        last_cmd->setJmpAddr(lbl);
         addr += res;
         break;
       }
@@ -172,17 +149,14 @@ void DisassemblerCore::disassembleBlock(const memory::Addr& st_addr) {
         std::cout << "!!!! cond jump: addr=" << addr.toString() << " to_addr " << jump_addr.toString() << std::endl;
         //auto& lastcmd = chunk->lastCommand();
         auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::JUMP);
-        auto& ch = _chunks.getChunkContains(addr);
-        ch->getCommand(addr)->setJmpAddr(lbl);
-        ;
+        last_cmd->setJmpAddr(lbl);
         addr += res;
         break;
       }
       case JumpType::JT_JUMP: {
         std::cout << "!!!! jump: addr=" << addr.toString() << " to_addr " << jump_addr.toString() << std::endl;
         auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::JUMP);
-        auto& ch = _chunks.getChunkContains(addr);
-        ch->lastCommand()->setJmpAddr(lbl);
+        last_cmd->setJmpAddr(lbl);
         res = 0;
         break;
       }
@@ -200,7 +174,7 @@ void DisassemblerCore::disassembleBlock(const memory::Addr& st_addr) {
         break;
     }
   } while (res);
-  std::cout << "finished chunk:st_addr=" << st_addr.toString() << " m_chunks.count=" << _chunks.count() << std::endl;
+  std::cout << "finished chunk:st_addr=" << st_addr.toString() << std::endl;
 }
 
 /*
@@ -246,35 +220,23 @@ ABBY
 std::shared_ptr<Label>
 DisassemblerCore::makeJump(const memory::Addr& from_addr, const memory::Addr& jump_addr, memory::Reference::Type ref_type) {
   disassembleBlock(jump_addr);
-  std::shared_ptr<Chunk> jmp_chunk = _chunks.getChunk(jump_addr);
-  if (jmp_chunk == nullptr) {
-    std::cout << "Split chunk at jump" << std::endl;
-    // split target chunk
-    std::shared_ptr<Chunk> near_chunk = _chunks.getChunkContains(jump_addr);
-    if (near_chunk == 0) {
-      std::cout << "Fatal error on split: No target chunk" << std::endl;
-      return nullptr;
-    }
-    std::cout << "near_chunk:addr" << near_chunk->addr().toString() << std::endl;
-    jmp_chunk = near_chunk->splitAt(jump_addr);
-    if (jmp_chunk == 0) {
-      std::cout << "Split impossible" << std::endl;
-      return nullptr;
-    }
+  auto jmp_cmd = _commands_map.get(jump_addr.offset());
+  if (jmp_cmd == nullptr) {
+    return nullptr;
   }
-  return addCrossRef(jmp_chunk, from_addr, jump_addr, ref_type);
+  return addCrossRef(jmp_cmd, from_addr, jump_addr, ref_type);
 }
 
-LabelPtr DisassemblerCore::addCrossRef(ChunkPtr chunk, const memory::Addr& from_addr, const memory::Addr& dst_addr, memory::Reference::Type ref_type) {
-  chunk->addCrossRef(from_addr, ref_type);
+LabelPtr DisassemblerCore::addCrossRef(CommandPtr cmd, const memory::Addr& from_addr, const memory::Addr& dst_addr, memory::Reference::Type ref_type) {
+  cmd->addCrossRef(from_addr, ref_type);
   LabelPtr lbl{ nullptr };
   if (_auto_commenter) {
     lbl = _auto_commenter->getLabelForAddr(dst_addr);
   }
-  if (chunk->label() == nullptr) {
-    lbl = chunk->setLabel(lbl, ref_type);
+  if (cmd->label() == nullptr) {
+    lbl = cmd->setLabel(lbl, ref_type);
   } else {
-    lbl = chunk->label();
+    lbl = cmd->label();
   }
   if (!labelPresent(dst_addr)) {
     //CLabel label(jump_addr, lbl);
@@ -283,63 +245,39 @@ LabelPtr DisassemblerCore::addCrossRef(ChunkPtr chunk, const memory::Addr& from_
   return lbl;
 }
 
-std::shared_ptr<Label>
-DisassemblerCore::makeData(const memory::Addr& from_addr, const memory::Addr& data_addr, memory::Reference::Type ref_type) {
-  auto data_chunk = _chunks.getChunk(data_addr);
-  if (data_chunk == nullptr) {
-    std::cout << "Split chunk at data" << std::endl;
-    // split target chunk
-    auto near_chunk = _chunks.getChunkContains(data_addr);
-    if (near_chunk == 0) {
-      std::cout << "Fatal error on split: No target chunk" << std::endl;
-      return nullptr;
-    }
-    if ((near_chunk->type() == Chunk::Type::DATA_BYTE_ARRAY) || (near_chunk->type() == Chunk::Type::DATA_WORD_ARRAY)) {
-      // here is an array
-      // FIXME: here we must show offset for data in the array and check data access type
-      return addCrossRef(near_chunk, from_addr, data_addr, ref_type);
-    } else {
-      // other cases, such as code (self modifying)
-      std::cout << "Fatal error on split: here is a code or other chunk" << std::endl;
-    }
+LabelPtr DisassemblerCore::makeData(const memory::Addr& from_addr, const memory::Addr& data_addr, memory::Reference::Type ref_type) {
+  auto data_cmd = _commands_map.get(data_addr.offset());
+  if (data_cmd == nullptr) {
+    std::cout << "[makeData] Can't find cmd at: " + data_addr.toString() << std::endl;
     return nullptr;
-  } else {
-    if ((ref_type == memory::Reference::Type::WRITE_BYTE) ||
-      (ref_type == memory::Reference::Type::READ_BYTE)) {
-      if (data_chunk->type() == Chunk::Type::CODE) {
-        return nullptr;
-      }
-      if (data_chunk->type() == Chunk::Type::UNPARSED) {
-        _chunks.removeChunk(data_addr);
-        data_chunk = _chunks.createChunk(data_addr, Chunk::Type::DATA_BYTE);
-        Byte byte = _memory.byte(data_addr);
-        CommandPtr cmd = std::make_shared<Command>();
-        cmd->command_code = CmdCode::DB;
-        cmd->addr = data_addr;
-        cmd->len = 1;
-        cmd->setArg(0, std::make_shared<ArgDefault>(byte));
-        data_chunk->appendCommand(cmd);
-      }
-    } else if ((ref_type == memory::Reference::Type::WRITE_WORD) || (ref_type == memory::Reference::Type::READ_WORD)) {
-      if (data_chunk->type() == Chunk::Type::CODE) {
-        return nullptr;
-      }
-      if (data_chunk->type() == Chunk::Type::UNPARSED) {
-        _chunks.removeChunk(data_addr);
-        _chunks.removeChunk(data_addr + 1);
-        data_chunk = _chunks.createChunk(data_addr, Chunk::Type::DATA_WORD);
-        Byte bl = _memory.byte(data_addr);
-        Byte bh = _memory.byte(data_addr + 1);
-        CommandPtr cmd = std::make_shared<Command>();
-        cmd->command_code = CmdCode::DW;
-        cmd->addr = data_addr;
-        cmd->len = 2;
-        cmd->setArg(0, std::make_shared<ArgDefault>((((uint16_t)((uint8_t)bh)) << 8) | ((uint16_t)((uint8_t)bl)), ArgSize::Word, true));
-        data_chunk->appendCommand(cmd);
-      }
-    }
-    return addCrossRef(data_chunk, from_addr, data_addr, ref_type);
   }
+  if ((data_cmd->command_code == CmdCode::DB) || (data_cmd->command_code == CmdCode::DW)) {
+    //already data
+    return nullptr;
+  }
+  if ((ref_type == memory::Reference::Type::WRITE_BYTE) || (ref_type == memory::Reference::Type::READ_BYTE)) {
+    if (data_cmd->command_code == CmdCode::NONE) {
+      Byte byte = _memory.byte(data_addr);
+      CommandPtr cmd = std::make_shared<Command>();
+      cmd->command_code = CmdCode::DB;
+      cmd->addr = data_addr;
+      cmd->len = 1;
+      cmd->setArg(0, std::make_shared<ArgDefault>(byte));
+      _commands_map.put(data_addr.offset(), 1, cmd);
+    }
+  } else if ((ref_type == memory::Reference::Type::WRITE_WORD) || (ref_type == memory::Reference::Type::READ_WORD)) {
+    if (data_cmd->command_code == CmdCode::NONE) {
+      Byte bl = _memory.byte(data_addr);
+      Byte bh = _memory.byte(data_addr + 1);
+      CommandPtr cmd = std::make_shared<Command>();
+      cmd->command_code = CmdCode::DW;
+      cmd->addr = data_addr;
+      cmd->len = 2;
+      cmd->setArg(0, std::make_shared<ArgDefault>((((uint16_t)((uint8_t)bh)) << 8) | ((uint16_t)((uint8_t)bl)), ArgSize::Word, true));
+      _commands_map.put(data_addr.offset(), 2, cmd);
+    }
+  }
+  return addCrossRef(data_cmd, from_addr, data_addr, ref_type);
 }
 
 void DisassemblerCore::makeArray(const memory::Addr& from_addr, int size, bool clearMem) {
@@ -351,20 +289,17 @@ void DisassemblerCore::makeArray(const memory::Addr& from_addr, int size, bool c
     }
   }
   memory::Addr addr = from_addr;
-  auto chunk = std::make_shared<Chunk>(from_addr, Chunk::Type::DATA_BYTE_ARRAY);
   CommandPtr cmd = std::make_shared<Command>();
   cmd->command_code = CmdCode::DB;
   cmd->addr = from_addr;
   cmd->len = size;
   auto arg = std::make_shared<ArgByteArray>(size);
   for (; size != 0; size--, ++addr) {
-    _chunks.removeChunk(addr);
     Byte byte = _memory.byte(addr);
     arg->pushByte(byte);
   }
   cmd->setArg(0, arg);
-  chunk->appendCommand(cmd);
-  _chunks.addChunk(from_addr, chunk);
+  _commands_map.put(from_addr.offset(), cmd->len, cmd);
 }
 
 std::string DisassemblerCore::disassembleInstructionInt(const memory::Addr& addr, size_t& len) {
@@ -373,8 +308,7 @@ std::string DisassemblerCore::disassembleInstructionInt(const memory::Addr& addr
   return std::string(tbuff);
 }
 
-JumpType DisassemblerCore::lastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr) {
-  CommandPtr cmd = chunk->lastCommand();
+JumpType DisassemblerCore::lastCmdJumpType(CommandPtr cmd, memory::Addr& jump_addr) {
   if ((cmd->command_code == CmdCode::CALL) || (cmd->command_code == CmdCode::RST)) {
     jump_addr = cmd->getJmpAddrFromString();
     return dasm::core::JumpType::JT_CALL;
@@ -417,10 +351,10 @@ JumpType DisassemblerCore::lastCmdJumpType(std::shared_ptr<Chunk> chunk, memory:
   return dasm::core::JumpType::JT_NONE;
 }
 
-size_t DisassemblerCore::postProcessChunk(ChunkPtr chunk, size_t len) {
+size_t DisassemblerCore::postProcessCmd(CommandPtr cmd, size_t len) {
   for (auto& p : _postprocessors) {
-    if (p->checkPrecondition(chunk)) {
-      len = p->process(chunk, len);
+    if (p->checkPrecondition(cmd)) {
+      len = p->process(cmd, len);
     }
   }
   return len;

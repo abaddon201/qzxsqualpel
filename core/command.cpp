@@ -49,6 +49,41 @@ void Command::setJmpAddr(const std::shared_ptr<Label> label) {
   }
 }
 
+void Command::addCrossRef(const memory::Addr& addr, memory::Reference::Type type) {
+  memory::ReferencePtr ref = std::make_shared<memory::Reference>(addr, type);
+  _references.push_back(ref);
+}
+
+LabelPtr Command::setLabel(LabelPtr label, memory::Reference::Type ref_type) {
+  if (label == nullptr) {
+    //generate from name
+    std::string t1{ addr.offsetString() };
+    switch (ref_type) {
+      case memory::Reference::Type::JUMP:
+        _label = std::make_shared<Label>(addr, std::string("jmp_") + t1);
+        break;
+      case memory::Reference::Type::CALL:
+        _label = std::make_shared<Label>(addr, std::string("sub_") + t1);
+        break;
+      case memory::Reference::Type::READ_BYTE:
+      case memory::Reference::Type::WRITE_BYTE:
+        _label = std::make_shared<Label>(addr, std::string("byte_") + t1);
+        break;
+      case memory::Reference::Type::READ_WORD:
+      case memory::Reference::Type::WRITE_WORD:
+        _label = std::make_shared<Label>(addr, std::string("word_") + t1);
+        break;
+    }
+  } else {
+    _label = label;
+  }
+  return _label;
+}
+
+void Command::setLabel(const std::string& label) {
+  _label = std::make_shared<Label>(addr, label);
+}
+
 std::string Command::getArgsString() const {
   if (_args.size() == 0) {
     return std::string();

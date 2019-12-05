@@ -16,9 +16,8 @@
 #include <memory>
 #include <functional>
 
-//#include "core/chunk.h"
-//#include "core/chunk_list.h"
 #include "memory_map.h"
+#include "memory/reference.h"
 #include "core/labels.h"
 #include "memory/addr.h"
 #include "memory/memory.h"
@@ -43,7 +42,7 @@ public:
   std::string disassembleInstructionInt(const memory::Addr& addr, size_t& len);
 
   ///@bug поменять местами возвращаемые значения, чтобы не было такой вырви-глаз конструкции
-  size_t disassembleInstruction(const memory::Addr& addr, std::shared_ptr<Chunk>& out_chunk);
+  size_t disassembleInstruction(const memory::Addr& addr, CommandPtr& out_cmd);
 
   void disassembleBlock(const memory::Addr& addr);
 
@@ -60,9 +59,10 @@ public:
 
   void makeArray(const memory::Addr& from_addr, int size, bool clearMem);
 
-  LabelPtr addCrossRef(ChunkPtr chunk, const memory::Addr& from_addr, const memory::Addr& dst_addr, memory::Reference::Type ref_type);
+  LabelPtr addCrossRef(CommandPtr cmd, const memory::Addr& from_addr, const memory::Addr& dst_addr, memory::Reference::Type ref_type);
 
-  JumpType lastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr);
+  //FIXME: move to command
+  JumpType lastCmdJumpType(CommandPtr cmd, memory::Addr& jump_addr);
 
   std::string fileName() const { return _file_name; }
   void setFileName(const std::string& file_name) { _file_name = file_name; }
@@ -90,7 +90,7 @@ public:
 
   void clear() {
     _memory.clear();
-    _chunks.clear();
+    _commands_map.clear();
     _labels.clear();
     _entry_point = nullptr;
     _auto_commenter = nullptr;
@@ -101,7 +101,7 @@ private:
 
   bool labelPresent(const memory::Addr& addr) const;
 
-  size_t postProcessChunk(ChunkPtr chunk, size_t len);
+  size_t postProcessCmd(CommandPtr cmd, size_t len);
 
   ///@brief кого оповещать об обновлении состояния
   IGUIUpdater* updater;

@@ -85,25 +85,6 @@ void deserializeMemory(const rapidjson::Value& node, core::DisassemblerCore& cor
   }
 }
 
-core::Chunk::Type chunkTypeFromString(const std::string& type) {
-  if (type == "UNKNOWN") {
-    return core::Chunk::Type::UNKNOWN;
-  } else if (type == "UNPARSED") {
-    return core::Chunk::Type::UNPARSED;
-  } else if (type == "CODE") {
-    return core::Chunk::Type::CODE;
-  } else if (type == "DATA_BYTE") {
-    return core::Chunk::Type::DATA_BYTE;
-  } else if (type == "DATA_WORD") {
-    return core::Chunk::Type::DATA_WORD;
-  } else if (type == "DATA_BYTE_ARRAY") {
-    return core::Chunk::Type::DATA_BYTE_ARRAY;
-  } else if (type == "DATA_WORD_ARRAY") {
-    return core::Chunk::Type::DATA_WORD_ARRAY;
-  }
-  throw std::runtime_error("Wrong chunk type: " + type);
-}
-
 memory::Reference::Type referenceTypeFromString(const std::string& type) {
   if (type == "UNKNOWN") {
     return memory::Reference::Type::UNKNOWN;
@@ -247,56 +228,6 @@ core::CommandPtr deserializeCommand(const rapidjson::Value& node) {
   return cmd;
 }
 
-core::ChunkPtr deserializeChunk(const rapidjson::Value& node) {
-  auto chunk = std::make_shared<core::Chunk>();
-  auto comment = json::get_optional_string(node, "comment", "");
-  if (!comment.empty()) {
-    chunk->setComment(comment);
-  }
-  auto lblj = json::get_optional_object(node, "label");
-  if (lblj != node.MemberEnd()) {
-    chunk->setLabel(deserializeLabel(lblj->value));
-  }
-  chunk->setLength(json::get_uint(node, "length"));
-  chunk->setType(chunkTypeFromString(json::get_string(node, "type")));
-  auto& saj = json::get_object(node, "start_addr");
-  chunk->setStartAddr(deserializeAddr(saj));
-  auto& laj = json::get_object(node, "last_addr");
-  chunk->setLastAddr(deserializeAddr(laj));
-  //References
-  {
-    auto arr = json::get_optional_array<memory::ReferencePtr>(node, "references", [](const rapidjson::Value& v)->memory::ReferencePtr {
-      return deserializeReference(v);
-    });
-
-    for (auto& r : arr) {
-      chunk->references().emplace_back(r);
-    }
-  }
-  //commands
-  {
-    auto arr = json::get_optional_array<core::CommandPtr>(node, "commands", [](const rapidjson::Value& v)->core::CommandPtr {
-      return deserializeCommand(v);
-    });
-    for (auto& r : arr) {
-      chunk->commands().emplace_back(r);
-    }
-  }
-  return chunk;
-}
-
-void deserializeChunks(const rapidjson::Value& node, core::DisassemblerCore& core) {
-  //auto& parent = json::get_object(node, "chunks");
-
-  auto arr = json::get_array<core::ChunkPtr>(node, "chunks", [](const rapidjson::Value& v)->core::ChunkPtr {
-    return deserializeChunk(v);
-  });
-
-  for (auto& s : arr) {
-    core.chunks().chunks()[s->addr()] = s;
-  }
-}
-
 void deserializeLabels(const rapidjson::Value& node, core::DisassemblerCore& core) {
   auto arr = json::get_array<core::LabelPtr>(node, "labels", [](const rapidjson::Value& v)->core::LabelPtr {
     return deserializeLabel(v);
@@ -332,7 +263,7 @@ void Serializer::deserialize_file(const std::string& file_name, core::Disassembl
 
   deserializeMemory(doc, core);
   deserializeLabels(doc, core);
-  deserializeChunks(doc, core);
+  //FIXME:deserializeCommands(doc, core);
 }
 
 }

@@ -97,19 +97,6 @@ void serializeMemory(const core::DisassemblerCore& core, rapidjson::Document& do
   doc.AddMember("memory", mem, allocator);
 }
 
-std::string chunkTypeToString(core::Chunk::Type type) {
-  switch (type) {
-    case core::Chunk::Type::UNKNOWN: return "UNKNOWN";
-    case core::Chunk::Type::UNPARSED: return "UNPARSED";
-    case core::Chunk::Type::CODE: return "CODE";
-    case core::Chunk::Type::DATA_BYTE: return "DATA_BYTE";
-    case core::Chunk::Type::DATA_WORD: return "DATA_WORD";
-    case core::Chunk::Type::DATA_BYTE_ARRAY: return "DATA_BYTE_ARRAY";
-    case core::Chunk::Type::DATA_WORD_ARRAY: return "DATA_WORD_ARRAY";
-  }
-  throw std::runtime_error("Wrong chunk type: " + std::to_string((int)type));
-}
-
 std::string referenceTypeToString(const memory::Reference::Type type) {
   switch (type) {
     case memory::Reference::Type::UNKNOWN: return "UNKNOWN";
@@ -236,53 +223,6 @@ rapidjson::Value serializeCommand(const core::CommandPtr cmd, rapidjson::Documen
   return v;
 }
 
-rapidjson::Value serializeChunk(const core::ChunkPtr chunk, rapidjson::Document::AllocatorType& allocator) {
-  rapidjson::Value v{};
-  v.SetObject();
-
-  if (!chunk->comment().empty()) {
-    json::add_string_field(v, "comment", chunk->comment(), allocator);
-  }
-  if (chunk->label() != nullptr) {
-    json::add_object(v, "label", serializeLabel(chunk->label(), allocator), allocator);
-  }
-  json::add_uint_field(v, "length", chunk->length(), allocator);
-  json::add_string_field(v, "type", chunkTypeToString(chunk->type()), allocator);
-  json::add_object(v, "start_addr", serializeAddr(chunk->addr(), allocator), allocator);
-  json::add_object(v, "last_addr", serializeAddr(chunk->lastAddr(), allocator), allocator);
-  //References
-  if (!chunk->references().empty()) {
-    rapidjson::Value refs{};
-    refs.SetArray();
-    for (const auto& ref : chunk->references()) {
-      json::push_object(refs, serializeReference(ref, allocator), allocator);
-    }
-    json::add_object(v, "references", refs, allocator);
-  }
-  //commands
-  if (!chunk->commands().empty()) {
-    rapidjson::Value cmds{};
-    cmds.SetArray();
-    for (const auto& cmd : chunk->commands()) {
-      json::push_object(cmds, serializeCommand(cmd, allocator), allocator);
-    }
-    json::add_object(v, "commands", cmds, allocator);
-  }
-  return v;
-}
-
-void serializeChunks(const core::DisassemblerCore& core, rapidjson::Document& doc) {
-  auto& allocator = doc.GetAllocator();
-
-  rapidjson::Value cont{};
-  cont.SetArray();
-
-  for (const auto& chunk : core.chunks().chunks()) {
-    json::push_object(cont, serializeChunk(chunk.second, allocator), allocator);
-  }
-  doc.AddMember("chunks", cont, allocator);
-}
-
 void serializeLabels(const core::DisassemblerCore& core, rapidjson::Document& doc) {
   auto& allocator = doc.GetAllocator();
 
@@ -313,7 +253,7 @@ std::string Serializer::serialize(const core::DisassemblerCore& core) {
   doc.AddMember("descr", info, allocator);
 
   serializeAutocommenter(core, doc);
-  serializeChunks(core, doc);
+  //FIXME: serializeCommands(core, doc);
   serializeMemory(core, doc);
   serializeLabels(core, doc);
   return json::doc_to_string(doc);

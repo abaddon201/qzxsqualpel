@@ -10,14 +10,16 @@ class MemoryMap {
 public:
   class Element {
   public:
-    Element(T& elem) { _elem = elem; _offs = 0; }
-    Element(int offs) { _offs = offs; }
-
+    explicit Element(T& elem) { _elem = elem; _offs = 0; }
+    explicit Element(int offs) { _offs = offs; }
+    Element() { _offs = -1; }
+    //FIXME: check if _offs ==-1
     T& elem() { return _elem; }
-    int offset() { return _offs; }
+    const T& elem() const { return _elem; }
+    int offset() const { return _offs; }
   private:
     T _elem;
-    int offs;
+    int _offs;
   };
 
   MemoryMap() {}
@@ -29,7 +31,7 @@ public:
     _elems[pos] = Element(elem);
     if (len > 1) {
       for (int i = 1; i <= len; ++i) {
-        _elem[pos + i] = Element(i);
+        _elems[pos + i] = Element(i);
       }
     }
   }
@@ -40,6 +42,7 @@ public:
     }
     return _elems[pos].elem();
   }
+  const std::vector<Element>& whole() const { return _elems; }
 private:
   std::vector<Element> _elems;
 };

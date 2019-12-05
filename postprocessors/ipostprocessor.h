@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/chunk.h"
+#include "core/command.h"
 
 namespace dasm {
 namespace postprocessors {
@@ -8,9 +8,9 @@ namespace postprocessors {
 class IPostProcessor {
 
 public:
-  virtual bool checkPrecondition(core::ChunkPtr chunk) = 0;
+  virtual bool checkPrecondition(core::CommandPtr chunk) = 0;
 
-  virtual size_t process(core::ChunkPtr chunk, size_t len) = 0;
+  virtual size_t process(core::CommandPtr chunk, size_t len) = 0;
 };
 }
 }

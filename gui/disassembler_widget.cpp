@@ -20,7 +20,6 @@
 
 #include "main_window.h"
 #include "widget_change_text.h"
-#include "gui_text_block_user_data.h"
 #include "guichunk.h"
 #include "core/debug_printers.h"
 #include "navigation_stack.h"
@@ -118,22 +117,12 @@ void DisassemblerWidget::changeNameUnderCursor() {
   if (nullptr == cmd) {
     return;
   }
-  auto chunk = dasm::core::DisassemblerCore::inst().chunks().getChunkContains(cmd->core()->addr);
-  if (nullptr == chunk) {
-    return;
-  }
-  if ((chunk->type() == Chunk::Type::CODE)
-      || (chunk->type() == Chunk::Type::DATA_BYTE)
-      || (chunk->type() == Chunk::Type::DATA_BYTE_ARRAY)
-      || (chunk->type() == Chunk::Type::DATA_WORD_ARRAY)
-      || (chunk->type() == Chunk::Type::DATA_WORD)
-      ) {
-    WidgetChangeText dlg(this, tr("Change label name"), tr("Label:"),
-                         QString::fromStdString(chunk->label()->name));
+  if (cmd->core()->command_code != CmdCode::NONE) {
+    WidgetChangeText dlg(this, tr("Change label name"), tr("Label:"), QString::fromStdString(cmd->core()->label()->name));
     if (dlg.exec()) {
-      dasm::core::DisassemblerCore::inst().labels().changeLabel(chunk->addr(), dlg.text().toStdString());
+      dasm::core::DisassemblerCore::inst().labels().changeLabel(cmd->core()->addr, dlg.text().toStdString());
       refreshView();
-      navigateToAddress(chunk->addr());
+      navigateToAddress(cmd->core()->addr);
     }
   }
 }
@@ -146,7 +135,7 @@ void DisassemblerWidget::makeCodeUnderCursor() {
   if (nullptr == chunk) {
     return;
   }
-  if (chunk->core()->command_code==dasm::core::CmdCode::NONE) {
+  if (chunk->core()->command_code == dasm::core::CmdCode::NONE) {
     const auto& ret_addr = chunk->core()->addr;
     dasm::core::DisassemblerCore::inst().disassembleBlock(ret_addr);
     refreshView();
@@ -163,11 +152,7 @@ void DisassemblerWidget::makeArrayUnderCursor() {
   if (nullptr == cmd) {
     return;
   }
-  auto chunk = dasm::core::DisassemblerCore::inst().chunks().getChunkContains(cmd->core()->addr);
-  if (nullptr == chunk) {
-    return;
-  }
-  if (chunk->isEmpty() || chunk->isSimpleData()) {
+  if (cmd->core()->command_code==CmdCode::NONE || cmd->core()->command_code == CmdCode::DB || cmd->core()->command_code == CmdCode::DW) {
     MakeArrayDlg a{ this };
     a();
   }
@@ -179,12 +164,8 @@ void DisassemblerWidget::makeArray(int size, bool clearMem) {
   if (nullptr == cmd) {
     return;
   }
-  auto chunk = dasm::core::DisassemblerCore::inst().chunks().getChunkContains(cmd->core()->addr);
-  if (nullptr == chunk) {
-    return;
-  }
-  if (chunk->isEmpty() || chunk->isSimpleData()) {
-    const auto& ret_addr = chunk->addr();
+  if (cmd->core()->command_code == CmdCode::NONE || cmd->core()->command_code == CmdCode::DB || cmd->core()->command_code == CmdCode::DW) {
+    const auto& ret_addr = cmd->core()->addr;
     dasm::core::DisassemblerCore::inst().makeArray(ret_addr, size, clearMem);
     refreshView();
     navigateToAddress(ret_addr);
@@ -384,13 +365,13 @@ void DisassemblerWidget::printCell(QTextCursor& cursor, const std::string& text,
   cursor.insertText(QString::fromStdString(text + spcline));
 }
 
-void DisassemblerWidget::printReferences(QTextCursor& cursor, dasm::core::ChunkPtr chunk) {
-  if (chunk->references().size() == 0) {
+void DisassemblerWidget::printReferences(QTextCursor& cursor, dasm::core::CommandPtr cmd) {
+  if (cmd->references().size() == 0) {
     return;
   }
   bool is_first = true;
   std::string empty{ "" };
-  for (auto& ref : chunk->references()) {
+  for (auto& ref : cmd->references()) {
     if (is_first) {
       is_first = false;
     } else {
@@ -419,22 +400,22 @@ void DisassemblerWidget::printCommand(QTextCursor& cursor, const CommandPtr cmd)
   }
 }
 
-void DisassemblerWidget::printChunkCode(QTextCursor& cursor, dasm::core::ChunkPtr chunk) {
-  if (chunk->label() != nullptr) {
+void DisassemblerWidget::printChunkCode(QTextCursor& cursor, dasm::core::CommandPtr cmd) {
+  if (cmd->label() != nullptr) {
     //cursor.insertBlock();
-    if (!chunk->comment().empty()) {
-      printCell(cursor, chunk->addr().toString(), _cell_length_addr, _cell_format_addr);
+    if (!cmd->blockComment().empty()) {
+      printCell(cursor, cmd->addr.toString(), _cell_length_addr, _cell_format_addr);
       //printCell(cursor, std::string(), _cell_length_opcodes, _cell_format_opcodes);
-      printCell(cursor, std::string(";") + chunk->comment(), _cell_length_chunk_comment, _cell_format_chunk_comment);
+      printCell(cursor, std::string(";") + cmd->blockComment(), _cell_length_chunk_comment, _cell_format_chunk_comment);
       //cursor.insertBlock();
     }
-    printCell(cursor, chunk->addr().toString(), _cell_length_addr, _cell_format_addr);
+    printCell(cursor, cmd->addr.toString(), _cell_length_addr, _cell_format_addr);
     //printCell(cursor, std::string(), _cell_length_opcodes, _cell_format_opcodes);
-    printCell(cursor, chunk->label()->name + ":", _cell_length_label, _cell_format_label);
-    printReferences(cursor, chunk);
+    printCell(cursor, cmd->label()->name + ":", _cell_length_label, _cell_format_label);
+    printReferences(cursor, cmd);
     cursor.insertText("\n");
   }
-  for (CommandPtr cmd : chunk->commands()) {
+  //for (CommandPtr cmd : chunk->commands()) {
     //std::cout << "cur_pos: " << cursor.position() << std::endl;
     auto gui_cmd = std::make_shared< GUIBlock<dasm::core::Command>>(cmd);
     gui_cmd->setCursorStartPosition(cursor.position());
@@ -444,19 +425,20 @@ void DisassemblerWidget::printChunkCode(QTextCursor& cursor, dasm::core::ChunkPt
     cursor.insertText("\n");
     //cursor.block().setUserData(new GUITextBlockUserData(chunk, cmd));
     //    cursor.movePosition(QTextCursor::End);
-  }
+  //}
   //  cursor.movePosition(QTextCursor::End);
 }
 
 void DisassemblerWidget::refreshView() {
-  auto chunks = dasm::core::DisassemblerCore::inst().chunks().chunks();
   _commands.clear();
   clear();
   QTextCursor cursor(textCursor());
   cursor.beginEditBlock();
   int i = 0;
-  for (auto& chunk : chunks) {
-    printChunkCode(cursor, chunk.second);
+  for (auto& cmd : dasm::core::DisassemblerCore::inst().commands().whole()) {
+    if (cmd.offset() == 0) {
+      printChunkCode(cursor, cmd.elem());
+    }
     i++;
   }
   cursor.endEditBlock();

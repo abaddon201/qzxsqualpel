@@ -16,6 +16,7 @@
 #include "core/byte.h"
 #include "core/cmd_code.h"
 #include "memory/addr.h"
+#include "memory/reference.h"
 
 #include <vector>
 #include <memory>
@@ -28,6 +29,8 @@ namespace core {
 
 ///@brief Структура описывающая одну команду ассемблера
 struct Command {
+  using ReferencesList = std::vector<memory::ReferencePtr>;
+
   ///@brief символьное представление команды
   //std::string command;
   ///@brief числовое представление команды (не обязательно опкод)
@@ -99,14 +102,21 @@ struct Command {
   bool isLDICmd();
 
   ArgPtr getArg(int idx) { return _args[idx]; }
-
   void setArg(int idx, ArgPtr arg) { if (_args.size() < idx + 1) { _args.resize(idx + 1); } _args[idx] = arg; }
-
   size_t getArgsCount() const { return _args.size(); }
-
   const std::vector<ArgPtr>& args() const { return _args; }
   std::vector<ArgPtr>& args() { return _args; }
   void setArgs(std::vector<ArgPtr>& args) { _args = args; }
+
+  LabelPtr label() const { return _label; }
+  LabelPtr setLabel(LabelPtr label = nullptr, memory::Reference::Type = memory::Reference::Type::JUMP);
+  void setLabel(const std::string& label);
+
+  void addCrossRef(const memory::Addr& addr, memory::Reference::Type type);
+  ReferencesList& references() { return _references; }
+
+  const std::string& blockComment() const { return _blockComment; }
+  void setBlockComment(const std::string& comm) { _blockComment = comm; }
 
   void setComment(const std::string& comm) { comment = comm; }
   void setAutoComment(const std::string& comm) { auto_comment = comm; }
@@ -118,6 +128,10 @@ private:
   ArgPtr parseArg(const std::string& arg);
 
   std::vector<ArgPtr> _args;
+  LabelPtr _label;
+  ReferencesList _references;
+  std::string _blockComment;
+
 };
 
 using CommandPtr = std::shared_ptr<Command>;

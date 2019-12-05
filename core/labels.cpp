@@ -11,8 +11,7 @@
 //
 
 #include "labels.h"
-#include "chunk.h"
-#include "chunk_list.h"
+#include "command.h"
 #include "disassembler_core.h"
 
 #include "debug_printers.h"
@@ -35,14 +34,14 @@ std::string Labels::offsetInLabel(const memory::Addr& addr) const {
     std::cout << "no labels" << std::endl;
     return addr.toString();
   }
-  std::shared_ptr<Chunk> chunk = DisassemblerCore::inst().chunks().getChunkContains(addr);
-  if (chunk == nullptr) {
+  auto cmd = DisassemblerCore::inst().commands().get(addr.offset());
+  if (cmd == nullptr) {
     std::cout << "no label for addr" << std::endl;
     return addr.toString();
   }
-  memory::Addr ch_addr = chunk->addr();
+  memory::Addr ch_addr = cmd->addr;
   std::cout << "addr:" << ch_addr.toString() << std::endl;
-  std::shared_ptr<Label> lbl = chunk->label();
+  std::shared_ptr<Label> lbl = cmd->label();
   if (lbl == nullptr) {
     std::cout << "no label for chunk" << std::endl;
     return addr.toString();
