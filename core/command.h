@@ -120,6 +120,7 @@ private:
   std::vector<ArgPtr> _args;
 };
 
+using CommandPtr = std::shared_ptr<Command>;
 }
 }
 #endif

@@ -9,7 +9,7 @@ namespace postprocessors {
 
 class AutoCommenter {
 public:
-  void commentCommand(core::Command& out_command);
+  void commentCommand(core::CommandPtr out_command);
 
   void loadGuessFile(const std::string& fname);
 

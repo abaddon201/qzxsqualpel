@@ -43,15 +43,15 @@ void DisassemblerCore::setRawMemory(unsigned char* buf, size_t size) {
 
 void DisassemblerCore::initialParse() {
   _chunks.clear();
-  Command cmd;
   for (unsigned long long i = 0; i < _memory.wholeSize(); ++i) {
     std::shared_ptr<Chunk> chunk = _chunks.createChunk(i, Chunk::Type::UNPARSED);
+    CommandPtr cmd = std::make_shared<Command>();
     Byte byte = _memory.byte(i);
     //cmd.command = "db";
-    cmd.command_code = CmdCode::NONE;
-    cmd.addr = i;
-    cmd.len = 1;
-    cmd.setArg(0, std::make_shared<ArgDefault>(byte));
+    cmd->command_code = CmdCode::NONE;
+    cmd->addr = i;
+    cmd->len = 1;
+    cmd->setArg(0, std::make_shared<ArgDefault>(byte));
     chunk->appendCommand(cmd);
   }
   updater->updateWidgets();
@@ -120,10 +120,10 @@ size_t DisassemblerCore::disassembleInstruction(const memory::Addr& addr, std::s
     }
     std::cout << "addr=" << addr.toString() << "command=" << buff << "len=" << len << std::endl;
 
-    Command cmd;
-    cmd.addr = addr;
-    cmd.len = len;
-    cmd.parse(buff);
+    CommandPtr cmd = std::make_shared<Command>();
+    cmd->addr = addr;
+    cmd->len = len;
+    cmd->parse(buff);
     if (_auto_commenter) {
       _auto_commenter->commentCommand(cmd);
     }
@@ -163,7 +163,7 @@ void DisassemblerCore::disassembleBlock(const memory::Addr& st_addr) {
         std::cout << "st_addr=" << st_addr.toString() << std::endl;
         auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::CALL);
         auto& ch = _chunks.getChunkContains(addr);
-        ch->lastCommand().setJmpAddr(lbl);
+        ch->lastCommand()->setJmpAddr(lbl);
         addr += res;
         break;
       }
@@ -173,7 +173,7 @@ void DisassemblerCore::disassembleBlock(const memory::Addr& st_addr) {
         //auto& lastcmd = chunk->lastCommand();
         auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::JUMP);
         auto& ch = _chunks.getChunkContains(addr);
-        ch->getCommand(addr).setJmpAddr(lbl);
+        ch->getCommand(addr)->setJmpAddr(lbl);
         ;
         addr += res;
         break;
@@ -182,7 +182,7 @@ void DisassemblerCore::disassembleBlock(const memory::Addr& st_addr) {
         std::cout << "!!!! jump: addr=" << addr.toString() << " to_addr " << jump_addr.toString() << std::endl;
         auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::JUMP);
         auto& ch = _chunks.getChunkContains(addr);
-        ch->lastCommand().setJmpAddr(lbl);
+        ch->lastCommand()->setJmpAddr(lbl);
         res = 0;
         break;
       }
@@ -313,11 +313,11 @@ DisassemblerCore::makeData(const memory::Addr& from_addr, const memory::Addr& da
         _chunks.removeChunk(data_addr);
         data_chunk = _chunks.createChunk(data_addr, Chunk::Type::DATA_BYTE);
         Byte byte = _memory.byte(data_addr);
-        Command cmd;
-        cmd.command_code = CmdCode::DB;
-        cmd.addr = data_addr;
-        cmd.len = 1;
-        cmd.setArg(0, std::make_shared<ArgDefault>(byte));
+        CommandPtr cmd = std::make_shared<Command>();
+        cmd->command_code = CmdCode::DB;
+        cmd->addr = data_addr;
+        cmd->len = 1;
+        cmd->setArg(0, std::make_shared<ArgDefault>(byte));
         data_chunk->appendCommand(cmd);
       }
     } else if ((ref_type == memory::Reference::Type::WRITE_WORD) || (ref_type == memory::Reference::Type::READ_WORD)) {
@@ -330,11 +330,11 @@ DisassemblerCore::makeData(const memory::Addr& from_addr, const memory::Addr& da
         data_chunk = _chunks.createChunk(data_addr, Chunk::Type::DATA_WORD);
         Byte bl = _memory.byte(data_addr);
         Byte bh = _memory.byte(data_addr + 1);
-        Command cmd;
-        cmd.command_code = CmdCode::DW;
-        cmd.addr = data_addr;
-        cmd.len = 2;
-        cmd.setArg(0, std::make_shared<ArgDefault>((((uint16_t)((uint8_t)bh)) << 8) | ((uint16_t)((uint8_t)bl)), ArgSize::Word, true));
+        CommandPtr cmd = std::make_shared<Command>();
+        cmd->command_code = CmdCode::DW;
+        cmd->addr = data_addr;
+        cmd->len = 2;
+        cmd->setArg(0, std::make_shared<ArgDefault>((((uint16_t)((uint8_t)bh)) << 8) | ((uint16_t)((uint8_t)bl)), ArgSize::Word, true));
         data_chunk->appendCommand(cmd);
       }
     }
@@ -352,17 +352,17 @@ void DisassemblerCore::makeArray(const memory::Addr& from_addr, int size, bool c
   }
   memory::Addr addr = from_addr;
   auto chunk = std::make_shared<Chunk>(from_addr, Chunk::Type::DATA_BYTE_ARRAY);
-  Command cmd;
-  cmd.command_code = CmdCode::DB;
-  cmd.addr = from_addr;
-  cmd.len = size;
+  CommandPtr cmd = std::make_shared<Command>();
+  cmd->command_code = CmdCode::DB;
+  cmd->addr = from_addr;
+  cmd->len = size;
   auto arg = std::make_shared<ArgByteArray>(size);
   for (; size != 0; size--, ++addr) {
     _chunks.removeChunk(addr);
     Byte byte = _memory.byte(addr);
     arg->pushByte(byte);
   }
-  cmd.setArg(0, arg);
+  cmd->setArg(0, arg);
   chunk->appendCommand(cmd);
   _chunks.addChunk(from_addr, chunk);
 }
@@ -374,13 +374,13 @@ std::string DisassemblerCore::disassembleInstructionInt(const memory::Addr& addr
 }
 
 JumpType DisassemblerCore::lastCmdJumpType(std::shared_ptr<Chunk> chunk, memory::Addr& jump_addr) {
-  Command& cmd = chunk->lastCommand();
-  if ((cmd.command_code == CmdCode::CALL) || (cmd.command_code == CmdCode::RST)) {
-    jump_addr = cmd.getJmpAddrFromString();
+  CommandPtr cmd = chunk->lastCommand();
+  if ((cmd->command_code == CmdCode::CALL) || (cmd->command_code == CmdCode::RST)) {
+    jump_addr = cmd->getJmpAddrFromString();
     return dasm::core::JumpType::JT_CALL;
   }
-  if (((cmd.command_code == CmdCode::JR) || (cmd.command_code == CmdCode::JP)) && (cmd.getArgsCount() == 1)) {
-    const auto& arg1 = cmd.getArg(0);
+  if (((cmd->command_code == CmdCode::JR) || (cmd->command_code == CmdCode::JP)) && (cmd->getArgsCount() == 1)) {
+    const auto& arg1 = cmd->getArg(0);
     //FIXME: tmp check, must be removed after debug
     const std::string& arg1str = arg1->toString();
     if (arg1str[0] == '"') {
@@ -391,27 +391,27 @@ JumpType DisassemblerCore::lastCmdJumpType(std::shared_ptr<Chunk> chunk, memory:
       //jump to (HL) or (IX) or (IY). address unknown, so we just break disassembling here
       return dasm::core::JumpType::JT_RET;
     }
-    jump_addr = cmd.getJmpAddrFromString();
+    jump_addr = cmd->getJmpAddrFromString();
     return dasm::core::JumpType::JT_JUMP;
   }
-  if (((cmd.command_code == CmdCode::JR) || (cmd.command_code == CmdCode::JP)) && (cmd.getArgsCount() == 2)) {
-    jump_addr = cmd.getJmpAddrFromString();
+  if (((cmd->command_code == CmdCode::JR) || (cmd->command_code == CmdCode::JP)) && (cmd->getArgsCount() == 2)) {
+    jump_addr = cmd->getJmpAddrFromString();
     return dasm::core::JumpType::JT_COND_JUMP;
   }
-  if (cmd.command_code == CmdCode::DJNZ) {
-    jump_addr = cmd.getJmpAddrFromString();
+  if (cmd->command_code == CmdCode::DJNZ) {
+    jump_addr = cmd->getJmpAddrFromString();
     return dasm::core::JumpType::JT_COND_JUMP;
   }
-  if ((cmd.command_code == CmdCode::RET) && (cmd.getArgsCount() == 1)) {
+  if ((cmd->command_code == CmdCode::RET) && (cmd->getArgsCount() == 1)) {
     return dasm::core::JumpType::JT_COND_RET;
   }
-  if ((cmd.command_code == CmdCode::RET) && (cmd.getArgsCount() == 0)) {
+  if ((cmd->command_code == CmdCode::RET) && (cmd->getArgsCount() == 0)) {
     return dasm::core::JumpType::JT_RET;
   }
-  if (cmd.command_code == CmdCode::RETI) {
+  if (cmd->command_code == CmdCode::RETI) {
     return dasm::core::JumpType::JT_RET;
   }
-  if (cmd.command_code == CmdCode::RETN) {
+  if (cmd->command_code == CmdCode::RETN) {
     return dasm::core::JumpType::JT_RET;
   }
   return dasm::core::JumpType::JT_NONE;

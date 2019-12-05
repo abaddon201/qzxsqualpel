@@ -7,10 +7,10 @@
 #include "core/chunk.h"
 
 struct GUITextBlockUserData : public QTextBlockUserData {
-  GUITextBlockUserData(std::shared_ptr<dasm::core::Chunk> ch, dasm::core::Command *cm) : chunk{ch}, cmd{cm} {}
+  GUITextBlockUserData(std::shared_ptr<dasm::core::Chunk> ch, dasm::core::CommandPtr cm) : chunk{ch}, cmd{cm} {}
 
   std::shared_ptr<dasm::core::Chunk> chunk;
-  dasm::core::Command *cmd;
+  dasm::core::CommandPtr cmd;
 };
 
 #endif // GUI_TEXT_BLOCK_USER_DATA_H

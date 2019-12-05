@@ -53,12 +53,10 @@ private:
   void printCell(QTextCursor& cursor, const std::string& text, int length, const QTextCharFormat& fmt);
   void printCell(QTextCursor& cursor, const std::string& text, int length);
 
-  void printReferences(QTextCursor& cursor, GUIChunkPtr chunk);
-  void printCommand(QTextCursor& cursor, const dasm::core::Command& cmd);
+  void printReferences(QTextCursor& cursor, dasm::core::ChunkPtr chunk);
+  void printCommand(QTextCursor& cursor, const dasm::core::CommandPtr cmd);
   //C++14 atributes -- http://en.cppreference.com/w/cpp/language/attributes
-  [[deprecated]] void printChunkUnparsed(QTextCursor& cursor, GUIChunkPtr chunk);
-  void printChunkCode(QTextCursor& cursor, GUIChunkPtr chunk);
-  void printChunkData(QTextCursor& cursor, GUIChunkPtr chunk);
+  void printChunkCode(QTextCursor& cursor, dasm::core::ChunkPtr chunk);
 
   void navigateToAddrDlg();
 
@@ -96,7 +94,7 @@ private:
 
   MainWindow* _main_window;
 
-  GUIBlockList<dasm::core::Chunk> _chunks;
+  //GUIBlockList<dasm::core::Chunk> _chunks;
   GUIBlockList<dasm::core::Command> _commands;
   Q_OBJECT
 };

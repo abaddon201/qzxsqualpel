@@ -123,12 +123,12 @@ std::string referenceTypeToString(const memory::Reference::Type type) {
   throw std::runtime_error("unknown reference type: " + std::to_string((int)type));
 }
 
-rapidjson::Value serializeReference(const memory::Reference& ref, rapidjson::Document::AllocatorType& allocator) {
+rapidjson::Value serializeReference(const memory::ReferencePtr ref, rapidjson::Document::AllocatorType& allocator) {
   rapidjson::Value v{};
   v.SetObject();
 
-  json::add_object(v, "addr", serializeAddr(ref.addr, allocator), allocator);
-  json::add_string_field(v, "type", referenceTypeToString(ref.type), allocator);
+  json::add_object(v, "addr", serializeAddr(ref->addr, allocator), allocator);
+  json::add_string_field(v, "type", referenceTypeToString(ref->type), allocator);
   return v;
 }
 
@@ -210,24 +210,24 @@ rapidjson::Value serializeArgument(const core::ArgPtr arg, rapidjson::Document::
   return v;
 }
 
-rapidjson::Value serializeCommand(const core::Command& cmd, rapidjson::Document::AllocatorType& allocator) {
+rapidjson::Value serializeCommand(const core::CommandPtr cmd, rapidjson::Document::AllocatorType& allocator) {
   rapidjson::Value v{};
   v.SetObject();
 
-  json::add_string_field(v, "code", cmd.command_code.toString(), allocator);
-  if (!cmd.comment.empty()) {
-    json::add_string_field(v, "comment", cmd.comment, allocator);
+  json::add_string_field(v, "code", cmd->command_code.toString(), allocator);
+  if (!cmd->comment.empty()) {
+    json::add_string_field(v, "comment", cmd->comment, allocator);
   }
-  if (!cmd.auto_comment.empty()) {
-    json::add_string_field(v, "auto_comment", cmd.auto_comment, allocator);
+  if (!cmd->auto_comment.empty()) {
+    json::add_string_field(v, "auto_comment", cmd->auto_comment, allocator);
   }
-  json::add_object(v, "addr", serializeAddr(cmd.addr, allocator), allocator);
-  json::add_uint_field(v, "len", cmd.len, allocator);
+  json::add_object(v, "addr", serializeAddr(cmd->addr, allocator), allocator);
+  json::add_uint_field(v, "len", cmd->len, allocator);
 
-  if (cmd.getArgsCount() != 0) {
+  if (cmd->getArgsCount() != 0) {
     rapidjson::Value args{};
     args.SetArray();
-    for (const auto& arg : cmd.args()) {
+    for (const auto& arg : cmd->args()) {
       json::push_object(args, serializeArgument(arg, allocator), allocator);
     }
     json::add_object(v, "arguments", args, allocator);

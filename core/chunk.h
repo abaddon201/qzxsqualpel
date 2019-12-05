@@ -24,8 +24,8 @@ namespace core {
 
 class Chunk {
 public:
-  using ReferencesList = std::vector<memory::Reference>;
-  using CommandsList = std::vector<Command>;
+  using ReferencesList = std::vector<memory::ReferencePtr>;
+  using CommandsList = std::vector<CommandPtr>;
   using size_type = size_t;
 
   enum class Type {
@@ -65,13 +65,13 @@ public:
 
   void addCrossRef(const memory::Addr& addr, memory::Reference::Type type);
 
-  void appendCommand(const Command& cmd);
+  void appendCommand(const CommandPtr cmd);
 
-  Command& getCommand(int idx);
+  CommandPtr getCommand(int idx);
 
-  Command& getCommand(const memory::Addr& addr);
+  CommandPtr getCommand(const memory::Addr& addr);
 
-  Command& lastCommand() { return _commands.back(); }
+  CommandPtr lastCommand() { return _commands.back(); }
 
   inline size_t commandsCount() const { return _commands.size(); }
 
@@ -91,9 +91,9 @@ public:
   inline Type type() const { return _type; }
   inline void setType(Type type) { _type = type; }
 
-  std::shared_ptr<Label> label() const { return _label; }
+  LabelPtr label() const { return _label; }
 
-  std::shared_ptr<Label> setLabel(std::shared_ptr<Label> label = nullptr, memory::Reference::Type = memory::Reference::Type::JUMP);
+  LabelPtr setLabel(LabelPtr label = nullptr, memory::Reference::Type = memory::Reference::Type::JUMP);
 
   void setLabel(const std::string& label);
 
@@ -122,7 +122,7 @@ private:
   ///@brief Ссылки на блок
   ReferencesList _references;
   ///@brief Метка блока
-  std::shared_ptr<Label> _label;
+  LabelPtr _label;
   ///@brief Команды блока
   CommandsList _commands;
   ///@brief Тип блока

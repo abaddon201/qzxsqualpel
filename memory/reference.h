@@ -38,6 +38,7 @@ struct Reference {
   Type type;
 };
 
+using ReferencePtr = std::shared_ptr<Reference>;
 }
 }
 

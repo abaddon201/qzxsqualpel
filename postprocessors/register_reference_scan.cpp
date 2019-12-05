@@ -20,26 +20,26 @@ void RegisterReferenceScan::updateRegisterSource(ChunkPtr chunk, int idx, Regist
   for (int i = idx; i >= 0; i--) {
     auto& cmd = chunk->commands()[i];
     //TODO also check register halves
-    if (cmd.getArgsCount() > 0) {
-      if (cmd.getArg(0)->arg_type == ArgType::ARG_REGISTER16) {
-        auto tst_ref = std::static_pointer_cast<ArgRegister16>(cmd.getArg(0));
+    if (cmd->getArgsCount() > 0) {
+      if (cmd->getArg(0)->arg_type == ArgType::ARG_REGISTER16) {
+        auto tst_ref = std::static_pointer_cast<ArgRegister16>(cmd->getArg(0));
         if (reg == tst_ref->reg_id) {
           // found register load, need to update right arg (if it's applicable)
-          if (cmd.command_code == CmdCode::LD) {
-            if (cmd.getArg(1)->arg_type == ArgType::ARG_DEFAULT) {
-              auto src_ref = std::static_pointer_cast<ArgDefault> (cmd.getArg(1))->value();
-              auto lbl = DisassemblerCore::inst().makeData(cmd.addr, src_ref, size == ArgSize::Word ? memory::Reference::Type::READ_WORD : memory::Reference::Type::READ_BYTE);
+          if (cmd->command_code == CmdCode::LD) {
+            if (cmd->getArg(1)->arg_type == ArgType::ARG_DEFAULT) {
+              auto src_ref = std::static_pointer_cast<ArgDefault> (cmd->getArg(1))->value();
+              auto lbl = DisassemblerCore::inst().makeData(cmd->addr, src_ref, size == ArgSize::Word ? memory::Reference::Type::READ_WORD : memory::Reference::Type::READ_BYTE);
               auto src = std::make_shared<ArgMemoryReference>(src_ref, false);
               src->setLabel(lbl);
-              cmd.setArg(1, src);
+              cmd->setArg(1, src);
             }
           }
-          if (cmd.command_code != CmdCode::EX || reg != Register16::DE) {
+          if (cmd->command_code != CmdCode::EX || reg != Register16::DE) {
             return;
           }
         }
-      } else if (cmd.getArg(0)->arg_type == ArgType::ARG_REGISTER8) {
-        auto tst_ref = std::static_pointer_cast<ArgRegister8>(cmd.getArg(0));
+      } else if (cmd->getArg(0)->arg_type == ArgType::ARG_REGISTER8) {
+        auto tst_ref = std::static_pointer_cast<ArgRegister8>(cmd->getArg(0));
         if (reg.isPart(tst_ref->reg_id)) {
           // loading part of register, just break search
           return;
@@ -52,10 +52,10 @@ void RegisterReferenceScan::updateRegisterSource(ChunkPtr chunk, int idx, Regist
 size_t RegisterReferenceScan::process(std::shared_ptr<core::Chunk> chunk, size_t len) {
   int idx = 0;
   for (auto& cmd : chunk->commands()) {
-    switch (cmd.command_code) {
+    switch (cmd->command_code) {
       case CmdCode::LD:
-        updateRegisterSource(chunk, idx, cmd.getArg(0), cmd.getArg(1)->getSize());
-        updateRegisterSource(chunk, idx, cmd.getArg(1), cmd.getArg(0)->getSize());
+        updateRegisterSource(chunk, idx, cmd->getArg(0), cmd->getArg(1)->getSize());
+        updateRegisterSource(chunk, idx, cmd->getArg(1), cmd->getArg(0)->getSize());
         break;
       case CmdCode::AND:
       case CmdCode::CP:
@@ -72,7 +72,7 @@ size_t RegisterReferenceScan::process(std::shared_ptr<core::Chunk> chunk, size_t
       case CmdCode::SRL:
       case CmdCode::SUB:
       case CmdCode::XOR:
-        updateRegisterSource(chunk, idx, cmd.getArg(0), ArgSize::Byte);
+        updateRegisterSource(chunk, idx, cmd->getArg(0), ArgSize::Byte);
         break;
       case CmdCode::ADC:
       case CmdCode::ADD:
@@ -80,7 +80,7 @@ size_t RegisterReferenceScan::process(std::shared_ptr<core::Chunk> chunk, size_t
       case CmdCode::RES:
       case CmdCode::SBC:
       case CmdCode::SET:
-        updateRegisterSource(chunk, idx, cmd.getArg(1), ArgSize::Byte);
+        updateRegisterSource(chunk, idx, cmd->getArg(1), ArgSize::Byte);
         break;
       case CmdCode::CPD:
       case CmdCode::CPDR:

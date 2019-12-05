@@ -18,32 +18,32 @@ namespace dasm {
 namespace core {
 
 void Chunk::addCrossRef(const memory::Addr& addr, memory::Reference::Type type) {
-  memory::Reference ref(addr, type);
+  memory::ReferencePtr ref = std::make_shared<memory::Reference>(addr, type);
   _references.push_back(ref);
 }
 
-void Chunk::appendCommand(const Command& cmd) {
+void Chunk::appendCommand(const CommandPtr cmd) {
   _commands.push_back(cmd);
-  _length += cmd.len;
+  _length += cmd->len;
   _last_addr = _starting_addr + _length;
 }
 
-Command& Chunk::getCommand(int idx) {
+CommandPtr Chunk::getCommand(int idx) {
   if (_commands.size() == 0) {
     std::cerr << "No commands here" << std::endl;
-    throw int(666);
+    throw std::runtime_error("No commands here: " + std::to_string(idx));
   }
   return _commands[idx];
 }
 
 
-Command& Chunk::getCommand(const memory::Addr& addr) {
+CommandPtr Chunk::getCommand(const memory::Addr& addr) {
   if (_commands.size() == 0) {
     std::cerr << "No commands here" << std::endl;
     throw int(666);
   }
   for (auto& c : _commands) {
-    if (c.addr == addr) {
+    if (c->addr == addr) {
       return c;
     }
   }
@@ -98,8 +98,8 @@ std::shared_ptr<Chunk> Chunk::splitAt(const memory::Addr& addr) {
       //split impossible, allready busy
       return nullptr;
     }
-    cur_addr += (*it).len;
-    len += (*it).len;
+    cur_addr += (*it)->len;
+    len += (*it)->len;
   }
   _length = len;
   _last_addr = _starting_addr + _length;

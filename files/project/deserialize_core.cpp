@@ -123,10 +123,10 @@ memory::Reference::Type referenceTypeFromString(const std::string& type) {
   throw std::runtime_error("unknown reference type: " + type);
 }
 
-memory::Reference deserializeReference(const rapidjson::Value& node) {
-  memory::Reference ref{};
-  ref.addr = deserializeAddr(json::get_object(node, "addr"));
-  ref.type = referenceTypeFromString(json::get_string(node, "type"));
+memory::ReferencePtr deserializeReference(const rapidjson::Value& node) {
+  memory::ReferencePtr ref = std::make_shared<memory::Reference>();
+  ref->addr = deserializeAddr(json::get_object(node, "addr"));
+  ref->type = referenceTypeFromString(json::get_string(node, "type"));
   return ref;
 }
 
@@ -225,23 +225,24 @@ core::ArgPtr deserializeArgument(const rapidjson::Value& node) {
     default:
       throw std::runtime_error("Unknown argument type: " + std::to_string((int)arg->arg_type));
   }
+  arg->size = asize;
   return arg;
 }
 
-core::Command deserializeCommand(const rapidjson::Value& node) {
-  core::Command cmd{};
-  cmd.command_code = core::CmdCode(json::get_string(node, "code"));
-  cmd.setComment(json::get_optional_string(node, "comment", ""));
-  cmd.setAutoComment(json::get_optional_string(node, "auto_comment", ""));
-  cmd.addr = deserializeAddr(json::get_object(node, "addr"));
-  cmd.len = json::get_uint(node, "len");
+core::CommandPtr deserializeCommand(const rapidjson::Value& node) {
+  core::CommandPtr cmd = std::make_shared<core::Command>();
+  cmd->command_code = core::CmdCode(json::get_string(node, "code"));
+  cmd->setComment(json::get_optional_string(node, "comment", ""));
+  cmd->setAutoComment(json::get_optional_string(node, "auto_comment", ""));
+  cmd->addr = deserializeAddr(json::get_object(node, "addr"));
+  cmd->len = json::get_uint(node, "len");
 
   auto arr = json::get_optional_array<core::ArgPtr>(node, "arguments", [](const rapidjson::Value& v)->core::ArgPtr {
     return deserializeArgument(v);
   });
 
   for (auto& a : arr) {
-    cmd.args().emplace_back(a);
+    cmd->args().emplace_back(a);
   }
   return cmd;
 }
@@ -264,7 +265,7 @@ core::ChunkPtr deserializeChunk(const rapidjson::Value& node) {
   chunk->setLastAddr(deserializeAddr(laj));
   //References
   {
-    auto arr = json::get_optional_array<memory::Reference>(node, "references", [](const rapidjson::Value& v)->memory::Reference {
+    auto arr = json::get_optional_array<memory::ReferencePtr>(node, "references", [](const rapidjson::Value& v)->memory::ReferencePtr {
       return deserializeReference(v);
     });
 
@@ -274,7 +275,7 @@ core::ChunkPtr deserializeChunk(const rapidjson::Value& node) {
   }
   //commands
   {
-    auto arr = json::get_optional_array<core::Command>(node, "commands", [](const rapidjson::Value& v)->core::Command {
+    auto arr = json::get_optional_array<core::CommandPtr>(node, "commands", [](const rapidjson::Value& v)->core::CommandPtr {
       return deserializeCommand(v);
     });
     for (auto& r : arr) {

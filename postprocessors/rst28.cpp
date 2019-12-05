@@ -8,7 +8,7 @@ namespace postprocessors {
 
 bool Rst28::checkPrecondition(core::ChunkPtr chunk) {
   auto& cmd = chunk->lastCommand();
-  return ((cmd.command_code == core::CmdCode::RST) && (std::dynamic_pointer_cast<core::ArgDefault>(cmd.getArg(0))->value() == 0x28));
+  return ((cmd->command_code == core::CmdCode::RST) && (std::dynamic_pointer_cast<core::ArgDefault>(cmd->getArg(0))->value() == 0x28));
 }
 
 size_t Rst28::process(core::ChunkPtr chunk, size_t len) {
@@ -28,30 +28,31 @@ size_t Rst28::process(core::ChunkPtr chunk, size_t len) {
   /// пример такого бага: 2DE3. Там осуществяется серия переходов, цели которых находятся после блока нормального ассемблера
   auto &cmd = chunk->lastCommand();
   //cmd.auto_comment = "FP-CALC";
-  memory::Addr a = cmd.addr + 1;
+  memory::Addr a = cmd->addr + 1;
 
   core::Byte b;
-  core::Command c;
   int args_cnt;
+  core::CommandPtr c;
   try {
     while ((unsigned char)(b = core::DisassemblerCore::inst().memory().byte(a)) != 0x38) {
-      c.addr = a;
-      c.command_code = core::CmdCode::DB;
-      c.setArg(0, std::make_shared<core::ArgDefault>(b));
-      c.auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
-      c.len = 1;
+      c = std::make_shared<core::Command>();
+      c->addr = a;
+      c->command_code = core::CmdCode::DB;
+      c->setArg(0, std::make_shared<core::ArgDefault>(b));
+      c->auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
+      c->len = 1;
 
       core::DisassemblerCore::inst().chunks().removeChunk(a);
       chunk->appendCommand(c);
       len++;
       ++a;
       if (args_cnt) {
-        c.addr = a;
-        c.command_code = core::CmdCode::DB;
+        c->addr = a;
+        c->command_code = core::CmdCode::DB;
         b = core::DisassemblerCore::inst().memory().byte(a);
-        c.setArg(0, std::make_shared<core::ArgDefault>(b));
-        c.auto_comment = "dest_addr: " + memory::Addr(a + int{ (signed char)(unsigned char)b }).toString();
-        c.len = 1;
+        c->setArg(0, std::make_shared<core::ArgDefault>(b));
+        c->auto_comment = "dest_addr: " + memory::Addr(a + int{ (signed char)(unsigned char)b }).toString();
+        c->len = 1;
 
         core::DisassemblerCore::inst().chunks().removeChunk(a);
         chunk->appendCommand(c);
@@ -59,11 +60,12 @@ size_t Rst28::process(core::ChunkPtr chunk, size_t len) {
         ++a;
       }
     }
-    c.addr = a;
-    c.command_code = core::CmdCode::DB;
-    c.setArg(0, std::make_shared<core::ArgDefault>(b));
-    c.len = 1;
-    c.auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
+    c = std::make_shared<core::Command>();
+    c->addr = a;
+    c->command_code = core::CmdCode::DB;
+    c->setArg(0, std::make_shared<core::ArgDefault>(b));
+    c->len = 1;
+    c->auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
 
     core::DisassemblerCore::inst().chunks().removeChunk(a);
     chunk->appendCommand(c);

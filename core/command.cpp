@@ -90,7 +90,7 @@ Byte Command::opcodes(unsigned long long offs) const {
 
 void Command::parse(std::string& src) {
   std::cout << addr.toString();
-  if (addr == 0x000b) {
+  if (addr == 0x03c1) {
     std::cout << "src: " << src << std::endl;
   }
   std::cout << "src: " << src << std::endl;

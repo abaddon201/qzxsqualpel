@@ -16,19 +16,19 @@ std::shared_ptr<core::Label> AutoCommenter::getLabelForAddr(const memory::Addr& 
 }
 
 //FIXME: load this data from file
-void AutoCommenter::commentCommand(dasm::core::Command& out_command) {
-  if (out_command.command_code == core::CmdCode::RST) {
+void AutoCommenter::commentCommand(dasm::core::CommandPtr out_command) {
+  if (out_command->command_code == core::CmdCode::RST) {
     //known RST's
-    if (std::dynamic_pointer_cast<core::ArgDefault>(out_command.getArg(0))->value() == 0x10) {
-      out_command.auto_comment = "PRINT_A";
-    } else if (std::dynamic_pointer_cast<core::ArgDefault>(out_command.getArg(0))->value() == 0x18) {
-      out_command.auto_comment = "NEXT_CHAR";
-    } else if (std::dynamic_pointer_cast<core::ArgDefault>(out_command.getArg(0))->value() == 0x20) {
-      out_command.auto_comment = "GET_CHAR";
-    } else if (std::dynamic_pointer_cast<core::ArgDefault>(out_command.getArg(0))->value() == 0x28) {
-      out_command.auto_comment = "FP_CALC";
+    if (std::dynamic_pointer_cast<core::ArgDefault>(out_command->getArg(0))->value() == 0x10) {
+      out_command->auto_comment = "PRINT_A";
+    } else if (std::dynamic_pointer_cast<core::ArgDefault>(out_command->getArg(0))->value() == 0x18) {
+      out_command->auto_comment = "NEXT_CHAR";
+    } else if (std::dynamic_pointer_cast<core::ArgDefault>(out_command->getArg(0))->value() == 0x20) {
+      out_command->auto_comment = "GET_CHAR";
+    } else if (std::dynamic_pointer_cast<core::ArgDefault>(out_command->getArg(0))->value() == 0x28) {
+      out_command->auto_comment = "FP_CALC";
     }
-  } else if (out_command.command_code == core::CmdCode::CALL) {
+  } else if (out_command->command_code == core::CmdCode::CALL) {
     //known CALL's
     /*if (out_command.getJmpAddr() == 0x0556) {
       //Load File
