@@ -10,6 +10,7 @@
 //
 //
 
+/*
 #ifndef CCHUNKLIST_H
 #define CCHUNKLIST_H
 
@@ -22,9 +23,6 @@
 namespace dasm {
 namespace core {
 
-/**
- * @todo split address space to segment based model. ie change any indices to form like m_Segments[addr.segemnt()].m_Offsets[addr.offset()]
- */
 class ChunkList {
 public:
   using List = std::map<const memory::Addr, std::shared_ptr<Chunk>>;
@@ -64,3 +62,4 @@ private:
 }
 
 #endif
+*/

@@ -16,8 +16,9 @@
 #include <memory>
 #include <functional>
 
-#include "core/chunk.h"
-#include "core/chunk_list.h"
+//#include "core/chunk.h"
+//#include "core/chunk_list.h"
+#include "memory_map.h"
 #include "core/labels.h"
 #include "memory/addr.h"
 #include "memory/memory.h"
@@ -50,10 +51,6 @@ public:
 
   void initialParse();
 
-  ChunkList& chunks() { return _chunks; }
-
-  memory::Memory& memory() { return _memory; }
-
   const Labels& labels() const { return _labels; }
   Labels& labels() { return _labels; }
 
@@ -77,8 +74,12 @@ public:
   void setAutoCommenter(std::shared_ptr<postprocessors::AutoCommenter> ac) { _auto_commenter = ac; }
 
   const memory::Memory& memory() const { return _memory; }
+  memory::Memory& memory() { return _memory; }
 
-  const ChunkList& chunks() const { return _chunks; }
+
+  using CommandsMap = MemoryMap<CommandPtr>;
+  const CommandsMap& commands() const { return _commands_map; }
+  CommandsMap& commands() { return _commands_map; }
 
   bool extractAddrFromRef(const std::string& ref, memory::Addr& add_out);
 
@@ -107,7 +108,7 @@ private:
   ///@brief содержимое памяти
   memory::Memory _memory;
   ///@brief распознаные цепочки
-  ChunkList _chunks;
+  CommandsMap _commands_map;
   ///@brief метки, собранные в результате дизасма
   Labels _labels;
 

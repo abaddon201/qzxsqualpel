@@ -9,7 +9,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-
+/*
 #ifndef CCHUNK_H
 #define CCHUNK_H
 
@@ -140,3 +140,4 @@ using ChunkPtr = std::shared_ptr<Chunk>;
 }
 
 #endif
+*/
