@@ -6,6 +6,8 @@
 #include <QMenuBar>
 #include <QApplication>
 
+#include "navigation_stack.h"
+
 void MainWindow::updateWidgets() {
   _disassembler_widget->refreshView();
 }
@@ -22,6 +24,7 @@ MainWindow::MainWindow() {
   _navigation_stack = new QListWidget(dock);
   dock->setWidget(_navigation_stack);
   addDockWidget(Qt::RightDockWidgetArea, dock);
+  dasm::gui::NavigationStack::inst().addView(_navigation_stack);
 
   dock = new QDockWidget(tr("Labels list"), this);
   dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
