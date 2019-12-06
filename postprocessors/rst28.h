@@ -2,8 +2,6 @@
 
 #include "ipostprocessor.h"
 
-#include "core/chunk.h"
-
 namespace dasm {
 namespace postprocessors {
 

@@ -39,9 +39,9 @@ std::string Labels::offsetInLabel(const memory::Addr& addr) const {
     std::cout << "no label for addr" << std::endl;
     return addr.toString();
   }
-  memory::Addr ch_addr = cmd->addr;
+  auto ch_addr = cmd->addr;
   std::cout << "addr:" << ch_addr.toString() << std::endl;
-  std::shared_ptr<Label> lbl = cmd->label();
+  auto lbl = cmd->label();
   if (lbl == nullptr) {
     std::cout << "no label for chunk" << std::endl;
     return addr.toString();

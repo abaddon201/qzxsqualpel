@@ -215,15 +215,28 @@ core::CommandPtr deserializeCommand(const rapidjson::Value& node) {
   cmd->command_code = core::CmdCode(json::get_string(node, "code"));
   cmd->setComment(json::get_optional_string(node, "comment", ""));
   cmd->setAutoComment(json::get_optional_string(node, "auto_comment", ""));
+  cmd->setBlockComment(json::get_optional_string(node, "block_comment", ""));
   cmd->addr = deserializeAddr(json::get_object(node, "addr"));
   cmd->len = json::get_uint(node, "len");
 
+  auto lblj = json::get_optional_object(node, "label");
+  if (lblj != node.MemberEnd()) {
+    cmd->setLabel(deserializeLabel(lblj->value));
+  }
   auto arr = json::get_optional_array<core::ArgPtr>(node, "arguments", [](const rapidjson::Value& v)->core::ArgPtr {
     return deserializeArgument(v);
   });
 
   for (auto& a : arr) {
     cmd->args().emplace_back(a);
+  }
+
+  auto arr2 = json::get_optional_array<memory::ReferencePtr>(node, "refs", [](const rapidjson::Value& v)->memory::ReferencePtr {
+    return deserializeReference(v);
+  });
+
+  for (auto& a : arr2) {
+    cmd->references().emplace_back(a);
   }
   return cmd;
 }
@@ -235,6 +248,20 @@ void deserializeLabels(const rapidjson::Value& node, core::DisassemblerCore& cor
 
   for (auto& s : arr) {
     core.labels()[s->addr] = s;
+  }
+}
+
+void deserializeCommands(const rapidjson::Value& node, core::DisassemblerCore& core) {
+  size_t sz = 0;
+  auto arr = json::get_array<core::CommandPtr>(node, "commands", [&](const rapidjson::Value& v)->core::CommandPtr {
+    auto cmd = deserializeCommand(v);
+    sz += cmd->len;
+    return cmd;
+  });
+
+  core.commands().reset(sz);
+  for (auto& s : arr) {
+    core.commands().put(s->addr.offset(), s->len, s);
   }
 }
 
@@ -263,7 +290,7 @@ void Serializer::deserialize_file(const std::string& file_name, core::Disassembl
 
   deserializeMemory(doc, core);
   deserializeLabels(doc, core);
-  //FIXME:deserializeCommands(doc, core);
+  deserializeCommands(doc, core);
 }
 
 }

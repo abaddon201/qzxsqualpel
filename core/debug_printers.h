@@ -2,7 +2,6 @@
 #define DEBUG_PRINTERS_H
 
 #include "label.h"
-#include "chunk.h"
 
 using namespace dasm::core;
 

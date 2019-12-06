@@ -16,7 +16,9 @@ public:
     //FIXME: check if _offs ==-1
     T& elem() { return _elem; }
     const T& elem() const { return _elem; }
+    void setElem(T& elem) { _elem = elem; _offs = 0; }
     int offset() const { return _offs; }
+    void setOffset(int offs) { _offs = offs; }
   private:
     T _elem;
     int _offs;
@@ -28,10 +30,10 @@ public:
   void reset(size_t size) { _elems.resize(size); }
 
   void put(int pos, int len, T& elem) {
-    _elems[pos] = Element(elem);
+    _elems[pos].setElem(elem);
     if (len > 1) {
-      for (int i = 1; i <= len; ++i) {
-        _elems[pos + i] = Element(i);
+      for (int i = 1; i < len; ++i) {
+        _elems[pos + i].setOffset(i);
       }
     }
   }

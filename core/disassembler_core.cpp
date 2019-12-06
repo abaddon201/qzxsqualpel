@@ -277,6 +277,7 @@ LabelPtr DisassemblerCore::makeData(const memory::Addr& from_addr, const memory:
       _commands_map.put(data_addr.offset(), 2, cmd);
     }
   }
+  data_cmd = _commands_map.get(data_addr.offset());
   return addCrossRef(data_cmd, from_addr, data_addr, ref_type);
 }
 
@@ -366,13 +367,14 @@ bool DisassemblerCore::extractAddrFromRef(const std::string& ref, memory::Addr& 
   //(word_5c5f),
   //jmp_1bd1+27/c
   //sub_0c3b+2/c
+  //0000:0abc/c
   //jmp_0c86/c
   //jmp_0053
   //ffff
 
-  if (ref.find(':') != ref.npos) {
+  /*if (ref.find(':') != ref.npos) {
     return false;
-  }
+  }*/
   if (ref.find('(') != ref.npos) {
     //data ref
     std::string refnc = ref;
@@ -404,6 +406,15 @@ bool DisassemblerCore::extractAddrFromRef(const std::string& ref, memory::Addr& 
     //ref with offset
     std::string refnc = ref;
     auto spl1 = utils::split(refnc, '/');
+    auto spl3 = utils::split(refnc, ':');
+    if (spl3.size() == 2) {
+      //simple address
+      auto seg = utils::hex2int(spl3[0]);
+      auto offs = utils::hex2int(spl3[1]);
+      add_out.setOffset(offs);
+      add_out.setSegment(seg);
+      return true;
+    }
     auto spl2 = utils::split(spl1[0], '_');
     auto offs = utils::hex2int(spl2[1]);
     add_out.setOffset(offs);

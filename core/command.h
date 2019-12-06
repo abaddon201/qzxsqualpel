@@ -55,6 +55,9 @@ struct Command {
     _args = c._args;
     comment = c.comment;
     auto_comment = c.auto_comment;
+    _label = c._label;
+    _references = c._references;
+    _blockComment = c._blockComment;
   }
   Command(const Command& c) {
     clone(c);
@@ -73,6 +76,9 @@ struct Command {
     _args = c._args;
     comment = c.comment;
     auto_comment = c.auto_comment;
+    _label = c._label;
+    _references = c._references;
+    _blockComment = c._blockComment;
     return *this;
   }
 

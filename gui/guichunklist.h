@@ -6,7 +6,6 @@
 
 #include "guichunk.h"
 #include "memory/addr.h"
-#include "core/chunk_list.h"
 
 template<typename T>
 class GUIBlockList {

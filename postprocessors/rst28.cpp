@@ -44,6 +44,7 @@ size_t Rst28::process(core::CommandPtr cmd, size_t len) {
       len++;
       ++a;
       if (args_cnt) {
+        c = std::make_shared<core::Command>();
         c->addr = a;
         c->command_code = core::CmdCode::DB;
         b = core::DisassemblerCore::inst().memory().byte(a);
