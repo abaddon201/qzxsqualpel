@@ -134,7 +134,7 @@ void DisassemblerCore::disassembleBlock(const memory::Addr& st_addr) {
       return;
     }
     memory::Addr jump_addr;
-    switch (lastCmdJumpType(last_cmd, jump_addr)) {
+    switch (last_cmd->jumpType(jump_addr)) {
       case JumpType::JT_CALL: {
         //call
         std::cout << "!!!! call: addr=" << addr.toString() << " to_addr " << jump_addr.toString() << std::endl;
@@ -307,49 +307,6 @@ std::string DisassemblerCore::disassembleInstructionInt(const memory::Addr& addr
   char tbuff[128];
   debugger_disassemble(tbuff, 128, &len, (libspectrum_word)addr.offset());
   return std::string(tbuff);
-}
-
-JumpType DisassemblerCore::lastCmdJumpType(CommandPtr cmd, memory::Addr& jump_addr) {
-  if ((cmd->command_code == CmdCode::CALL) || (cmd->command_code == CmdCode::RST)) {
-    jump_addr = cmd->getJmpAddrFromString();
-    return dasm::core::JumpType::JT_CALL;
-  }
-  if (((cmd->command_code == CmdCode::JR) || (cmd->command_code == CmdCode::JP)) && (cmd->getArgsCount() == 1)) {
-    const auto& arg1 = cmd->getArg(0);
-    //FIXME: tmp check, must be removed after debug
-    const std::string& arg1str = arg1->toString();
-    if (arg1str[0] == '"') {
-      throw std::runtime_error("unknown argument");
-    }
-    if (arg1->arg_type == ArgType::ARG_REGISTER_REF) {
-      // posybly need to check register: IX, IY, HL
-      //jump to (HL) or (IX) or (IY). address unknown, so we just break disassembling here
-      return dasm::core::JumpType::JT_RET;
-    }
-    jump_addr = cmd->getJmpAddrFromString();
-    return dasm::core::JumpType::JT_JUMP;
-  }
-  if (((cmd->command_code == CmdCode::JR) || (cmd->command_code == CmdCode::JP)) && (cmd->getArgsCount() == 2)) {
-    jump_addr = cmd->getJmpAddrFromString();
-    return dasm::core::JumpType::JT_COND_JUMP;
-  }
-  if (cmd->command_code == CmdCode::DJNZ) {
-    jump_addr = cmd->getJmpAddrFromString();
-    return dasm::core::JumpType::JT_COND_JUMP;
-  }
-  if ((cmd->command_code == CmdCode::RET) && (cmd->getArgsCount() == 1)) {
-    return dasm::core::JumpType::JT_COND_RET;
-  }
-  if ((cmd->command_code == CmdCode::RET) && (cmd->getArgsCount() == 0)) {
-    return dasm::core::JumpType::JT_RET;
-  }
-  if (cmd->command_code == CmdCode::RETI) {
-    return dasm::core::JumpType::JT_RET;
-  }
-  if (cmd->command_code == CmdCode::RETN) {
-    return dasm::core::JumpType::JT_RET;
-  }
-  return dasm::core::JumpType::JT_NONE;
 }
 
 size_t DisassemblerCore::postProcessCmd(CommandPtr cmd, size_t len) {

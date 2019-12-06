@@ -61,9 +61,6 @@ public:
 
   LabelPtr addCrossRef(CommandPtr cmd, const memory::Addr& from_addr, const memory::Addr& dst_addr, memory::Reference::Type ref_type);
 
-  //FIXME: move to command
-  JumpType lastCmdJumpType(CommandPtr cmd, memory::Addr& jump_addr);
-
   std::string fileName() const { return _file_name; }
   void setFileName(const std::string& file_name) { _file_name = file_name; }
 

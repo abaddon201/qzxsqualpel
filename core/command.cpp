@@ -258,5 +258,49 @@ ArgPtr Command::parseArg(const std::string& arg) {
     return std::make_shared<ArgDefault>(v, ArgSize::Word, true);
   }
 }
+
+JumpType Command::jumpType(memory::Addr& jump_addr) {
+  if ((command_code == CmdCode::CALL) || (command_code == CmdCode::RST)) {
+    jump_addr = getJmpAddrFromString();
+    return JumpType::JT_CALL;
+  }
+  if (((command_code == CmdCode::JR) || (command_code == CmdCode::JP)) && (getArgsCount() == 1)) {
+    const auto& arg1 = getArg(0);
+    //FIXME: tmp check, must be removed after debug
+    const std::string& arg1str = arg1->toString();
+    if (arg1str[0] == '"') {
+      throw std::runtime_error("unknown argument");
+    }
+    if (arg1->arg_type == ArgType::ARG_REGISTER_REF) {
+      // posybly need to check register: IX, IY, HL
+      //jump to (HL) or (IX) or (IY). address unknown, so we just break disassembling here
+      return JumpType::JT_RET;
+    }
+    jump_addr = getJmpAddrFromString();
+    return JumpType::JT_JUMP;
+  }
+  if (((command_code == CmdCode::JR) || (command_code == CmdCode::JP)) && (getArgsCount() == 2)) {
+    jump_addr = getJmpAddrFromString();
+    return JumpType::JT_COND_JUMP;
+  }
+  if (command_code == CmdCode::DJNZ) {
+    jump_addr = getJmpAddrFromString();
+    return JumpType::JT_COND_JUMP;
+  }
+  if ((command_code == CmdCode::RET) && (getArgsCount() == 1)) {
+    return JumpType::JT_COND_RET;
+  }
+  if ((command_code == CmdCode::RET) && (getArgsCount() == 0)) {
+    return JumpType::JT_RET;
+  }
+  if (command_code == CmdCode::RETI) {
+    return JumpType::JT_RET;
+  }
+  if (command_code == CmdCode::RETN) {
+    return JumpType::JT_RET;
+  }
+  return JumpType::JT_NONE;
+}
+
 }
 }

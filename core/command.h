@@ -95,6 +95,7 @@ struct Command {
 
   ///@brief Возвращает адрес перехода команды (первый либо второй аргумент)
   memory::Addr getJmpAddr() const;
+  JumpType jumpType(memory::Addr& jump_addr);
 
   bool containsAddr(const memory::Addr& a) const {
     return a >= addr && a < addr + len;
