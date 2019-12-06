@@ -52,8 +52,8 @@ public:
   const Labels& labels() const { return _labels; }
   Labels& labels() { return _labels; }
 
-  std::shared_ptr<Label> makeJump(uint16_t from_addr, uint16_t jump_addr, memory::Reference::Type ref_type);
-  std::shared_ptr<Label> makeData(uint16_t from_addr, uint16_t data_addr, memory::Reference::Type ref_type);
+  LabelPtr makeJump(uint16_t from_addr, uint16_t jump_addr, memory::Reference::Type ref_type);
+  LabelPtr makeData(uint16_t from_addr, uint16_t data_addr, memory::Reference::Type ref_type);
   void makeArray(uint16_t from_addr, int size, bool clearMem);
 
   LabelPtr addCrossRef(CommandPtr cmd, uint16_t from_addr, uint16_t dst_addr, memory::Reference::Type ref_type);

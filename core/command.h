@@ -102,7 +102,7 @@ struct Command {
   uint16_t getJmpAddrFromString() const;
 
   ///@brief Устанавливает метку перехода команды (первый либо второй аргумент)
-  void setJmpAddr(const std::shared_ptr<Label> label);
+  void setJmpAddr(const LabelPtr label);
 
   bool isLDICmd();
 
@@ -115,7 +115,7 @@ struct Command {
 
   LabelPtr label() const { return _label; }
   LabelPtr setLabel(LabelPtr label = nullptr, memory::Reference::Type = memory::Reference::Type::JUMP);
-  void setLabel(const std::string& label);
+  //void setLabel(const std::string& label);
 
   void addCrossRef(uint16_t addr, memory::Reference::Type type);
   ReferencesList& references() { return _references; }

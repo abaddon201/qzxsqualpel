@@ -38,7 +38,7 @@ uint16_t Command::getJmpAddr() const {
   }
 }
 
-void Command::setJmpAddr(const std::shared_ptr<Label> label) {
+void Command::setJmpAddr(const LabelPtr label) {
   // if label is nullptr, we can't change default type arg to the label (we don't know about it)
   if (label != nullptr) {
     if (_args.size() == 1) {
@@ -79,11 +79,11 @@ LabelPtr Command::setLabel(LabelPtr label, memory::Reference::Type ref_type) {
   }
   return _label;
 }
-
+/*
 void Command::setLabel(const std::string& label) {
   _label = std::make_shared<Label>(addr, label);
 }
-
+*/
 std::string Command::getArgsString() const {
   if (_args.size() == 0) {
     return std::string();

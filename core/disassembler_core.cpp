@@ -107,7 +107,7 @@ size_t DisassemblerCore::disassembleInstruction(uint16_t addr, CommandPtr& out_c
       _auto_commenter->commentCommand(cmd);
     }
     if (klbl != nullptr) {
-      cmd->setLabel(klbl->name);
+      cmd->setLabel(klbl);
     }
     _commands_map.put(addr, len, cmd);
     std::cout << "cmd appended" << std::endl;
@@ -216,8 +216,7 @@ ABBY
 0x0edf LD HL, byte_5b00
 0x0ee7 LD (HL), A
 */
-std::shared_ptr<Label>
-DisassemblerCore::makeJump(uint16_t from_addr, uint16_t jump_addr, memory::Reference::Type ref_type) {
+LabelPtr DisassemblerCore::makeJump(uint16_t from_addr, uint16_t jump_addr, memory::Reference::Type ref_type) {
   disassembleBlock(jump_addr);
   auto jmp_cmd = _commands_map.get(jump_addr);
   if (jmp_cmd == nullptr) {

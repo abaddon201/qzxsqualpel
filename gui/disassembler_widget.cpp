@@ -103,7 +103,7 @@ void DisassemblerWidget::blockCommentUnderCursor() {
 
 void DisassemblerWidget::changeNameUnderCursor() {
   auto cmd = getCmdUnderCursor();
-  if (nullptr == cmd) {
+  if (nullptr == cmd || cmd->label() == nullptr) {
     return;
   }
   if (cmd->command_code != CmdCode::NONE) {

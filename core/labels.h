@@ -21,7 +21,7 @@
 namespace dasm {
 namespace core {
 
-class Labels : public std::map<uint16_t, std::shared_ptr<Label>> {
+class Labels : public std::map<uint16_t, LabelPtr> {
 public:
   ///@brief Вовращает сроку адреса относительно метки.
   std::string offsetInLabel(uint16_t addr) const;

@@ -38,7 +38,7 @@ void LabelsWidget::refresh() {
   int i = 0;
   dasm::core::Labels& my_labels = dasm::core::DisassemblerCore::inst().labels();
   setRowCount((int)my_labels.size());
-  for (auto lbl : my_labels) {
+  for (auto &lbl : my_labels) {
     QTableWidgetItem* nameItem = new QTableWidgetItem(QString::fromStdString(lbl.second->name));
     setItem(i, 0, nameItem);
     QTableWidgetItem* addrItem = new QTableWidgetItem(QString::fromStdString(utils::toHex(lbl.second->addr)));
