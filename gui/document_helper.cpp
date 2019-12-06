@@ -19,17 +19,16 @@ std::string DocumentHelper::getString(int pos, int count) const {
   return res.toStdString();
 }
 
-dasm::memory::Addr DocumentHelper::getAddrFromLineStart() const {
+uint16_t DocumentHelper::getAddrFromLineStart() const {
   QTextCursor cursor(_doc->textCursor());
   do {
     cursor.movePosition(QTextCursor::StartOfLine);
     auto pos = cursor.position();
-    std::string segs = getString(pos, 4);
-    std::string offss = getString(pos + 5, 4);
+    std::string offss = getString(pos, 4);
     try {
-      auto seg = utils::hex2int(segs);
-      auto offs = utils::hex2int(offss);
-      return memory::Addr(offs, seg);
+      //auto seg = utils::hex2int(segs);
+      uint16_t offs = utils::fromHex(offss);
+      return offs;
     } catch (...) {
       //unable to decode
     }

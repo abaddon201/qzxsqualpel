@@ -10,11 +10,13 @@
 //
 //
 
+#include "utils/utils.h"
 #include "labels.h"
 #include "command.h"
 #include "disassembler_core.h"
 
 #include "debug_printers.h"
+
 
 namespace dasm {
 namespace core {
@@ -29,31 +31,31 @@ namespace core {
  * 2. Если метка существует, то вычисляется смещение запрошенного адреса, относительно метки
  * и формируется строка вида <label>+<offset>, если смещение не нулевое, и <label>, в противном случае
  */
-std::string Labels::offsetInLabel(const memory::Addr& addr) const {
+std::string Labels::offsetInLabel(uint16_t addr) const {
   if (size() == 0) {
     std::cout << "no labels" << std::endl;
-    return addr.toString();
+    return utils::toHex(addr);
   }
-  auto cmd = DisassemblerCore::inst().commands().get(addr.offset());
+  auto cmd = DisassemblerCore::inst().commands().get(addr);
   if (cmd == nullptr) {
     std::cout << "no label for addr" << std::endl;
-    return addr.toString();
+    return utils::toHex(addr);
   }
   auto ch_addr = cmd->addr;
-  std::cout << "addr:" << ch_addr.toString() << std::endl;
+  std::cout << "addr:" << utils::toHex(ch_addr) << std::endl;
   auto lbl = cmd->label();
   if (lbl == nullptr) {
     std::cout << "no label for chunk" << std::endl;
-    return addr.toString();
+    return utils::toHex(addr);
   }
-  memory::Addr delta = addr - ch_addr;
+  uint16_t delta = addr - ch_addr;
   if (delta == 0) {
     return lbl->name;
   }
-  return lbl->name + "+" + std::to_string(delta.offset());
+  return lbl->name + "+" + std::to_string(delta);
 }
 
-void Labels::changeLabel(const memory::Addr& addr, const std::string& new_label) {
+void Labels::changeLabel(uint16_t addr, const std::string& new_label) {
   this->at(addr)->name = new_label;
 }
 

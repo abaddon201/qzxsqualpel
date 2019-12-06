@@ -13,9 +13,7 @@
 #ifndef CCOMMAND_H
 #define CCOMMAND_H
 
-#include "core/byte.h"
 #include "core/cmd_code.h"
-#include "memory/addr.h"
 #include "memory/reference.h"
 
 #include <vector>
@@ -41,7 +39,7 @@ struct Command {
   std::string auto_comment;
   ///@brief Адрес начала команды
   /// @todo Команда может быть разорвана по сегментам
-  memory::Addr addr;
+  uint16_t addr;
   ///@brief Длина команды в байтах
   size_t len;
 
@@ -91,17 +89,17 @@ struct Command {
   /// @todo стоит добавить ограничение на кол-во опкодов
   std::string getOpcodesString(size_t opcodes_count = -1) const;
 
-  Byte opcodes(unsigned long long offs) const;
+  uint8_t opcodes(unsigned long long offs) const;
 
   ///@brief Возвращает адрес перехода команды (первый либо второй аргумент)
-  memory::Addr getJmpAddr() const;
-  JumpType jumpType(memory::Addr& jump_addr);
+  uint16_t getJmpAddr() const;
+  JumpType jumpType(uint16_t& jump_addr);
 
-  bool containsAddr(const memory::Addr& a) const {
+  bool containsAddr(const uint16_t a) const {
     return a >= addr && a < addr + len;
   }
 
-  memory::Addr getJmpAddrFromString() const;
+  uint16_t getJmpAddrFromString() const;
 
   ///@brief Устанавливает метку перехода команды (первый либо второй аргумент)
   void setJmpAddr(const std::shared_ptr<Label> label);
@@ -119,7 +117,7 @@ struct Command {
   LabelPtr setLabel(LabelPtr label = nullptr, memory::Reference::Type = memory::Reference::Type::JUMP);
   void setLabel(const std::string& label);
 
-  void addCrossRef(const memory::Addr& addr, memory::Reference::Type type);
+  void addCrossRef(uint16_t addr, memory::Reference::Type type);
   ReferencesList& references() { return _references; }
 
   const std::string& blockComment() const { return _blockComment; }

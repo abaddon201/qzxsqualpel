@@ -8,23 +8,10 @@ namespace dasm {
 namespace files {
 namespace project {
 
-memory::AddrPtr deserializeAddrPtr(const rapidjson::Value& node) {
-  auto segment = json::get_uint(node, "segment");
-  auto offset = json::get_uint(node, "offset");
-  auto res = std::make_shared<memory::Addr>(offset, segment);
-  return res;
-}
-
-memory::Addr deserializeAddr(const rapidjson::Value& node) {
-  auto segment = json::get_uint(node, "segment");
-  auto offset = json::get_uint(node, "offset");
-  return memory::Addr(offset, segment);
-}
-
 core::LabelPtr deserializeLabel(const rapidjson::Value& node) {
   core::LabelPtr res = std::make_shared<core::Label>();
   res->name = json::get_string(node, "name");
-  res->addr = deserializeAddr(json::get_object(node, "addr"));
+  res->addr = json::get_uint(node, "addr");
   return res;
 }
 
@@ -68,7 +55,7 @@ memory::SegmentPtr deserializeSegment(const rapidjson::Value& node) {
   });
   auto& bytes = seg->bytes();
   for (uint8_t b : arr) {
-    bytes.emplace_back(core::Byte(b));
+    bytes.emplace_back(b);
   }
   return seg;
 }
@@ -106,7 +93,7 @@ memory::Reference::Type referenceTypeFromString(const std::string& type) {
 
 memory::ReferencePtr deserializeReference(const rapidjson::Value& node) {
   memory::ReferencePtr ref = std::make_shared<memory::Reference>();
-  ref->addr = deserializeAddr(json::get_object(node, "addr"));
+  ref->addr = json::get_uint(node, "addr");
   ref->type = referenceTypeFromString(json::get_string(node, "type"));
   return ref;
 }
@@ -198,7 +185,7 @@ core::ArgPtr deserializeArgument(const rapidjson::Value& node) {
       //FIXME: unneeded copy of bytes
       json::get_array<uint8_t>(node, "bytes", [&](const rapidjson::Value& v)->uint8_t {
         auto b = (uint8_t)v.GetUint();
-        core::argConvert<core::ArgByteArray>(arg)->pushByte(core::Byte(b));
+        core::argConvert<core::ArgByteArray>(arg)->pushByte(b);
         return b;
       });
       break;
@@ -216,7 +203,7 @@ core::CommandPtr deserializeCommand(const rapidjson::Value& node) {
   cmd->setComment(json::get_optional_string(node, "comment", ""));
   cmd->setAutoComment(json::get_optional_string(node, "auto_comment", ""));
   cmd->setBlockComment(json::get_optional_string(node, "block_comment", ""));
-  cmd->addr = deserializeAddr(json::get_object(node, "addr"));
+  cmd->addr = json::get_uint(node, "addr");
   cmd->len = json::get_uint(node, "len");
 
   auto lblj = json::get_optional_object(node, "label");
@@ -261,7 +248,7 @@ void deserializeCommands(const rapidjson::Value& node, core::DisassemblerCore& c
 
   core.commands().reset(sz);
   for (auto& s : arr) {
-    core.commands().put(s->addr.offset(), s->len, s);
+    core.commands().put(s->addr, s->len, s);
   }
 }
 
@@ -277,13 +264,10 @@ void Serializer::deserialize_file(const std::string& file_name, core::Disassembl
   auto arch = json::get_string(descr, "arch");
   auto fname = json::get_string(descr, "file_name");
 
-  auto entry_point = json::get_optional_object(descr, "entry_point");
+  auto entry_point = json::get_optional_uint(descr, "entry_point", 0);
 
   core.clear();
   core.setFileName(fname);
-  if (entry_point != descr.MemberEnd()) {
-    core.setEntryPoint(deserializeAddrPtr(entry_point->value));
-  }
 
   auto autoc = deserializeAutocommenter(doc);
   core.setAutoCommenter(autoc);

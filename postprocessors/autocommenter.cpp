@@ -7,7 +7,7 @@
 namespace dasm {
 namespace postprocessors {
 
-std::shared_ptr<core::Label> AutoCommenter::getLabelForAddr(const memory::Addr& addr) {
+std::shared_ptr<core::Label> AutoCommenter::getLabelForAddr(uint16_t addr) {
   auto it = _known_labels.find(addr);
   if (it != _known_labels.end()) {
     return it->second;
@@ -40,14 +40,14 @@ void AutoCommenter::commentCommand(dasm::core::CommandPtr out_command) {
 void AutoCommenter::loadGuessFile(const std::string& fname) {
   std::ifstream f(fname);
   while (!f.eof()) {
-    unsigned long long seg, off;
+    uint16_t seg, off;
     std::string nm;
     f >> std::hex >> seg;
     f.ignore(1);
     f >> std::hex >> off;
     f >> nm;
     if (!nm.empty()) {
-      memory::Addr a(off, seg);
+      uint16_t a{ off };
       _known_labels[a] = std::make_shared<core::Label>(a, nm);
     }
   }

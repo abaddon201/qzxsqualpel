@@ -17,20 +17,20 @@ void Memory::createSegment(Segment::IdType id, size_type size) {
   _segments[id] = std::make_shared<Segment>(id, size);
 }
 
-core::Byte Memory::byte(const Addr& addr) const {
-  const auto& seg = _segments.find(addr.segment());
+uint8_t Memory::byte(uint16_t addr) const {
+  const auto& seg = _segments.find(0/*addr.segment()*/);
   if (seg == _segments.cend()) {
     throw std::runtime_error("wrong segment");
   }
-  return seg->second->getByte(addr.offset());
+  return seg->second->getByte(addr);
 }
 
-void Memory::setByte(const Addr& addr, core::Byte& b) {
-  const auto& seg = _segments.find(addr.segment());
+void Memory::setByte(uint16_t addr, uint8_t b) {
+  const auto& seg = _segments.find(0/*addr.segment()*/);
   if (seg == _segments.cend()) {
     throw std::runtime_error("wrong segment");
   }
-  return seg->second->setByte(addr.offset(), b);
+  return seg->second->setByte(addr, b);
 }
 
 Memory::size_type Memory::wholeSize() {

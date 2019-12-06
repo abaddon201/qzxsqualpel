@@ -3,6 +3,9 @@
 #include "ui_make_array.h"
 #include "disassembler_widget.h"
 
+namespace dasm {
+namespace gui {
+
 class MakeArrayDlg : public QDialog {
   Ui::MakeArrayDlg _ui;
   DisassemblerWidget* _wdg;
@@ -22,8 +25,11 @@ public:
 public slots:
 
   void accept() override {
-    _wdg->makeArray(_ui.size->text().toInt(nullptr), _ui.clearMem->checkState()==Qt::Checked);
+    _wdg->makeArray(_ui.size->text().toInt(nullptr), _ui.clearMem->checkState() == Qt::Checked);
     close();
   }
 
 };
+
+}
+}

@@ -16,10 +16,13 @@
 #include <QTableWidget>
 #include "disassembler_widget.h"
 
+namespace dasm {
+namespace gui {
+
 class LabelsWidget : public QTableWidget {
-Q_OBJECT
+  Q_OBJECT
 public:
-  LabelsWidget(QWidget *par, DisassemblerWidget *disasm);
+  LabelsWidget(QWidget* par, DisassemblerWidget* disasm);
 
   void refresh();
 
@@ -28,7 +31,9 @@ public slots:
   void jumpToLabel(int, int);
 
 private:
-  DisassemblerWidget *_disasm;
+  DisassemblerWidget* _disasm;
 };
 
+}
+}
 #endif

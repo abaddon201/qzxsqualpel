@@ -17,20 +17,20 @@ public:
   }
   bool hasAddr() { return !_stack.empty(); }
 
-  void push(const memory::Addr& addr) {
+  void push(uint16_t addr) {
     _stack.push(addr);
     if (_wgt != nullptr) {
       auto lbl = core::DisassemblerCore::inst().labels().find(addr);
       if (lbl != core::DisassemblerCore::inst().labels().end()) {
-        _wgt->addItem(QString::fromStdString(addr.toString() + " " + lbl->second->name));
+        _wgt->addItem(QString::fromStdString(utils::toHex(addr) + " " + lbl->second->name));
       } else {
-        _wgt->addItem(QString::fromStdString(addr.toString()));
+        _wgt->addItem(QString::fromStdString(utils::toHex(addr)));
       }
     }
   }
 
-  memory::Addr pop() {
-    memory::Addr res = _stack.top();
+  uint16_t pop() {
+    uint16_t res = _stack.top();
     _stack.pop();
     if (_wgt != nullptr) {
       auto it = _wgt->takeItem(_wgt->count() - 1);
@@ -41,7 +41,7 @@ public:
 
 private:
   NavigationStack() = default;
-  std::stack<memory::Addr> _stack;
+  std::stack<uint16_t> _stack;
   QListWidget* _wgt;
 };
 }

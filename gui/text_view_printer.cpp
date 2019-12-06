@@ -64,18 +64,18 @@ void TextViewPrinter::printReferences(QTextCursor& cursor, dasm::core::CommandPt
 void TextViewPrinter::printCommand(QTextCursor& cursor, const core::CommandPtr cmd) {
   if (cmd->label() != nullptr) {
     if (!cmd->blockComment().empty()) {
-      printCell(cursor, cmd->addr.toString(), _cell_length_addr, _cell_format_addr);
+      printCell(cursor, utils::toHex(cmd->addr), _cell_length_addr, _cell_format_addr);
       printCell(cursor, std::string(";") + cmd->blockComment(), _cell_length_chunk_comment, _cell_format_chunk_comment);
     }
-    printCell(cursor, cmd->addr.toString(), _cell_length_addr, _cell_format_addr);
+    printCell(cursor, utils::toHex(cmd->addr), _cell_length_addr, _cell_format_addr);
     printCell(cursor, cmd->label()->name + ":", _cell_length_label, _cell_format_label);
     printReferences(cursor, cmd);
     cursor.insertText("\n");
   }
   if (cmd->addr < 16384) {
-    printCell(cursor, cmd->addr.toString(), _cell_length_addr, _cell_format_addr_rom);
+    printCell(cursor, utils::toHex(cmd->addr), _cell_length_addr, _cell_format_addr_rom);
   } else {
-    printCell(cursor, cmd->addr.toString(), _cell_length_addr, _cell_format_addr);
+    printCell(cursor, utils::toHex(cmd->addr), _cell_length_addr, _cell_format_addr);
   }
   printCell(cursor, cmd->getOpcodesString(MAX_OPCODES_COUNT), _cell_length_opcodes, _cell_format_opcodes);
   printCell(cursor, cmd->command_code.toString(), _cell_length_command, _cell_format_command);
@@ -86,6 +86,26 @@ void TextViewPrinter::printCommand(QTextCursor& cursor, const core::CommandPtr c
     printCell(cursor, std::string(";") + cmd->auto_comment, _cell_length_cmd_comment, _cell_format_cmd_auto_comment);
   }
 }
+
+QTextCharFormat TextViewPrinter::_cell_format_addr;
+QTextCharFormat TextViewPrinter::_cell_format_addr_rom;
+QTextCharFormat TextViewPrinter::_cell_format_opcodes;
+QTextCharFormat TextViewPrinter::_cell_format_label;
+QTextCharFormat TextViewPrinter::_cell_format_command;
+QTextCharFormat TextViewPrinter::_cell_format_args;
+QTextCharFormat TextViewPrinter::_cell_format_cmd_comment;
+QTextCharFormat TextViewPrinter::_cell_format_cmd_auto_comment;
+QTextCharFormat TextViewPrinter::_cell_format_chunk_comment;
+QTextCharFormat TextViewPrinter::_cell_format_reference;
+
+int TextViewPrinter::_cell_length_addr;
+int TextViewPrinter::_cell_length_opcodes;
+int TextViewPrinter::_cell_length_label;
+int TextViewPrinter::_cell_length_command;
+int TextViewPrinter::_cell_length_args;
+int TextViewPrinter::_cell_length_cmd_comment;
+int TextViewPrinter::_cell_length_chunk_comment;
+int TextViewPrinter::_cell_length_reference;
 
 }
 }

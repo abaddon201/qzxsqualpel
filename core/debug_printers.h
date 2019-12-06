@@ -2,11 +2,12 @@
 #define DEBUG_PRINTERS_H
 
 #include "label.h"
+#include "utils/utils.h"
 
 using namespace dasm::core;
 
 inline std::ostream &operator<<(std::ostream &out, Label &lab) {
-  out << "Label: Name='" << lab.name << "', addr=" << lab.addr.toString();
+  out << "Label: Name='" << lab.name << "', addr=" << dasm::utils::toHex(lab.addr);
   return out;
 }
 

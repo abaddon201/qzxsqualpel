@@ -13,29 +13,29 @@ namespace utils {
 
 extern std::string _hex[256];
 
-inline uint16_t hex2int(const std::string& val) {
+inline auto fromHex(const std::string& val) {
   return std::stoul(val, nullptr, 16);
 }
 
-inline const std::string& byte2hex(unsigned char b) {
+inline const std::string& toHex(uint8_t b) {
   return _hex[b];
 }
 
-///@todo make from this things class
-template<typename T>
-std::string hexify(T i, int len = 0) {
-  std::stringbuf buf;
-  std::ostream os(&buf);
-  len = len ? len : (sizeof(T) * 2);
-
-  os << std::setfill('0') << std::setw(len) << std::hex << (unsigned long long) i;
-  return buf.str();
+inline const std::string toHex(uint16_t b) {
+  return toHex((uint8_t)(b >> 8)) + toHex((uint8_t)b);
 }
 
-inline void initHexes() {
-  for (int i = 0; i < 256; ++i)
-    _hex[i] = hexify(i, 2);
+inline const std::string toHex(uint16_t b, int size) {
+  if (size == 2) {
+    return toHex((uint8_t)(b >> 8)) + toHex((uint8_t)b);
+  } else if (size == 1) {
+    return _hex[b & 0xFF];
+  } else {
+    throw std::runtime_error("wrong hex size: " + std::to_string(size));
+  }
 }
+
+void initHexes();
 
 inline std::string tolowerStd(std::string s) {
   ///@bug this shit not found

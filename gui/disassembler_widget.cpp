@@ -25,6 +25,10 @@
 #include "navigation_stack.h"
 
 #include "text_view_printer.h"
+#include "utils/utils.h"
+
+namespace dasm {
+namespace gui {
 
 DisassemblerWidget::DisassemblerWidget()
   : QPlainTextEdit() {
@@ -32,7 +36,7 @@ DisassemblerWidget::DisassemblerWidget()
 }
 
 DisassemblerWidget::DisassemblerWidget(MainWindow* mwnd)
-  : QPlainTextEdit(), _main_window(mwnd) {
+  : QPlainTextEdit(), _main_window{ mwnd } {
 
   init();
 }
@@ -136,15 +140,15 @@ void DisassemblerWidget::makeArray(int size, bool clearMem) {
   }
 }
 
-void DisassemblerWidget::navigateToAddress(const dasm::memory::Addr& from_addr, const dasm::memory::Addr& addr) {
-  qDebug() << "GUI: navigate to address:" << addr.toString() << " from: " << from_addr.toString();
+void DisassemblerWidget::navigateToAddress(uint16_t from_addr, uint16_t addr) {
+  qDebug() << "GUI: navigate to address:" << utils::toHex(addr) << " from: " << utils::toHex(from_addr);
   dasm::gui::NavigationStack::inst().push(from_addr);
   navigateToAddress(addr);
 }
 
-void DisassemblerWidget::navigateToAddress(const dasm::memory::Addr& addr) {
-  qDebug() << "GUI: navigate to address:" << addr.toString();
-  auto cmd = getGuiCmdUnderCursor();
+void DisassemblerWidget::navigateToAddress(uint16_t addr) {
+  qDebug() << "GUI: navigate to address:" << utils::toHex(addr);
+  auto cmd = _commands.getChunkContains(addr);
   if (nullptr != cmd) {
     QTextCursor cursor(textCursor());
     cursor.setPosition(cmd->cursorStartPosition() + 1);
@@ -155,10 +159,10 @@ void DisassemblerWidget::navigateToAddress(const dasm::memory::Addr& addr) {
 
 void DisassemblerWidget::navigateToReference() {
   auto txt = dasm::gui::DocumentHelper::inst().getWordUnderCursor();
-  dasm::memory::Addr addr;
+  uint16_t addr;
   if (dasm::core::DisassemblerCore::inst().extractAddrFromRef(txt, addr)) {
     //navigating to addr
-    qDebug() << "navigating to addr: " << addr.toString();
+    qDebug() << "navigating to addr: " << utils::toHex(addr);
     try {
       navigateToAddress(dasm::gui::DocumentHelper::inst().getAddrFromLineStart(), addr);
     } catch (...) {
@@ -290,4 +294,7 @@ void DisassemblerWidget::refreshView() {
   }
   cursor.endEditBlock();
   _main_window->labelsWidget()->refresh();
+}
+
+}
 }

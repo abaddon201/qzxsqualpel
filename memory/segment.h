@@ -4,8 +4,8 @@
 #include <vector>
 #include <stdexcept>
 #include <algorithm>
-
-#include "core/byte.h"
+#include <memory>
+#include <string>
 
 namespace dasm {
 namespace memory {
@@ -43,10 +43,10 @@ public:
   inline Type type() const { return _type; }
   inline void setType(Type type) { _type = type; }
 
-  const std::vector<core::Byte>& bytes() const { return _mem; }
-  std::vector<core::Byte>& bytes() { return _mem; }
+  const std::vector<uint8_t>& bytes() const { return _mem; }
+  std::vector<uint8_t>& bytes() { return _mem; }
 
-  inline core::Byte getByte(size_type offset) const {
+  inline uint8_t getByte(size_type offset) const {
     if (offset < _dataSize) {
       return _mem[offset];
     } else {
@@ -54,7 +54,7 @@ public:
     }
   }
 
-  inline void setByte(size_type offset, core::Byte& b) {
+  inline void setByte(size_type offset, uint8_t b) {
     if (offset < _dataSize) {
       _mem[offset] = b;
     } else {
@@ -72,7 +72,7 @@ private:
   ///@brief Тип сегмента
   Type _type;
   ///@brief Содержимое сегмента
-  std::vector<core::Byte> _mem;
+  std::vector<uint8_t> _mem;
 };
 
 using SegmentPtr = std::shared_ptr<Segment>;

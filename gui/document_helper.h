@@ -3,8 +3,6 @@
 #include <string>
 #include <QPlainTextEdit>
 
-#include "memory/addr.h"
-
 namespace dasm {
 namespace gui {
 
@@ -13,7 +11,7 @@ public:
 
   std::string getString(int pos, int count) const;
 
-  memory::Addr getAddrFromLineStart() const;
+  uint16_t getAddrFromLineStart() const;
 
   std::string getWordUnderCursor();
 

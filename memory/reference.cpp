@@ -17,7 +17,7 @@
 namespace dasm {
 namespace memory {
 
-Reference::Reference(const Addr& addr_, Type type_)
+Reference::Reference(uint16_t addr_, Type type_)
   : addr(addr_), type(type_) {}
 
 std::string Reference::toString() {

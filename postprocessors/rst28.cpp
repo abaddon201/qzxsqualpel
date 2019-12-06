@@ -26,9 +26,9 @@ size_t Rst28::process(core::CommandPtr cmd, size_t len) {
   /// @bug: Переходы могут осуществляться через куски нормального года, что приводит к возникновению "рваных" цепей
   /// пример такого бага: 2DE3. Там осуществяется серия переходов, цели которых находятся после блока нормального ассемблера
   //cmd.auto_comment = "FP-CALC";
-  memory::Addr a = cmd->addr + 1;
+  uint16_t a = cmd->addr + 1;
 
-  core::Byte b;
+  uint8_t b;
   int args_cnt;
   core::CommandPtr c;
   try {
@@ -40,7 +40,7 @@ size_t Rst28::process(core::CommandPtr cmd, size_t len) {
       c->auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
       c->len = 1;
 
-      core::DisassemblerCore::inst().commands().put(a.offset(), 1, c);
+      core::DisassemblerCore::inst().commands().put(a, 1, c);
       len++;
       ++a;
       if (args_cnt) {
@@ -49,10 +49,10 @@ size_t Rst28::process(core::CommandPtr cmd, size_t len) {
         c->command_code = core::CmdCode::DB;
         b = core::DisassemblerCore::inst().memory().byte(a);
         c->setArg(0, std::make_shared<core::ArgDefault>(b));
-        c->auto_comment = "dest_addr: " + memory::Addr(a + int{ (signed char)(unsigned char)b }).toString();
+        c->auto_comment = "dest_addr: " + utils::toHex((uint16_t)(a +  (int)b));
         c->len = 1;
 
-        core::DisassemblerCore::inst().commands().put(a.offset(), 1, c);
+        core::DisassemblerCore::inst().commands().put(a, 1, c);
         len++;
         ++a;
       }
@@ -64,7 +64,7 @@ size_t Rst28::process(core::CommandPtr cmd, size_t len) {
     c->len = 1;
     c->auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
 
-    core::DisassemblerCore::inst().commands().put(a.offset(), 1, c);
+    core::DisassemblerCore::inst().commands().put(a, 1, c);
     len++;
   } catch (std::out_of_range&) {
     std::cout << "finished due address exceeds" << std::endl;

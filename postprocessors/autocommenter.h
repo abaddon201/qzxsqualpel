@@ -12,7 +12,7 @@ public:
 
   void loadGuessFile(const std::string& fname);
 
-  core::LabelPtr getLabelForAddr(const memory::Addr& addr);
+  core::LabelPtr getLabelForAddr(uint16_t addr);
 
   const core::Labels& getKnownLabels() const { return _known_labels; }
 

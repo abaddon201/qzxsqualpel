@@ -18,7 +18,7 @@
 namespace dasm {
 namespace core {
 
-memory::Addr Command::getJmpAddrFromString() const {
+uint16_t Command::getJmpAddrFromString() const {
   if (_args.size() == 1) {
     //get from arg1
     return std::stoi(_args[0]->toString(), nullptr, 16);
@@ -28,7 +28,7 @@ memory::Addr Command::getJmpAddrFromString() const {
   }
 }
 
-memory::Addr Command::getJmpAddr() const {
+uint16_t Command::getJmpAddr() const {
   if (_args.size() == 1) {
     //get from arg1
     return dynamic_cast<ArgMemoryReference*>(_args[0].get())->label->addr;
@@ -49,7 +49,7 @@ void Command::setJmpAddr(const std::shared_ptr<Label> label) {
   }
 }
 
-void Command::addCrossRef(const memory::Addr& addr, memory::Reference::Type type) {
+void Command::addCrossRef(uint16_t addr, memory::Reference::Type type) {
   memory::ReferencePtr ref = std::make_shared<memory::Reference>(addr, type);
   _references.push_back(ref);
 }
@@ -57,7 +57,7 @@ void Command::addCrossRef(const memory::Addr& addr, memory::Reference::Type type
 LabelPtr Command::setLabel(LabelPtr label, memory::Reference::Type ref_type) {
   if (label == nullptr) {
     //generate from name
-    std::string t1{ addr.offsetString() };
+    std::string t1{ utils::toHex(addr) };
     switch (ref_type) {
       case memory::Reference::Type::JUMP:
         _label = std::make_shared<Label>(addr, std::string("jmp_") + t1);
@@ -105,7 +105,7 @@ std::string Command::getOpcodesString(size_t opcodes_count) const {
       suffix = " ...";
     }
   }
-  memory::Addr a = addr;
+  uint16_t a = addr;
   bool first = true;
   for (; l1; --l1, ++a) {
     if (first) {
@@ -113,18 +113,18 @@ std::string Command::getOpcodesString(size_t opcodes_count) const {
     } else {
       tmp += " ";
     }
-    tmp += DisassemblerCore::inst().memory().byte(a).toString();
+    tmp += utils::toHex(DisassemblerCore::inst().memory().byte(a));
   }
   tmp += suffix;
   return tmp;
 }
 
-Byte Command::opcodes(unsigned long long offs) const {
+uint8_t Command::opcodes(unsigned long long offs) const {
   return DisassemblerCore::inst().memory().byte(addr + offs);
 }
 
 void Command::parse(std::string& src) {
-  std::cout << addr.toString();
+  std::cout << utils::toHex(addr);
   if (addr == 0x03c1) {
     std::cout << "src: " << src << std::endl;
   }
@@ -228,7 +228,7 @@ ArgPtr Command::parseArg(const std::string& arg) {
       return std::make_shared<ArgRegisterOffset>(r, a[1].substr(0, a[1].length() - 1), true);
     } else {
       //memory
-      auto addr = utils::hex2int(ref_str);
+      uint16_t addr = utils::fromHex(ref_str);
       if ((command_code == CmdCode::OUT) || (command_code == CmdCode::IN)) {
         return std::make_shared <ArgPort>(addr);
       } else {
@@ -249,7 +249,7 @@ ArgPtr Command::parseArg(const std::string& arg) {
   if (f != Flag::None) {
     return std::make_shared<ArgFlag>(f);
   }
-  auto v = utils::hex2int(arg);
+  uint16_t v = utils::fromHex(arg);
   if (isSingleByteArgCmd()) {
     return std::make_shared<ArgDefault>(v, ArgSize::Byte, true);
   } else if ((command_code == CmdCode::SET) || (command_code == CmdCode::RES) || (command_code == CmdCode::BIT) || (command_code == CmdCode::IM)) {
@@ -259,7 +259,7 @@ ArgPtr Command::parseArg(const std::string& arg) {
   }
 }
 
-JumpType Command::jumpType(memory::Addr& jump_addr) {
+JumpType Command::jumpType(uint16_t& jump_addr) {
   if ((command_code == CmdCode::CALL) || (command_code == CmdCode::RST)) {
     jump_addr = getJmpAddrFromString();
     return JumpType::JT_CALL;

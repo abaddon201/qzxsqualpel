@@ -19,7 +19,7 @@ public:
   static void printCommand(QTextCursor& cursor, const dasm::core::CommandPtr cmd);
 
   static QTextCharFormat _cell_format_addr;
-  static   QTextCharFormat _cell_format_addr_rom;
+  static QTextCharFormat _cell_format_addr_rom;
   static QTextCharFormat _cell_format_opcodes;
   static QTextCharFormat _cell_format_label;
   static QTextCharFormat _cell_format_command;

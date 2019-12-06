@@ -5,13 +5,16 @@
 #include "disassembler_widget.h"
 #include "document_helper.h"
 
+namespace dasm {
+namespace gui {
+
 class NavigateToAddrDlg : public QDialog {
   Ui::GotoAddressDlg _ui;
-  DisassemblerWidget *_wdg;
-Q_OBJECT;
+  DisassemblerWidget* _wdg;
+  Q_OBJECT;
 
 public:
-  NavigateToAddrDlg(DisassemblerWidget *wdg) : _wdg{wdg} {}
+  NavigateToAddrDlg(DisassemblerWidget* wdg) : _wdg{ wdg } {}
 
   virtual ~NavigateToAddrDlg() {}
 
@@ -25,16 +28,18 @@ public slots:
 
   void accept() override {
     try {
-      auto from = dasm::gui::DocumentHelper::inst().getAddrFromLineStart();
-      _wdg->navigateToAddress(from, dasm::memory::Addr(_ui.addr->text().toInt(0, 16)));
+      auto from = DocumentHelper::inst().getAddrFromLineStart();
+      _wdg->navigateToAddress(from, utils::fromHex(_ui.addr->text().toStdString()));
     } catch (...) {
-      _wdg->navigateToAddress(dasm::memory::Addr(_ui.addr->text().toInt(0, 16)));
+      _wdg->navigateToAddress(utils::fromHex(_ui.addr->text().toStdString()));
     }
     close();
   }
 
 };
 
+}
+}
 
 #endif // HELPER_WIDGETS
 

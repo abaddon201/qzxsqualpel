@@ -7,6 +7,8 @@
 #include "disassembler_widget.h"
 #include "labels_widget.h"
 
+namespace dasm {
+namespace gui {
 
 class MainWindow : public QMainWindow, public IGUIUpdater {
   Q_OBJECT
@@ -39,5 +41,8 @@ private slots:
 
   void saveAsm();
 };
+
+}
+}
 
 #endif

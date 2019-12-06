@@ -12,6 +12,9 @@
 
 #include "guichunklist.h"
 
+namespace dasm {
+namespace gui {
+
 class MainWindow;
 
 class DisassemblerWidget : public QPlainTextEdit {
@@ -26,8 +29,8 @@ public:
   void saveASMFile(const QString& fileName);
 
   ///@brief Показать на экране код с меткой под номером
-  void navigateToAddress(const dasm::memory::Addr& from_addr, const dasm::memory::Addr& addr);
-  void navigateToAddress(const dasm::memory::Addr& addr);
+  void navigateToAddress(uint16_t from_addr, uint16_t addr);
+  void navigateToAddress(uint16_t addr);
   void navigateToReference();
 
   void makeArray(int size, bool clearMem);
@@ -60,4 +63,6 @@ private:
   Q_OBJECT
 };
 
+}
+}
 #endif

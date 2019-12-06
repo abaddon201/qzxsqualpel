@@ -8,6 +8,9 @@
 
 #include "navigation_stack.h"
 
+namespace dasm {
+namespace gui {
+
 void MainWindow::updateWidgets() {
   _disassembler_widget->refreshView();
 }
@@ -102,3 +105,5 @@ void MainWindow::openProject() {
   }
 }
 
+}
+}

@@ -15,8 +15,7 @@
 
 #include <utility>
 #include <memory>
-
-#include "memory/addr.h"
+#include <string>
 
 namespace dasm {
 namespace core {
@@ -24,7 +23,7 @@ namespace core {
 struct Label {
   Label() = default;
 
-  Label(const memory::Addr& addr, std::string name) : name(std::move(name)), addr(addr) {}
+  Label(uint16_t addr, const std::string& name) : name(std::move(name)), addr(addr) {}
 
   Label(const Label& s) {
     addr = s.addr;
@@ -40,7 +39,7 @@ struct Label {
   ~Label() = default;
 
   std::string name;
-  memory::Addr addr;
+  uint16_t addr;
 };
 
 using LabelPtr = std::shared_ptr<Label>;

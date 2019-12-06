@@ -13,7 +13,8 @@
 #ifndef CREFERENCE_H
 #define CREFERENCE_H
 
-#include "addr.h"
+#include <memory>
+#include <string>
 
 namespace dasm {
 namespace memory {
@@ -30,11 +31,11 @@ struct Reference {
   };
 
   Reference() : type{ Type::UNKNOWN } {}
-  Reference(const Addr& addr_, Type type_);
+  Reference(const uint16_t addr_, Type type_);
 
   std::string toString();
 
-  Addr addr;
+  uint16_t addr;
   Type type;
 };
 

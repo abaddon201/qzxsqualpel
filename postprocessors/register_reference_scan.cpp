@@ -7,7 +7,7 @@ namespace dasm {
 using namespace core;
 namespace postprocessors {
 
-void RegisterReferenceScan::updateRegisterSource(memory::Addr& addr, ArgPtr arg, ArgSize size) {
+void RegisterReferenceScan::updateRegisterSource(uint16_t addr, ArgPtr arg, ArgSize size) {
   if (arg->arg_type != ArgType::ARG_REGISTER_REF) {
     return;
   }
@@ -16,12 +16,12 @@ void RegisterReferenceScan::updateRegisterSource(memory::Addr& addr, ArgPtr arg,
   updateRegisterSource(addr, reg, size);
 }
 
-void RegisterReferenceScan::updateRegisterSource(memory::Addr& addr, Register16 reg, ArgSize size) {
-  memory::Addr tmp_addr = addr;
+void RegisterReferenceScan::updateRegisterSource(uint16_t addr, Register16 reg, ArgSize size) {
+  uint16_t tmp_addr = addr;
   auto commands = core::DisassemblerCore::inst().commands();
   CommandPtr cmd;
   do {
-    cmd = commands.get(tmp_addr.offset());
+    cmd = commands.get(tmp_addr);
     //TODO also check register halves
     if (cmd->getArgsCount() > 0) {
       if (cmd->getArg(0)->arg_type == ArgType::ARG_REGISTER16) {
@@ -50,7 +50,7 @@ void RegisterReferenceScan::updateRegisterSource(memory::Addr& addr, Register16 
       }
     }
     --tmp_addr;
-  } while (tmp_addr.offset() > 0 && isNotBreakCommand(cmd));
+  } while (tmp_addr > 0 && isNotBreakCommand(cmd));
 }
 
 bool RegisterReferenceScan::isNotBreakCommand(core::CommandPtr cmd) {

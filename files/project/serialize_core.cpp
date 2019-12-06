@@ -6,25 +6,16 @@ namespace dasm {
 namespace files {
 namespace project {
 
-rapidjson::Value serializeAddr(const memory::Addr& addr, rapidjson::Document::AllocatorType& allocator) {
-  rapidjson::Value v{};
-  v.SetObject();
-
-  json::add_uint_field(v, "segment", addr.segment(), allocator);
-  json::add_uint_field(v, "offset", addr.offset(), allocator);
-  return v;
-}
-
 rapidjson::Value  serializeLabel(core::LabelPtr lbl, rapidjson::Document::AllocatorType& allocator) {
   rapidjson::Value v{};
   v.SetObject();
 
-  v.AddMember("addr", serializeAddr(lbl->addr, allocator), allocator);
+  json::add_uint_field(v, "addr", lbl->addr, allocator);
   json::add_string_field(v, "name", lbl->name, allocator);
   return v;
 }
 
-rapidjson::Value serializeKnownLabel(std::pair < memory::Addr, core::LabelPtr> lbl, rapidjson::Document::AllocatorType& allocator) {
+rapidjson::Value serializeKnownLabel(std::pair < uint16_t, core::LabelPtr> lbl, rapidjson::Document::AllocatorType& allocator) {
   auto jvl = serializeLabel(lbl.second, allocator);
   return jvl;
 }
@@ -114,7 +105,7 @@ rapidjson::Value serializeReference(const memory::ReferencePtr ref, rapidjson::D
   rapidjson::Value v{};
   v.SetObject();
 
-  json::add_object(v, "addr", serializeAddr(ref->addr, allocator), allocator);
+  json::add_uint_field(v, "addr", ref->addr, allocator);
   json::add_string_field(v, "type", referenceTypeToString(ref->type), allocator);
   return v;
 }
@@ -223,7 +214,7 @@ rapidjson::Value serializeCommand(const core::CommandPtr cmd, rapidjson::Documen
     json::add_object(v, "refs", args, allocator);
 
   }
-  json::add_object(v, "addr", serializeAddr(cmd->addr, allocator), allocator);
+  json::add_uint_field(v, "addr", cmd->addr, allocator);
   json::add_uint_field(v, "len", cmd->len, allocator);
 
   if (cmd->getArgsCount() != 0) {
@@ -275,9 +266,7 @@ std::string Serializer::serialize(const core::DisassemblerCore& core) {
   json::add_string_field(info, "version", "0.2", allocator);
   json::add_string_field(info, "arch", "z80", allocator);
   json::add_string_field(info, "file_name", core.fileName(), allocator);
-  if (core.entryPoint() != nullptr) {
-    json::add_object(info, "entry_point", serializeAddr(*core.entryPoint(), allocator), allocator);
-  }
+  json::add_uint_field(info, "entry_point", core.entryPoint(), allocator);
 
   doc.AddMember("descr", info, allocator);
 

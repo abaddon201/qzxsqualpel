@@ -5,7 +5,6 @@
 #include <list>
 
 #include "guichunk.h"
-#include "memory/addr.h"
 
 template<typename T>
 class GUIBlockList {
@@ -21,7 +20,7 @@ public:
     return nullptr;
   }
 
-  GUIBlockPtr getChunkContains(const dasm::memory::Addr& addr) const {
+  GUIBlockPtr getChunkContains(uint16_t addr) const {
     auto res = std::find_if(_chunks.begin(), _chunks.end(),
                             [&addr](auto chunk) { return (chunk->core()->containsAddr(addr)); });
     if (res != _chunks.end()) {

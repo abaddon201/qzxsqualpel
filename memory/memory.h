@@ -4,10 +4,9 @@
 #include <map>
 #include <algorithm>
 #include <memory>
+#include <string>
 
 #include "segment.h"
-#include "addr.h"
-#include "core/byte.h"
 
 namespace dasm {
 namespace memory {
@@ -37,11 +36,11 @@ public:
 
   const std::map<Segment::IdType, std::shared_ptr<Segment>>& segments() const { return _segments; }
 
-  Addr maxAddr() const { return _segments.rbegin()->second->dataSize(); }
+  uint32_t maxAddr() const { return _segments.rbegin()->second->dataSize(); }
 
-  core::Byte byte(const Addr& addr) const;
+  uint8_t byte(uint16_t addr) const;
 
-  void setByte(const Addr& addr, core::Byte& b);
+  void setByte(uint16_t addr, uint8_t b);
 
   size_type wholeSize();
 
