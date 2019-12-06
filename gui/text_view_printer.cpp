@@ -62,11 +62,11 @@ void TextViewPrinter::printReferences(QTextCursor& cursor, dasm::core::CommandPt
 }
 
 void TextViewPrinter::printCommand(QTextCursor& cursor, const core::CommandPtr cmd) {
+  if (!cmd->blockComment().empty()) {
+    printCell(cursor, std::string(";") + cmd->blockComment(), _cell_length_chunk_comment, _cell_format_chunk_comment);
+    cursor.insertText("\n");
+  }
   if (cmd->label() != nullptr) {
-    if (!cmd->blockComment().empty()) {
-      printCell(cursor, utils::toHex(cmd->addr), _cell_length_addr, _cell_format_addr);
-      printCell(cursor, std::string(";") + cmd->blockComment(), _cell_length_chunk_comment, _cell_format_chunk_comment);
-    }
     printCell(cursor, utils::toHex(cmd->addr), _cell_length_addr, _cell_format_addr);
     printCell(cursor, cmd->label()->name + ":", _cell_length_label, _cell_format_label);
     printReferences(cursor, cmd);

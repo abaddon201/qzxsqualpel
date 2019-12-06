@@ -49,6 +49,7 @@ public slots:
   void makeCodeUnderCursor();
   void makeArrayUnderCursor();
   void commentCommandUnderCursor();
+  void blockCommentUnderCursor();
 
 private:
   DisassemblerWidget();

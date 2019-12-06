@@ -20,6 +20,7 @@
 
 #include "main_window.h"
 #include "widget_change_text.h"
+#include "widget_change_line.h"
 #include "guichunk.h"
 #include "core/debug_printers.h"
 #include "navigation_stack.h"
@@ -79,9 +80,22 @@ void DisassemblerWidget::commentCommandUnderCursor() {
   if (nullptr == cmd) {
     return;
   }
-  WidgetChangeText dlg(this, tr("Change command comment"), tr("Comment:"), QString::fromStdString(cmd->comment));
+  WidgetChangeLine dlg(this, tr("Change command comment"), tr("Comment:"), QString::fromStdString(cmd->comment));
   if (dlg.exec()) {
     cmd->comment = dlg.text().toStdString();
+    refreshView();
+    navigateToAddress(cmd->addr);
+  }
+}
+
+void DisassemblerWidget::blockCommentUnderCursor() {
+  auto cmd = getCmdUnderCursor();
+  if (nullptr == cmd) {
+    return;
+  }
+  WidgetChangeText dlg(this, tr("Change block comment"), tr("Comment:"), QString::fromStdString(cmd->comment));
+  if (dlg.exec()) {
+    cmd->setBlockComment(dlg.text().toStdString());
     refreshView();
     navigateToAddress(cmd->addr);
   }
@@ -93,7 +107,7 @@ void DisassemblerWidget::changeNameUnderCursor() {
     return;
   }
   if (cmd->command_code != CmdCode::NONE) {
-    WidgetChangeText dlg(this, tr("Change label name"), tr("Label:"), QString::fromStdString(cmd->label()->name));
+    WidgetChangeLine dlg(this, tr("Change label name"), tr("Label:"), QString::fromStdString(cmd->label()->name));
     if (dlg.exec()) {
       dasm::core::DisassemblerCore::inst().labels().changeLabel(cmd->addr, dlg.text().toStdString());
       refreshView();
@@ -203,6 +217,10 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
     case Qt::Key_Semicolon:
       // must set comment for command under cursor
       commentCommandUnderCursor();
+      return;
+    case Qt::Key_Colon:
+      // must set comment for command under cursor
+      blockCommentUnderCursor();
       return;
     case Qt::Key_G:
       // jump to addr

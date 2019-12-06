@@ -10,24 +10,24 @@
 //
 //
 
-#ifndef CWIDGETCHANGETEXT_H
-#define CWIDGETCHANGETEXT_H
+#ifndef CWIDGETCHANGELINE_H
+#define CWIDGETCHANGELINE_H
 
 #include <QDialog>
-#include <QTextEdit>
+#include <QLineEdit>
 
 namespace dasm {
 namespace gui {
 
-class WidgetChangeText : public QDialog {
+class WidgetChangeLine : public QDialog {
   Q_OBJECT
 public:
-  WidgetChangeText(QWidget* par, QString title, QString label, QString old_text);
+  WidgetChangeLine(QWidget* par, QString title, QString label, QString old_text);
 
-  QString text() { return _text->document()->toPlainText(); }
+  QString text() { return _text->text(); }
 
 private:
-  QTextEdit* _text;
+  QLineEdit* _text;
 };
 
 }
