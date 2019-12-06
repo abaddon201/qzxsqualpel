@@ -12,7 +12,7 @@ public:
   using GUIBlockPtr = std::shared_ptr<GUIBlock<T>>;
   GUIBlockPtr getChunkByPosition(int pos) const {
     auto res = std::find_if(_chunks.begin(), _chunks.end(), [pos](auto chunk) {
-      return ((chunk->cursorStartPosition() < pos) && (chunk->cursorEndPosition() >= pos));
+      return ((chunk->cursorStartPosition() <= pos) && (chunk->cursorEndPosition() >= pos));
     });
     if (res != _chunks.end()) {
       return *res;
