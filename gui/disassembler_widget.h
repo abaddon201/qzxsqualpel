@@ -38,10 +38,11 @@ public:
   void paintEvent(QPaintEvent* event);
   void refreshView();
 
-  dasm::core::CommandPtr getCmdUnderCursor();
+  core::CommandPtr getCmdUnderCursor();
   GUICommandPtr getGuiCmdUnderCursor();
 
   void keyPressEvent(QKeyEvent*);
+  void setCursorPosition(int position);
 
 public slots:
   void changeNameUnderCursor();
@@ -59,7 +60,7 @@ private:
 
   MainWindow* _main_window;
 
-  GUIBlockList<dasm::core::Command> _commands;
+  GUIBlockList<core::Command> _commands;
   Q_OBJECT
 };
 

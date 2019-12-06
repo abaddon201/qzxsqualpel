@@ -4,7 +4,7 @@
 // Description:
 //
 //
-// Author: Glebov Alex <abaddon@easi.ru>, (C) 2009
+// Author: Glebov Alex <aglebov2@gmail.com>, (C) 2009
 //
 // Copyright: See COPYING file that comes with this distribution
 //
@@ -22,6 +22,7 @@ LabelsWidget::LabelsWidget(QWidget* par, DisassemblerWidget* disasm)
   : QTableWidget(par),
   _disasm{ disasm } {
   setSortingEnabled(true);
+  setMinimumWidth(400);
   connect(this, SIGNAL(cellDoubleClicked(int, int)), this, SLOT(jumpToLabel(int, int)));
 }
 

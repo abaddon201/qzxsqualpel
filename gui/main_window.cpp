@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QApplication>
+#include <QDesktopWidget>
 
 #include "navigation_stack.h"
 
@@ -37,7 +38,8 @@ MainWindow::MainWindow() {
 
   //m_Highlighter=new Highlighter(m_Disassembler->document());
   setCentralWidget(_disassembler_widget);
-
+  adjustSize();
+  move(QApplication::desktop()->availableGeometry().center() - this->rect().center());
   setupMenu();
 }
 

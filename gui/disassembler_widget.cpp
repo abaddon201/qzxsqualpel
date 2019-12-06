@@ -146,13 +146,17 @@ void DisassemblerWidget::navigateToAddress(uint16_t from_addr, uint16_t addr) {
   navigateToAddress(addr);
 }
 
+void DisassemblerWidget::setCursorPosition(int position) {
+  QTextCursor cursor(textCursor());
+  cursor.setPosition(position);
+  setTextCursor(cursor);
+}
+
 void DisassemblerWidget::navigateToAddress(uint16_t addr) {
   qDebug() << "GUI: navigate to address:" << utils::toHex(addr);
   auto cmd = _commands.getChunkContains(addr);
   if (nullptr != cmd) {
-    QTextCursor cursor(textCursor());
-    cursor.setPosition(cmd->cursorStartPosition() + 1);
-    setTextCursor(cursor);
+    setCursorPosition(cmd->cursorStartPosition() + 1);
   }
   centerCursor();
 }
@@ -250,6 +254,8 @@ void DisassemblerWidget::openRAWFile(const QString& fileName) {
   delete[] buf;
   ///@fixme: Add checks
   dasm::core::DisassemblerCore::inst().initialParse();
+  setCursorPosition(0);
+  setFocus();
 }
 
 void DisassemblerWidget::saveProjectFile(const QString& fileName) {
@@ -267,6 +273,8 @@ void DisassemblerWidget::saveProjectFile(const QString& fileName) {
 void DisassemblerWidget::openProjectFile(const QString& fileName) {
   dasm::files::project::Serializer::deserialize_file(fileName.toStdString(), dasm::core::DisassemblerCore::inst());
   refreshView();
+  setCursorPosition(0);
+  setFocus();
 }
 
 void DisassemblerWidget::saveASMFile(const QString& fileName) {
