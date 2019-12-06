@@ -6,12 +6,11 @@
 namespace dasm {
 namespace postprocessors {
 
-bool Rst28::checkPrecondition(core::ChunkPtr chunk) {
-  auto& cmd = chunk->lastCommand();
+bool Rst28::checkPrecondition(core::CommandPtr cmd) {
   return ((cmd->command_code == core::CmdCode::RST) && (std::dynamic_pointer_cast<core::ArgDefault>(cmd->getArg(0))->value() == 0x28));
 }
 
-size_t Rst28::process(core::ChunkPtr chunk, size_t len) {
+size_t Rst28::process(core::CommandPtr cmd, size_t len) {
   /// RST 28 Нужно анализировать особо... после RST располагается набор инструкций для вычислений (bcalc)
   /// Пример:
   /// 2E24 PF-SMALL RST 0028, FP-CALC
@@ -26,7 +25,6 @@ size_t Rst28::process(core::ChunkPtr chunk, size_t len) {
   ///
   /// @bug: Переходы могут осуществляться через куски нормального года, что приводит к возникновению "рваных" цепей
   /// пример такого бага: 2DE3. Там осуществяется серия переходов, цели которых находятся после блока нормального ассемблера
-  auto &cmd = chunk->lastCommand();
   //cmd.auto_comment = "FP-CALC";
   memory::Addr a = cmd->addr + 1;
 
@@ -42,11 +40,11 @@ size_t Rst28::process(core::ChunkPtr chunk, size_t len) {
       c->auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
       c->len = 1;
 
-      core::DisassemblerCore::inst().chunks().removeChunk(a);
-      chunk->appendCommand(c);
+      core::DisassemblerCore::inst().commands().put(a.offset(), 1, c);
       len++;
       ++a;
       if (args_cnt) {
+        c = std::make_shared<core::Command>();
         c->addr = a;
         c->command_code = core::CmdCode::DB;
         b = core::DisassemblerCore::inst().memory().byte(a);
@@ -54,8 +52,7 @@ size_t Rst28::process(core::ChunkPtr chunk, size_t len) {
         c->auto_comment = "dest_addr: " + memory::Addr(a + int{ (signed char)(unsigned char)b }).toString();
         c->len = 1;
 
-        core::DisassemblerCore::inst().chunks().removeChunk(a);
-        chunk->appendCommand(c);
+        core::DisassemblerCore::inst().commands().put(a.offset(), 1, c);
         len++;
         ++a;
       }
@@ -67,8 +64,7 @@ size_t Rst28::process(core::ChunkPtr chunk, size_t len) {
     c->len = 1;
     c->auto_comment = getRST28AutoComment((unsigned char)b, args_cnt);
 
-    core::DisassemblerCore::inst().chunks().removeChunk(a);
-    chunk->appendCommand(c);
+    core::DisassemblerCore::inst().commands().put(a.offset(), 1, c);
     len++;
   } catch (std::out_of_range&) {
     std::cout << "finished due address exceeds" << std::endl;

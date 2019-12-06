@@ -36,6 +36,7 @@ public:
   void setOffset(addr_t offs) { _offset = offs; }
 
   addr_t segment() const { return _segment; }
+  void setSegment(addr_t seg) { _segment = seg; }
 
   bool compare(addr_t s) const { return _offset == s; }
 

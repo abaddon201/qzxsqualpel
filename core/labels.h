@@ -17,7 +17,6 @@
 #include <memory>
 
 #include "label.h"
-#include "chunk.h"
 
 namespace dasm {
 namespace core {

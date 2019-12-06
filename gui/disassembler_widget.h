@@ -6,7 +6,6 @@
 #include <QList>
 #include <QPlainTextEdit>
 
-#include "core/chunk_list.h"
 #include "core/label.h"
 #include "core/labels.h"
 #include "core/disassembler_core.h"
@@ -17,7 +16,6 @@ class MainWindow;
 
 class DisassemblerWidget : public QPlainTextEdit {
 public:
-  using GUIChunkPtr = std::shared_ptr<GUIBlock<dasm::core::Chunk>>;
   using GUICommandPtr = std::shared_ptr<GUIBlock<dasm::core::Command>>;
 
   DisassemblerWidget(MainWindow* mwnd);
@@ -53,10 +51,10 @@ private:
   void printCell(QTextCursor& cursor, const std::string& text, int length, const QTextCharFormat& fmt);
   void printCell(QTextCursor& cursor, const std::string& text, int length);
 
-  void printReferences(QTextCursor& cursor, dasm::core::ChunkPtr chunk);
+  void printReferences(QTextCursor& cursor, dasm::core::CommandPtr chunk);
   void printCommand(QTextCursor& cursor, const dasm::core::CommandPtr cmd);
   //C++14 atributes -- http://en.cppreference.com/w/cpp/language/attributes
-  void printChunkCode(QTextCursor& cursor, dasm::core::ChunkPtr chunk);
+  void printChunkCode(QTextCursor& cursor, dasm::core::CommandPtr chunk);
 
   void navigateToAddrDlg();
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/command.h"
-#include "core/chunk.h"
 #include "core/labels.h"
 
 namespace dasm {
