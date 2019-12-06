@@ -3,6 +3,7 @@
 
 #include "ui_navigate_to_addr.h"
 #include "disassembler_widget.h"
+#include "document_helper.h"
 
 class NavigateToAddrDlg : public QDialog {
   Ui::GotoAddressDlg _ui;
@@ -24,7 +25,7 @@ public slots:
 
   void accept() override {
     try {
-      auto from = _wdg->getCurrentAddr();
+      auto from = dasm::gui::DocumentHelper::inst().getAddrFromLineStart();
       _wdg->navigateToAddress(from, dasm::memory::Addr(_ui.addr->text().toInt(0, 16)));
     } catch (...) {
       _wdg->navigateToAddress(dasm::memory::Addr(_ui.addr->text().toInt(0, 16)));

@@ -24,18 +24,21 @@ public:
   void saveProjectFile(const QString& fileName);
   void openProjectFile(const QString& fileName);
   void saveASMFile(const QString& fileName);
-  void keyPressEvent(QKeyEvent*);
 
   ///@brief Показать на экране код с меткой под номером
   void navigateToAddress(const dasm::memory::Addr& from_addr, const dasm::memory::Addr& addr);
   void navigateToAddress(const dasm::memory::Addr& addr);
   void navigateToReference();
-  dasm::memory::Addr getCurrentAddr() const;
 
   void makeArray(int size, bool clearMem);
 
   void paintEvent(QPaintEvent* event);
   void refreshView();
+
+  dasm::core::CommandPtr getCmdUnderCursor();
+  GUICommandPtr getGuiCmdUnderCursor();
+
+  void keyPressEvent(QKeyEvent*);
 
 public slots:
   void changeNameUnderCursor();
@@ -47,52 +50,12 @@ private:
   DisassemblerWidget();
   void init();
 
-  std::string getString(int pos, int count) const;
-  void printCell(QTextCursor& cursor, const std::string& text, int length, const QTextCharFormat& fmt);
-  void printCell(QTextCursor& cursor, const std::string& text, int length);
-
-  void printReferences(QTextCursor& cursor, dasm::core::CommandPtr chunk);
-  void printCommand(QTextCursor& cursor, const dasm::core::CommandPtr cmd);
-  //C++14 atributes -- http://en.cppreference.com/w/cpp/language/attributes
-  void printChunkCode(QTextCursor& cursor, dasm::core::CommandPtr chunk);
-
   void navigateToAddrDlg();
-
-  QTextCharFormat _cell_format_addr;
-  QTextCharFormat _cell_format_addr_rom;
-  QTextCharFormat _cell_format_opcodes;
-  QTextCharFormat _cell_format_label;
-  QTextCharFormat _cell_format_command;
-  QTextCharFormat _cell_format_args;
-  QTextCharFormat _cell_format_cmd_comment;
-  QTextCharFormat _cell_format_cmd_auto_comment;
-  QTextCharFormat _cell_format_chunk_comment;
-  QTextCharFormat _cell_format_reference;
-
-  int _cell_length_addr;
-  int _cell_length_opcodes;
-  int _cell_length_label;
-  int _cell_length_command;
-  int _cell_length_args;
-  int _cell_length_cmd_comment;
-  int _cell_length_chunk_comment;
-  int _cell_length_reference;
-
-  static const int CELL_LENGTH_ADDR = 10;
-  static const int CELL_LENGTH_OPCODES = 19;
-  static const int CELL_LENGTH_LABEL = 19;
-  static const int CELL_LENGTH_COMMAND = 5;
-  static const int CELL_LENGTH_ARGS = 10;
-  static const int CELL_LENGTH_CHUNK_COMMENT = 0;
-  static const int CELL_LENGTH_CMD_COMMENT = 0;
-  static const int CELL_LENGTH_REFERENCE = 0;
-  static const size_t MAX_OPCODES_COUNT = 5;
 
   int _references_on_line;
 
   MainWindow* _main_window;
 
-  //GUIBlockList<dasm::core::Chunk> _chunks;
   GUIBlockList<dasm::core::Command> _commands;
   Q_OBJECT
 };

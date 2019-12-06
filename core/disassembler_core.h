@@ -54,9 +54,7 @@ public:
   Labels& labels() { return _labels; }
 
   std::shared_ptr<Label> makeJump(const memory::Addr& from_addr, const memory::Addr& jump_addr, memory::Reference::Type ref_type);
-
   std::shared_ptr<Label> makeData(const memory::Addr& from_addr, const memory::Addr& data_addr, memory::Reference::Type ref_type);
-
   void makeArray(const memory::Addr& from_addr, int size, bool clearMem);
 
   LabelPtr addCrossRef(CommandPtr cmd, const memory::Addr& from_addr, const memory::Addr& dst_addr, memory::Reference::Type ref_type);
