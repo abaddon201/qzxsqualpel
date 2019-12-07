@@ -10,7 +10,7 @@
 #include "core/labels.h"
 #include "core/disassembler_core.h"
 
-#include "guichunklist.h"
+#include "guiblocklist.h"
 
 namespace dasm {
 namespace gui {
@@ -19,8 +19,6 @@ class MainWindow;
 
 class DisassemblerWidget : public QPlainTextEdit {
 public:
-  using GUICommandPtr = std::shared_ptr<GUIBlock<dasm::core::Command>>;
-
   DisassemblerWidget(MainWindow* mwnd);
 
   void openRAWFile(const QString& fileName);
@@ -39,7 +37,7 @@ public:
   void refreshView();
 
   core::CommandPtr getCmdUnderCursor();
-  GUICommandPtr getGuiCmdUnderCursor();
+  GUIBlockPtr getGuiCmdUnderCursor();
 
   void keyPressEvent(QKeyEvent*);
   void setCursorPosition(int position);
@@ -61,7 +59,7 @@ private:
 
   MainWindow* _main_window;
 
-  GUIBlockList<core::Command> _commands;
+  GUIBlockList _commands;
   Q_OBJECT
 };
 

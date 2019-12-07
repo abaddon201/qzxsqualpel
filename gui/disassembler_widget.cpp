@@ -21,7 +21,7 @@
 #include "main_window.h"
 #include "widget_change_text.h"
 #include "widget_change_line.h"
-#include "guichunk.h"
+#include "guiblock.h"
 #include "core/debug_printers.h"
 #include "navigation_stack.h"
 
@@ -60,19 +60,22 @@ dasm::core::CommandPtr DisassemblerWidget::getCmdUnderCursor() {
   QTextCursor cursor(textCursor());
   qDebug() << "GUI: getCmdUnderCursor: " << cursor.block().text();
   qDebug() << "GUI: getCmdUnderCursor: Cursor pos:" << cursor.position();
-  auto gcmd = _commands.getChunkByPosition(cursor.position());
-  if (gcmd == nullptr) {
-    return nullptr;
+  auto gcmd = _commands.find_position((size_t)cursor.position());
+  if (gcmd != _commands.end()) {
+    return DisassemblerCore::inst().commands().get(gcmd);
   }
-  return gcmd->core();
+  return nullptr;
 }
 
-DisassemblerWidget::GUICommandPtr DisassemblerWidget::getGuiCmdUnderCursor() {
+GUIBlockPtr DisassemblerWidget::getGuiCmdUnderCursor() {
   QTextCursor cursor(textCursor());
   qDebug() << "GUI: getGuiCmdUnderCursor: " << cursor.block().text();
   qDebug() << "GUI: getGuiCmdUnderCursor: Cursor pos:" << cursor.position();
-  auto gcmd = _commands.getChunkByPosition(cursor.position());
-  return gcmd;
+  auto gcmd = _commands.find_position(cursor.position());
+  if (gcmd != _commands.end()) {
+    return _commands.get(gcmd);
+  }
+  return nullptr;
 }
 
 void DisassemblerWidget::commentCommandUnderCursor() {
@@ -168,7 +171,7 @@ void DisassemblerWidget::setCursorPosition(int position) {
 
 void DisassemblerWidget::navigateToAddress(uint16_t addr) {
   qDebug() << "GUI: navigate to address:" << utils::toHex(addr);
-  auto cmd = _commands.getChunkContains(addr);
+  auto cmd = _commands.get(addr);
   if (nullptr != cmd) {
     setCursorPosition(cmd->cursorStartPosition() + 1);
   }
@@ -201,6 +204,9 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
       return;
     case Qt::Key_D:
       // must datefi under cursor
+      return;
+    case Qt::Key_E:
+      // set entry point
       return;
     case Qt::Key_Asterisk:
       makeArrayUnderCursor();
@@ -272,6 +278,9 @@ void DisassemblerWidget::openRAWFile(const QString& fileName) {
   dasm::core::DisassemblerCore::inst().setFileName(fileName.toStdString());
   delete[] buf;
   ///@fixme: Add checks
+  _commands.clear();
+  _commands.reset(65536);
+
   dasm::core::DisassemblerCore::inst().initialParse();
   setCursorPosition(0);
   setFocus();
@@ -290,6 +299,8 @@ void DisassemblerWidget::saveProjectFile(const QString& fileName) {
 }
 
 void DisassemblerWidget::openProjectFile(const QString& fileName) {
+  _commands.clear();
+  _commands.reset(65536);
   dasm::files::project::Serializer::deserialize_file(fileName.toStdString(), dasm::core::DisassemblerCore::inst());
   refreshView();
   setCursorPosition(0);
@@ -304,15 +315,16 @@ void DisassemblerWidget::saveASMFile(const QString& fileName) {
 
 void DisassemblerWidget::refreshView() {
   _commands.clear();
+  _commands.reset(65536);
   clear();
   QTextCursor cursor(textCursor());
   cursor.beginEditBlock();
   int i = 0;
   for (auto& cmd : dasm::core::DisassemblerCore::inst().commands().whole()) {
     if (cmd.offset() == 0) {
-      auto gui_cmd = std::make_shared< GUIBlock<dasm::core::Command>>(cmd.elem());
+      GUIBlockPtr gui_cmd=std::make_shared<GUIBlock>();
       gui_cmd->setCursorStartPosition(cursor.position());
-      _commands.push(gui_cmd);
+      _commands.put(cmd.elem()->addr, cmd.elem()->len, gui_cmd);
       dasm::gui::TextViewPrinter::printCommand(cursor, cmd.elem());
       gui_cmd->setCursorEndPosition(cursor.position());
       cursor.insertText("\n");
