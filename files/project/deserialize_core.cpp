@@ -9,10 +9,18 @@ namespace files {
 namespace project {
 
 core::LabelPtr deserializeLabel(const rapidjson::Value& node) {
-  core::LabelPtr res = std::make_shared<core::Label>();
-  res->name = json::get_string(node, "name");
-  res->addr = json::get_uint(node, "addr");
-  return res;
+  auto name = json::get_string(node, "name");
+  auto addr = json::get_uint(node, "addr");
+  auto& lbls = core::DisassemblerCore::inst().labels();
+  if (lbls.find(addr) == lbls.end()) {
+    core::LabelPtr res = std::make_shared<core::Label>();
+    res->name = name;
+    res->addr = addr;
+    lbls[addr] = res;
+    return res;
+  } else {
+    return lbls[addr];
+  }
 }
 
 std::shared_ptr<postprocessors::AutoCommenter> deserializeAutocommenter(const rapidjson::Value& node) {
