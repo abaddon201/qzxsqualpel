@@ -19,24 +19,6 @@ std::string DocumentHelper::getString(int pos, int count) const {
   return res.toStdString();
 }
 
-uint16_t DocumentHelper::getAddrFromLineStart() const {
-  QTextCursor cursor(_doc->textCursor());
-  do {
-    cursor.movePosition(QTextCursor::StartOfLine);
-    auto pos = cursor.position();
-    std::string offss = getString(pos, 4);
-    try {
-      //auto seg = utils::hex2int(segs);
-      uint16_t offs = utils::fromHex(offss);
-      return offs;
-    } catch (...) {
-      //unable to decode
-    }
-    cursor.movePosition(QTextCursor::Up);
-  } while (cursor.position() != 0);
-  throw;
-}
-
 std::string DocumentHelper::getWordUnderCursor() {
   QTextCursor cursor(_doc->textCursor());
   cursor.select(QTextCursor::WordUnderCursor);

@@ -11,8 +11,6 @@ public:
 
   std::string getString(int pos, int count) const;
 
-  uint16_t getAddrFromLineStart() const;
-
   std::string getWordUnderCursor();
 
 

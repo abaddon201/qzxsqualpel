@@ -181,9 +181,10 @@ void DisassemblerWidget::navigateToReference() {
   if (dasm::core::DisassemblerCore::inst().extractAddrFromRef(txt, addr)) {
     //navigating to addr
     qDebug() << "navigating to addr: " << utils::toHex(addr);
-    try {
-      navigateToAddress(dasm::gui::DocumentHelper::inst().getAddrFromLineStart(), addr);
-    } catch (...) {
+    auto cmd = getCmdUnderCursor();
+    if (cmd != nullptr) {
+      navigateToAddress(cmd->addr, addr);
+    } else {
       std::cerr << "unable to navigate, source addr unknown" << std::endl;
     }
   } else {

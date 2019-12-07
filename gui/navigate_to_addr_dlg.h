@@ -27,10 +27,11 @@ public:
 public slots:
 
   void accept() override {
-    try {
-      auto from = DocumentHelper::inst().getAddrFromLineStart();
+    auto cmd = _wdg->getCmdUnderCursor();
+    if (cmd != nullptr) {
+      auto from = cmd->addr;
       _wdg->navigateToAddress(from, utils::fromHex(_ui.addr->text().toStdString()));
-    } catch (...) {
+    } else {
       _wdg->navigateToAddress(utils::fromHex(_ui.addr->text().toStdString()));
     }
     close();

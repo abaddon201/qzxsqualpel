@@ -322,14 +322,11 @@ bool DisassemblerCore::extractAddrFromRef(const std::string& ref, uint16_t& add_
   //(word_5c5f),
   //jmp_1bd1+27/c
   //sub_0c3b+2/c
-  //0000:0abc/c
+  //0abc/c
   //jmp_0c86/c
   //jmp_0053
   //ffff
 
-  /*if (ref.find(':') != ref.npos) {
-    return false;
-  }*/
   if (ref.find('(') != ref.npos) {
     //data ref
     std::string refnc = ref;
@@ -342,8 +339,7 @@ bool DisassemblerCore::extractAddrFromRef(const std::string& ref, uint16_t& add_
       return false;
       //throw std::runtime_error("unable to process reference: " + ref);
     }
-    uint16_t offs = utils::fromHex(splited[1]);
-    add_out = offs;
+    add_out = utils::fromHex(splited[1]);
     return true;
   }
   if (ref.find('+') != ref.npos) {
@@ -361,32 +357,28 @@ bool DisassemblerCore::extractAddrFromRef(const std::string& ref, uint16_t& add_
     //ref with offset
     std::string refnc = ref;
     auto spl1 = utils::split(refnc, '/');
-    auto spl3 = utils::split(refnc, ':');
-    if (spl3.size() == 2) {
+    auto spl2 = utils::split(spl1[0], '_');
+    if (spl2.size() == 2) {
       //simple address
-      uint16_t seg = utils::fromHex(spl3[0]);
-      uint16_t offs = utils::fromHex(spl3[1]);
-      add_out = offs;
+      add_out = utils::fromHex(spl2[1]);
+      return true;
+    } else {
+      //simple address
+      add_out = utils::fromHex(spl2[0]);
       return true;
     }
-    auto spl2 = utils::split(spl1[0], '_');
-    uint16_t offs = utils::fromHex(spl2[1]);
-    add_out = offs;
-    return true;
   }
   if (ref.find('_') != ref.npos) {
     //ref with offset
     std::string refnc = ref;
     auto spl1 = utils::split(refnc, '_');
-    uint16_t offs = utils::fromHex(spl1[1]);
-    add_out = offs;
+    add_out = utils::fromHex(spl1[1]);
     return true;
   }
   if (ref.size() == 4) {
     //value
     try {
-      uint16_t offs = utils::fromHex(ref);
-      add_out = offs;
+      add_out = utils::fromHex(ref);
       return true;
     } catch (...) {
       std::cerr << "unable to process reference : " << ref << std::endl;
