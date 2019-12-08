@@ -21,10 +21,10 @@ namespace core {
 uint16_t Command::getJmpAddrFromString() const {
   if (_args.size() == 1) {
     //get from arg1
-    return std::stoi(_args[0]->toString(), nullptr, 16);
+    return argConvert<ArgDefault>(_args[0])->value();
   } else {
     //get from arg2
-    return std::stoi(_args[1]->toString(), nullptr, 16);
+    return argConvert<ArgDefault>(_args[1])->value();
   }
 }
 
@@ -79,19 +79,14 @@ LabelPtr Command::setLabel(LabelPtr label, memory::Reference::Type ref_type) {
   }
   return _label;
 }
-/*
-void Command::setLabel(const std::string& label) {
-  _label = std::make_shared<Label>(addr, label);
-}
-*/
+
 std::string Command::getArgsString() const {
   if (_args.size() == 0) {
     return std::string();
   }
   if (_args.size() == 1) {
-    return _args[0]->toString(); //std::toupper(arg1);
+    return _args[0]->toString();
   }
-  //  return arg1.toUpper()+", "+arg2.toUpper();
   return _args[0]->toString() + ", " + _args[1]->toString();
 }
 
@@ -165,7 +160,11 @@ void Command::updateArgs() {
         a1->setSize(a2->getSize());
         break;
       case ArgType::ARG_REGISTER_REF:
-        a1->setSize(a2->getSize());
+        a2->setSize(ArgSize::Byte);
+        break;
+      case ArgType::ARG_REGISTER_OFFSET:
+        a2->setSize(ArgSize::Byte);
+        break;
     }
     switch (a2->arg_type) {
       case ArgType::ARG_REGISTER16:
@@ -178,7 +177,10 @@ void Command::updateArgs() {
         a2->setSize(a1->getSize());
         break;
       case ArgType::ARG_REGISTER_REF:
-        a2->setSize(a1->getSize());
+        a1->setSize(ArgSize::Byte);
+        break;
+      case ArgType::ARG_REGISTER_OFFSET:
+        a1->setSize(ArgSize::Byte);
         break;
         /*          case ArgType::ARG_DEFAULT: {
                     std::shared_ptr<ArgRegisterReference> a2ref = std::static_pointer_cast<ArgRegisterReference>(a2);

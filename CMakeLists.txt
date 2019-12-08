@@ -33,3 +33,5 @@ find_package(Qt5Widgets REQUIRED)
 add_executable(qzxsqualpel ${TGT_SRC})
 
 target_link_libraries(qzxsqualpel Qt5::Widgets)
+
+add_subdirectory(tests)

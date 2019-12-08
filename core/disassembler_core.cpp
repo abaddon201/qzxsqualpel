@@ -178,46 +178,6 @@ void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
   std::cout << "finished chunk:st_addr=" << utils::toHex(st_addr) << std::endl;
 }
 
-/*
-ABBY
-0x0008, 0x000b LD HL, (word); LD (word), HL
-0x0c90 LD (byte_5c8c), A
-0x03d9 LD C, 3f
-0x0b9b LD A, (byte_5c91)
-0x0bdf AND 03
-0x0be1 OR 58
-0x0c0b LD H, 00
-0x11a7 (back jump)
-0x2e24 (rst 28)
-0x1276 (index reg) (navigation bug)
-0x2aa9 res 6,(IY+1)
-0x1287 set 1, (IY+1)
-0x12a2 LD (IY+31), 02
-0x122e IM 1
-0x11ce OUT fe, A
-0x007d CP 21
-
-0x0b52 SUB a5
-0x0b56 ADD A,15
-0x0cf4 DJNZ 0x0cf0
-0x0bbd EX AF, AF'
-
-0x5c72 DW ffff
-
-0x1222 LD HL, (word_5cb2)
-0x1225 LD (HL), 3e
-
-0x120a LDDR
-
-0x137c LD HL,5C44
-0x137f BIT 7, (HL)
-
-0x0daf LD HL, 0000 // brakes code at start
-0x0dc9 LD HL, (word_5c51) //wrong label (not inited) 0x1615 - address of first initialization
-
-0x0edf LD HL, byte_5b00
-0x0ee7 LD (HL), A
-*/
 LabelPtr DisassemblerCore::makeJump(uint16_t from_addr, uint16_t jump_addr, memory::Reference::Type ref_type) {
   disassembleBlock(jump_addr);
   auto jmp_cmd = _commands_map.get(jump_addr);

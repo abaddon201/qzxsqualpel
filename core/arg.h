@@ -73,7 +73,7 @@ class ArgDefault : public Argument {
 public:
   explicit ArgDefault() : Argument(ArgType::ARG_DEFAULT, ArgSize::Byte) {}
   explicit ArgDefault(uint8_t s) : Argument(ArgType::ARG_DEFAULT, ArgSize::Byte), _value{ s }, _is_hex{ true } { }
-  explicit ArgDefault(uint16_t s, ArgSize bytes_length, bool is_hex) : Argument(ArgType::ARG_DEFAULT, bytes_length), _value{ s }, _is_hex{ _is_hex } { }
+  explicit ArgDefault(uint16_t s, ArgSize bytes_length, bool is_hex) : Argument(ArgType::ARG_DEFAULT, bytes_length), _value{ s }, _is_hex{ is_hex } { }
   virtual ~ArgDefault() = default;
 
   std::string toString() const override { return _is_hex ? utils::toHex(_value, getBytesSize()) : std::to_string(_value); }
@@ -256,13 +256,13 @@ public:
         if (label != nullptr) {
           tstr_cache = std::string("(") + label->name + ")";
         } else {
-          tstr_cache = std::string("(") + ((size == ArgSize::Byte) ? "b_" : "w_") + utils::toHex(addr) + ")";
+          tstr_cache = std::string("(") + ((size == ArgSize::Byte) ? "byte_" : "word_") + utils::toHex(addr) + ")";
         }
       } else {
         if (label != nullptr) {
           tstr_cache = label->name;
         } else {
-          tstr_cache = ((size == ArgSize::Byte) ? "b_" : "w_") + utils::toHex(addr);
+          tstr_cache = ((size == ArgSize::Byte) ? "byte_" : "word_") + utils::toHex(addr);
         }
       }
     }
