@@ -192,6 +192,32 @@ void DisassemblerWidget::navigateToReference() {
   }
 }
 
+void DisassemblerWidget::setEntryPoint() {
+  if (core::DisassemblerCore::inst().entryPoint() != 0) {
+    return;
+  }
+  auto cmd = getCmdUnderCursor();
+  if (nullptr == cmd) {
+    return;
+  }
+  if (cmd->command_code != CmdCode::NONE && cmd->command_code != CmdCode::DB && cmd->command_code != CmdCode::DW) {
+    core::DisassemblerCore::inst().setEntryPoint(cmd->addr);
+    bool modified = false;
+    if (cmd->blockComment().empty()) {
+      cmd->setBlockComment("Entry point");
+      modified = true;
+    }
+    if (cmd->label() == nullptr) {
+      auto lbl = std::make_shared<core::Label>(cmd->addr, "ENTRY_POINT");
+      cmd->setLabel(lbl);
+      modified = true;
+    }
+    if (modified) {
+      onAddressUpdated(cmd->addr, cmd->len);
+    }
+  }
+}
+
 void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
   //std::cout << "key: " << std::to_string(event->key()) << std::endl;
   switch (event->key()) {
@@ -204,6 +230,7 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
       return;
     case Qt::Key_E:
       // set entry point
+      setEntryPoint();
       return;
     case Qt::Key_Asterisk:
       makeArrayUnderCursor();
@@ -226,9 +253,8 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
       // must set comment for command under cursor
       blockCommentUnderCursor();
       return;
-    case Qt::Key_G:
-      // jump to addr
-    {
+    case Qt::Key_G: {
+      // navigate to addr
       NavigateToAddrDlg a{ this };
       a();
       return;

@@ -35,6 +35,8 @@ public:
 
   void paintEvent(QPaintEvent* event);
 
+  void setEntryPoint();
+
   void onAddressUpdated(uint16_t addr, uint16_t bytes);
   void refreshView();
 
