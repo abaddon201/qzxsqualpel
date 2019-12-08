@@ -60,6 +60,15 @@ public:
     }
     return _elems[pos].elem();
   }
+
+  bool get_if(size_t pos, T& res) {
+    if (_elems[pos].offset() != 0) {
+      return false;
+    }
+    res = _elems[pos].elem();
+    return true;
+  }
+
   const std::vector<Element>& whole() const { return _elems; }
 private:
   std::vector<Element> _elems;

@@ -10,6 +10,11 @@ public:
 
   int cursorStartPosition() const { return _start_cursor_position; }
 
+  void shiftPosition(int offset) {
+    _start_cursor_position += offset;
+    _end_cursor_position += offset;
+  }
+
 private:
   int _start_cursor_position;
   int _end_cursor_position;

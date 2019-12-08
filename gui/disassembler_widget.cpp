@@ -38,7 +38,6 @@ DisassemblerWidget::DisassemblerWidget()
 
 DisassemblerWidget::DisassemblerWidget(MainWindow* mwnd)
   : QPlainTextEdit(), _main_window{ mwnd } {
-
   init();
 }
 
@@ -86,7 +85,7 @@ void DisassemblerWidget::commentCommandUnderCursor() {
   WidgetChangeLine dlg(this, tr("Change command comment"), tr("Comment:"), QString::fromStdString(cmd->comment));
   if (dlg.exec()) {
     cmd->comment = dlg.text().toStdString();
-    refreshView();
+    onAddressUpdated(cmd->addr, cmd->len);
     navigateToAddress(cmd->addr);
   }
 }
@@ -99,7 +98,7 @@ void DisassemblerWidget::blockCommentUnderCursor() {
   WidgetChangeText dlg(this, tr("Change block comment"), tr("Comment:"), QString::fromStdString(cmd->comment));
   if (dlg.exec()) {
     cmd->setBlockComment(dlg.text().toStdString());
-    refreshView();
+    onAddressUpdated(cmd->addr, cmd->len);
     navigateToAddress(cmd->addr);
   }
 }
@@ -113,7 +112,7 @@ void DisassemblerWidget::changeNameUnderCursor() {
     WidgetChangeLine dlg(this, tr("Change label name"), tr("Label:"), QString::fromStdString(cmd->label()->name));
     if (dlg.exec()) {
       dasm::core::DisassemblerCore::inst().labels().changeLabel(cmd->addr, dlg.text().toStdString());
-      refreshView();
+      onAddressUpdated(cmd->addr, cmd->len);
       navigateToAddress(cmd->addr);
     }
   }
@@ -127,7 +126,6 @@ void DisassemblerWidget::makeCodeUnderCursor() {
   if (cmd->command_code == dasm::core::CmdCode::NONE) {
     const auto& ret_addr = cmd->addr;
     dasm::core::DisassemblerCore::inst().disassembleBlock(ret_addr);
-    refreshView();
     navigateToAddress(ret_addr);
   }
 }
@@ -152,7 +150,6 @@ void DisassemblerWidget::makeArray(int size, bool clearMem) {
   if (cmd->command_code == CmdCode::NONE || cmd->command_code == CmdCode::DB || cmd->command_code == CmdCode::DW) {
     const auto& ret_addr = cmd->addr;
     dasm::core::DisassemblerCore::inst().makeArray(ret_addr, size, clearMem);
-    refreshView();
     navigateToAddress(ret_addr);
   }
 }
@@ -322,7 +319,7 @@ void DisassemblerWidget::refreshView() {
   int i = 0;
   for (auto& cmd : dasm::core::DisassemblerCore::inst().commands().whole()) {
     if (cmd.offset() == 0) {
-      GUIBlockPtr gui_cmd=std::make_shared<GUIBlock>();
+      GUIBlockPtr gui_cmd = std::make_shared<GUIBlock>();
       gui_cmd->setCursorStartPosition(cursor.position());
       _commands.put(cmd.elem()->addr, cmd.elem()->len, gui_cmd);
       dasm::gui::TextViewPrinter::printCommand(cursor, cmd.elem());
@@ -333,6 +330,42 @@ void DisassemblerWidget::refreshView() {
   }
   cursor.endEditBlock();
   _main_window->labelsWidget()->refresh();
+}
+
+void DisassemblerWidget::onAddressUpdated(uint16_t addr, uint16_t bytes) {
+  auto block = _commands.get(addr);
+  //std::cout << "onUpdated addr: " << addr << ", bytes: " << bytes << std::endl;
+  //std::cout << "block start: " << block->cursorStartPosition() << ", end: " << block->cursorEndPosition() << std::endl;
+  int block_size = 0;
+  auto cmd = core::DisassemblerCore::inst().commands().get(addr);
+  for (int i = 0; i < bytes; ++i) {
+    GUIBlockPtr rblck;
+    if (_commands.get_if(addr + i, rblck)) {
+      block_size += rblck->cursorEndPosition() - rblck->cursorStartPosition() + 1;
+    }
+    //std::cout << "block_sz: " << rblck->cursorStartPosition() << ", end: " << rblck->cursorEndPosition() << std::endl;
+  }
+  --block_size;
+  //std::cout << "block_size: " << block_size << std::endl;
+  QTextCursor cursor(textCursor());
+  cursor.beginEditBlock();
+  cursor.setPosition(block->cursorStartPosition());
+  dasm::gui::TextViewPrinter::removeBlock(cursor, block_size);
+  //cursor.insertText("\n");
+  dasm::gui::TextViewPrinter::printCommand(cursor, cmd);
+  auto new_end = cursor.position();
+  //std::cout << "new_end: " << new_end << std::endl;
+  auto new_block_size = new_end - block->cursorStartPosition();
+  //std::cout << "new_block_size: " << new_block_size << std::endl;
+  cursor.endEditBlock();
+  block->setCursorEndPosition(new_end);
+  _commands.put(addr, bytes, block);
+  for (uint32_t nba = addr + cmd->len; nba < 65536; ++nba) {
+    GUIBlockPtr nb;
+    if (_commands.get_if(nba, nb)) {
+      nb->shiftPosition(new_block_size - block_size);
+    }
+  }
 }
 
 }

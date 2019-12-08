@@ -25,6 +25,13 @@ void TextViewPrinter::init() {
   _cell_length_chunk_comment = CELL_LENGTH_CHUNK_COMMENT;
 }
 
+
+void TextViewPrinter::removeBlock(QTextCursor& cursor, int length) {
+  for (int i = 0; i < length; ++i) {
+    cursor.deleteChar();
+  }
+}
+
 void TextViewPrinter::printCell(QTextCursor& cursor, const std::string& text, int length, const QTextCharFormat& fmt) {
   int spclen = length - (int)text.length();
   if (spclen > 0) {
@@ -61,7 +68,8 @@ void TextViewPrinter::printReferences(QTextCursor& cursor, dasm::core::CommandPt
   }
 }
 
-void TextViewPrinter::printCommand(QTextCursor& cursor, const core::CommandPtr cmd) {
+int TextViewPrinter::printCommand(QTextCursor& cursor, const core::CommandPtr cmd) {
+  int start_pos = cursor.position();
   if (!cmd->blockComment().empty()) {
     printCell(cursor, std::string(";") + cmd->blockComment(), _cell_length_chunk_comment, _cell_format_chunk_comment);
     cursor.insertText("\n");
@@ -85,6 +93,7 @@ void TextViewPrinter::printCommand(QTextCursor& cursor, const core::CommandPtr c
   } else if (!cmd->auto_comment.empty()) {
     printCell(cursor, std::string(";") + cmd->auto_comment, _cell_length_cmd_comment, _cell_format_cmd_auto_comment);
   }
+  return cursor.position() - start_pos;
 }
 
 QTextCharFormat TextViewPrinter::_cell_format_addr;

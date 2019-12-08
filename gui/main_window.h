@@ -21,6 +21,8 @@ public:
 
   void updateWidgets() override;
 
+  void onAddressUpdated(uint16_t addr, uint16_t bytes) override;
+
 private:
   //Ui::CMainWindow ui;
   QListWidget* _navigation_stack;

@@ -12,11 +12,14 @@ class TextViewPrinter {
 public:
 
   static void init();
+
+  static void removeBlock(QTextCursor& cursor, int length);
+
   static void printCell(QTextCursor& cursor, const std::string& text, int length, const QTextCharFormat& fmt);
   static void printCell(QTextCursor& cursor, const std::string& text, int length);
 
   static void printReferences(QTextCursor& cursor, dasm::core::CommandPtr cmd);
-  static void printCommand(QTextCursor& cursor, const dasm::core::CommandPtr cmd);
+  static int printCommand(QTextCursor& cursor, const dasm::core::CommandPtr cmd);
 
   static QTextCharFormat _cell_format_addr;
   static QTextCharFormat _cell_format_addr_rom;

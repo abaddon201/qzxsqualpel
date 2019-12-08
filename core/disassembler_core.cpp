@@ -81,7 +81,6 @@ size_t DisassemblerCore::disassembleInstruction(uint16_t addr, CommandPtr& out_c
       std::cout << "allready parsed: " << utils::toHex(addr) << std::endl;
       return 0;
     }
-    ///@bug must be in segment range check... think about it
     if (len > 1) {
       // check that all bytes for the command are not parsed, if so, remove their chunks, if not, don't do anything
       for (size_t i = 1; i < len; i++) {
@@ -120,9 +119,11 @@ size_t DisassemblerCore::disassembleInstruction(uint16_t addr, CommandPtr& out_c
 void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
   size_t res = 0;
   uint16_t addr = st_addr;
+  uint16_t cmd_addr;
+  CommandPtr last_cmd;
   std::cout << "disassembleBlock(): addr" << utils::toHex(addr) << std::endl;
   do {
-    CommandPtr last_cmd;
+    cmd_addr = addr;
     res = disassembleInstruction(addr, last_cmd);
     if (res == 0) {
       //end of block
@@ -172,6 +173,7 @@ void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
         addr += res;
         break;
     }
+    updater->onAddressUpdated(cmd_addr, last_cmd->len);
   } while (res);
   std::cout << "finished chunk:st_addr=" << utils::toHex(st_addr) << std::endl;
 }
@@ -240,6 +242,7 @@ LabelPtr DisassemblerCore::addCrossRef(CommandPtr cmd, uint16_t from_addr, uint1
     //CLabel label(jump_addr, lbl);
     _labels[dst_addr] = lbl;
   }
+  updater->onAddressUpdated(dst_addr, cmd->len);
   return lbl;
 }
 
@@ -262,6 +265,7 @@ LabelPtr DisassemblerCore::makeData(uint16_t from_addr, uint16_t data_addr, memo
       cmd->len = 1;
       cmd->setArg(0, std::make_shared<ArgDefault>(byte));
       _commands_map.put(data_addr, 1, cmd);
+      updater->onAddressUpdated(data_addr, 1);
     }
   } else if ((ref_type == memory::Reference::Type::WRITE_WORD) || (ref_type == memory::Reference::Type::READ_WORD)) {
     if (data_cmd->command_code == CmdCode::NONE) {
@@ -273,6 +277,7 @@ LabelPtr DisassemblerCore::makeData(uint16_t from_addr, uint16_t data_addr, memo
       cmd->len = 2;
       cmd->setArg(0, std::make_shared<ArgDefault>((((uint16_t)((uint8_t)bh)) << 8) | ((uint16_t)((uint8_t)bl)), ArgSize::Word, true));
       _commands_map.put(data_addr, 2, cmd);
+      updater->onAddressUpdated(data_addr, 2);
     }
   }
   data_cmd = _commands_map.get(data_addr);
@@ -299,6 +304,7 @@ void DisassemblerCore::makeArray(uint16_t from_addr, int size, bool clearMem) {
   }
   cmd->setArg(0, arg);
   _commands_map.put(from_addr, cmd->len, cmd);
+  updater->onAddressUpdated(from_addr, cmd->len);
 }
 
 std::string DisassemblerCore::disassembleInstructionInt(uint16_t addr, size_t& len) {

@@ -34,6 +34,8 @@ public:
   void makeArray(int size, bool clearMem);
 
   void paintEvent(QPaintEvent* event);
+
+  void onAddressUpdated(uint16_t addr, uint16_t bytes);
   void refreshView();
 
   core::CommandPtr getCmdUnderCursor();

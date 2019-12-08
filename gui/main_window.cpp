@@ -16,6 +16,10 @@ void MainWindow::updateWidgets() {
   _disassembler_widget->refreshView();
 }
 
+void MainWindow::onAddressUpdated(uint16_t addr, uint16_t bytes) {
+  _disassembler_widget->onAddressUpdated(addr, bytes);
+}
+
 MainWindow::MainWindow() {
   //ui.setupUi(this);
 
