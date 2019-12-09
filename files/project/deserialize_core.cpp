@@ -2,6 +2,8 @@
 
 #include "files/JsonHelper.h"
 
+#include "core/navigation_stack.h"
+
 #include <list>
 
 namespace dasm {
@@ -260,6 +262,17 @@ void deserializeCommands(const rapidjson::Value& node, core::DisassemblerCore& c
   }
 }
 
+void deserializeNavigationStack(const rapidjson::Value& node, core::DisassemblerCore& core) {
+  size_t sz = 0;
+  auto arr = json::get_optional_array<core::NavigationStack::StackItem>(node, "navigation_stack", [&](const rapidjson::Value& v)->core::NavigationStack::StackItem {
+    return v.GetUint();
+  });
+
+  for (auto& s : arr) {
+    core::NavigationStack::inst().push(s);
+  }
+}
+
 void Serializer::deserialize_file(const std::string& file_name, core::DisassemblerCore& core) {
   rapidjson::Document doc{};
   auto& allocator = doc.GetAllocator();
@@ -279,6 +292,8 @@ void Serializer::deserialize_file(const std::string& file_name, core::Disassembl
 
   auto autoc = deserializeAutocommenter(doc);
   core.setAutoCommenter(autoc);
+
+  deserializeNavigationStack(doc, core);
 
   deserializeMemory(doc, core);
   deserializeLabels(doc, core);

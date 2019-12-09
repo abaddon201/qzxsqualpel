@@ -1,6 +1,7 @@
 #include "files/project.h"
 
 #include "files/JsonHelper.h"
+#include "core/navigation_stack.h"
 
 namespace dasm {
 namespace files {
@@ -255,6 +256,21 @@ void serializeCommands(const core::DisassemblerCore& core, rapidjson::Document& 
   doc.AddMember("commands", cont, allocator);
 }
 
+void serializeNavigationStack(const core::DisassemblerCore& core, rapidjson::Document& doc) {
+  if (!dasm::core::NavigationStack::inst().hasAddr()) {
+    return;
+  }
+  auto& allocator = doc.GetAllocator();
+
+  rapidjson::Value cont{};
+  cont.SetArray();
+
+  for (const auto& elem : dasm::core::NavigationStack::inst().items()) {
+      json::push_uint(cont, elem, allocator);
+  }
+  doc.AddMember("navigation_stack", cont, allocator);
+}
+
 std::string Serializer::serialize(const core::DisassemblerCore& core) {
   rapidjson::Document doc{};
   auto& allocator = doc.GetAllocator();
@@ -272,6 +288,7 @@ std::string Serializer::serialize(const core::DisassemblerCore& core) {
   doc.AddMember("descr", info, allocator);
 
   serializeAutocommenter(core, doc);
+  serializeNavigationStack(core, doc);
   serializeCommands(core, doc);
   serializeMemory(core, doc);
   serializeLabels(core, doc);
