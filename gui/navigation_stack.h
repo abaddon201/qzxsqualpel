@@ -2,10 +2,12 @@
 
 #include <stack>
 
+#include "core/navigation_stack.h"
+
 namespace dasm {
 namespace gui {
 
-class NavigationStack {
+class NavigationStack : public core::NavigationStack::Listener {
 public:
   static NavigationStack& inst() {
     static NavigationStack _inst;
@@ -15,10 +17,7 @@ public:
   void addView(QListWidget* wgt) {
     _wgt = wgt;
   }
-  bool hasAddr() { return !_stack.empty(); }
-
-  void push(uint16_t addr) {
-    _stack.push(addr);
+  void onPush(uint16_t addr) override {
     if (_wgt != nullptr) {
       auto lbl = core::DisassemblerCore::inst().labels().find(addr);
       if (lbl != core::DisassemblerCore::inst().labels().end()) {
@@ -29,20 +28,16 @@ public:
     }
   }
 
-  uint16_t pop() {
-    uint16_t res = _stack.top();
-    _stack.pop();
+  void onPop() {
     if (_wgt != nullptr) {
       auto it = _wgt->takeItem(_wgt->count() - 1);
       delete it;
     }
-    return res;
   }
 
 private:
   NavigationStack() = default;
-  std::stack<uint16_t> _stack;
-  QListWidget* _wgt;
+  QListWidget* _wgt = nullptr;
 };
 }
 }

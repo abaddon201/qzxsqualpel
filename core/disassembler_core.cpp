@@ -61,6 +61,10 @@ void DisassemblerCore::initialParse() {
 }
 
 void DisassemblerCore::setEntryPoint(CommandPtr cmd) {
+  if (_entry_point != std::numeric_limits<uint32_t>::max()) {
+    PLOGD << "Entry point is exists";
+    return;
+  }
   if (cmd->command_code != CmdCode::NONE && cmd->command_code != CmdCode::DB && cmd->command_code != CmdCode::DW) {
     _is_modified = true;
     _entry_point = cmd->addr;

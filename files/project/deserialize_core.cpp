@@ -272,10 +272,10 @@ void Serializer::deserialize_file(const std::string& file_name, core::Disassembl
   auto arch = json::get_string(descr, "arch");
   auto fname = json::get_string(descr, "file_name");
 
-  auto entry_point = json::get_optional_uint(descr, "entry_point", 0);
-
+  auto entry_point = json::get_optional_uint(descr, "entry_point", std::numeric_limits<uint32_t>::max());
   core.clear();
   core.setFileName(fname);
+  core.setEntryPoint(entry_point);
 
   auto autoc = deserializeAutocommenter(doc);
   core.setAutoCommenter(autoc);

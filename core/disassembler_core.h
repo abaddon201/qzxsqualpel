@@ -54,7 +54,9 @@ public:
   void setFileName(const std::string& file_name) { _file_name = file_name; }
 
   const uint16_t entryPoint() const { return _entry_point; }
+  bool entryPointExists() const { return _entry_point != std::numeric_limits<uint32_t>::max(); }
   void setEntryPoint(CommandPtr cmd);
+  void setEntryPoint(uint32_t ep) { _entry_point = ep; }
 
   std::shared_ptr<postprocessors::AutoCommenter> autoCommenter() const { return _auto_commenter; }
   void setAutoCommenter(std::shared_ptr<postprocessors::AutoCommenter> ac) { _auto_commenter = ac; }
@@ -110,7 +112,7 @@ private:
 
   bool _is_modified;
 
-  uint16_t _entry_point;
+  uint32_t _entry_point = std::numeric_limits<uint32_t>::max();
   std::shared_ptr<postprocessors::AutoCommenter> _auto_commenter;
   std::vector<std::shared_ptr<postprocessors::IPostProcessor>> _postprocessors;
 };

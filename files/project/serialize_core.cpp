@@ -266,8 +266,9 @@ std::string Serializer::serialize(const core::DisassemblerCore& core) {
   json::add_string_field(info, "version", "0.2", allocator);
   json::add_string_field(info, "arch", "z80", allocator);
   json::add_string_field(info, "file_name", core.fileName(), allocator);
-  json::add_uint_field(info, "entry_point", core.entryPoint(), allocator);
-
+  if (core.entryPointExists()) {
+    json::add_uint_field(info, "entry_point", core.entryPoint(), allocator);
+  }
   doc.AddMember("descr", info, allocator);
 
   serializeAutocommenter(core, doc);

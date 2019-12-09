@@ -155,7 +155,7 @@ void DisassemblerWidget::makeArray(int size, bool clearMem) {
 
 void DisassemblerWidget::navigateToAddress(uint16_t from_addr, uint16_t addr) {
   PLOGD << "GUI: navigate to address:" << utils::toHex(addr) << " from: " << utils::toHex(from_addr);
-  dasm::gui::NavigationStack::inst().push(from_addr);
+  dasm::core::NavigationStack::inst().push(from_addr);
   navigateToAddress(addr);
 }
 
@@ -249,8 +249,8 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
       return;
     case Qt::Key_Escape:
       // follow back
-      if (dasm::gui::NavigationStack::inst().hasAddr()) {
-        navigateToAddress(dasm::gui::NavigationStack::inst().pop());
+      if (dasm::core::NavigationStack::inst().hasAddr()) {
+        navigateToAddress(dasm::core::NavigationStack::inst().pop());
       }
       return;
   }

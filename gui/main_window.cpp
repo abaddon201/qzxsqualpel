@@ -9,6 +9,7 @@
 #include <QDesktopWidget>
 
 #include "navigation_stack.h"
+#include "core/navigation_stack.h"
 
 namespace dasm {
 namespace gui {
@@ -33,6 +34,7 @@ MainWindow::MainWindow() {
   _navigation_stack = new QListWidget(dock);
   dock->setWidget(_navigation_stack);
   addDockWidget(Qt::RightDockWidgetArea, dock);
+  dasm::core::NavigationStack::inst().setListener(&dasm::gui::NavigationStack::inst());
   dasm::gui::NavigationStack::inst().addView(_navigation_stack);
 
   dock = new QDockWidget(tr("Labels list"), this);
