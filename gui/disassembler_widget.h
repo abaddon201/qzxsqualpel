@@ -50,6 +50,7 @@ public:
 public slots:
   void changeNameUnderCursor();
   void makeCodeUnderCursor();
+  void unCodeUnderCursor();
   void makeArrayUnderCursor();
   void commentCommandUnderCursor();
   void blockCommentUnderCursor();

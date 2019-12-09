@@ -131,6 +131,18 @@ void DisassemblerWidget::makeCodeUnderCursor() {
   }
 }
 
+void DisassemblerWidget::unCodeUnderCursor() {
+  auto cmd = getCmdUnderCursor();
+  if (nullptr == cmd) {
+    return;
+  }
+  if (cmd->command_code != dasm::core::CmdCode::NONE) {
+    const auto& ret_addr = cmd->addr;
+    dasm::core::DisassemblerCore::inst().uncodeBlock(ret_addr);
+    navigateToAddress(ret_addr);
+  }
+}
+
 void DisassemblerWidget::makeArrayUnderCursor() {
   //make array
   auto cmd = getCmdUnderCursor();
@@ -222,6 +234,7 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
       return;
     case Qt::Key_U:
       // must uncode and undatefy under cursor
+      unCodeUnderCursor();
       return;
     case Qt::Key_N:
       // must set name under cursor
@@ -362,7 +375,6 @@ void DisassemblerWidget::onAddressUpdated(uint16_t addr, uint16_t bytes) {
   //PLOGD << "onUpdated addr: " << addr << ", bytes: " << bytes << std::endl;
   //PLOGD << "block start: " << block->cursorStartPosition() << ", end: " << block->cursorEndPosition() << std::endl;
   int block_size = 0;
-  auto cmd = core::DisassemblerCore::inst().commands().get(addr);
   for (int i = 0; i < bytes; ++i) {
     GUIBlockPtr rblck;
     if (_commands.get_if(addr + i, rblck)) {
@@ -374,8 +386,11 @@ void DisassemblerWidget::onAddressUpdated(uint16_t addr, uint16_t bytes) {
   //PLOGD << "block_size: " << block_size << std::endl;
   QTextCursor cursor(textCursor());
   cursor.beginEditBlock();
+
+  //possibly added multipe commands (unparseblock, for ex, if multibyte instruction reversed, multiple cmds are created) we need to travers them and fill their structs
   cursor.setPosition(block->cursorStartPosition());
   dasm::gui::TextViewPrinter::removeBlock(cursor, block_size);
+  auto cmd = core::DisassemblerCore::inst().commands().get(addr);
   dasm::gui::TextViewPrinter::printCommand(cursor, cmd);
   auto new_end = cursor.position();
   //PLOGD << "new_end: " << new_end << std::endl;

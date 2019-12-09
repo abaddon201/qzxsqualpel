@@ -112,6 +112,7 @@ struct Command {
   const std::vector<ArgPtr>& args() const { return _args; }
   std::vector<ArgPtr>& args() { return _args; }
   void setArgs(std::vector<ArgPtr>& args) { _args = args; }
+  void setUnknownByteArg(uint8_t byte);
 
   LabelPtr label() const { return _label; }
   LabelPtr setLabel(LabelPtr label = nullptr, memory::Reference::Type = memory::Reference::Type::JUMP);

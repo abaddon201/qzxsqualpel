@@ -147,6 +147,13 @@ bool Command::isLDICmd() {
   return (command_code == CmdCode::LDI) || (command_code == CmdCode::LDIR) || (command_code == CmdCode::LDD) || (command_code == CmdCode::LDDR);
 }
 
+void Command::setUnknownByteArg(uint8_t b) {
+  setArg(0, std::make_shared<ArgDefault>(b));
+  if (std::isprint(b)) {
+    comment = (char)b;
+  }
+}
+
 void Command::updateArgs() {
   if ((command_code == CmdCode::LD) || (command_code == CmdCode::SBC) || (command_code == CmdCode::ADD) || (command_code == CmdCode::ADC)) {
     auto& a1 = _args[0];

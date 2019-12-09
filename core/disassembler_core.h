@@ -39,6 +39,7 @@ public:
   void loadGuessFile(const std::string& fname);
 
   void disassembleBlock(uint16_t addr);
+  void uncodeBlock(uint16_t addr);
 
   void setRawMemory(unsigned char* buf, size_t size);
 

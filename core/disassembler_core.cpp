@@ -54,7 +54,7 @@ void DisassemblerCore::initialParse() {
     cmd->command_code = CmdCode::NONE;
     cmd->addr = i;
     cmd->len = 1;
-    cmd->setArg(0, std::make_shared<ArgDefault>(byte));
+    cmd->setUnknownByteArg(byte);
     _commands_map.put(i, 1, cmd);
   }
   updater->updateWidgets();
@@ -205,6 +205,23 @@ void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
     updater->onAddressUpdated(cmd_addr, last_cmd->len);
   } while (res);
   PLOGD << "finished chunk:st_addr=" << utils::toHex(st_addr) << std::endl;
+}
+
+void DisassemblerCore::uncodeBlock(uint16_t addr) {
+  auto cmd = _commands_map.get(addr);
+  if (cmd->command_code == CmdCode::NONE) {
+    return;
+  }
+  addr = cmd->addr;
+  for (int i = 0; i < cmd->len; ++i, ++addr) {
+    auto nc = std::make_shared<Command>();
+    nc->addr = addr;
+    nc->len = 1;
+    nc->command_code = CmdCode::NONE;
+    nc->setUnknownByteArg(_memory.byte(addr));
+    _commands_map.put(addr, 1, nc);
+  }
+  updater->onAddressUpdated(cmd->addr, cmd->len);
 }
 
 LabelPtr DisassemblerCore::makeJump(uint16_t from_addr, uint16_t jump_addr, memory::Reference::Type ref_type) {
