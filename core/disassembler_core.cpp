@@ -146,7 +146,7 @@ size_t DisassemblerCore::disassembleInstruction(uint16_t addr, CommandPtr& out_c
 
 void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
   _is_modified = true;
-  size_t res = 0;
+  int res = 0;
   uint16_t addr = st_addr;
   uint16_t cmd_addr;
   CommandPtr last_cmd;

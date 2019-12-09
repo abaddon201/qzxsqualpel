@@ -194,7 +194,7 @@ void DisassemblerWidget::navigateToReference() {
 }
 
 void DisassemblerWidget::setEntryPoint() {
-  if (core::DisassemblerCore::inst().entryPoint() != 0) {
+  if (core::DisassemblerCore::inst().entryPointExists()) {
     return;
   }
   auto cmd = getCmdUnderCursor();
