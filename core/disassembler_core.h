@@ -38,11 +38,6 @@ public:
 
   void loadGuessFile(const std::string& fname);
 
-  std::string disassembleInstructionInt(uint16_t addr, size_t& len);
-
-  ///@bug поменять местами возвращаемые значения, чтобы не было такой вырви-глаз конструкции
-  size_t disassembleInstruction(uint16_t addr, CommandPtr& out_cmd);
-
   void disassembleBlock(uint16_t addr);
 
   void setRawMemory(unsigned char* buf, size_t size);
@@ -52,17 +47,13 @@ public:
   const Labels& labels() const { return _labels; }
   Labels& labels() { return _labels; }
 
-  LabelPtr makeJump(uint16_t from_addr, uint16_t jump_addr, memory::Reference::Type ref_type);
   LabelPtr makeData(uint16_t from_addr, uint16_t data_addr, memory::Reference::Type ref_type);
   void makeArray(uint16_t from_addr, int size, bool clearMem);
-
-  LabelPtr addCrossRef(CommandPtr cmd, uint16_t from_addr, uint16_t dst_addr, memory::Reference::Type ref_type);
 
   std::string fileName() const { return _file_name; }
   void setFileName(const std::string& file_name) { _file_name = file_name; }
 
   const uint16_t entryPoint() const { return _entry_point; }
-
   void setEntryPoint(CommandPtr cmd);
 
   std::shared_ptr<postprocessors::AutoCommenter> autoCommenter() const { return _auto_commenter; }
@@ -71,12 +62,15 @@ public:
   const memory::Memory& memory() const { return _memory; }
   memory::Memory& memory() { return _memory; }
 
-
   using CommandsMap = MemoryMap<CommandPtr>;
   const CommandsMap& commands() const { return _commands_map; }
   CommandsMap& commands() { return _commands_map; }
 
   bool extractAddrFromRef(const std::string& ref, uint16_t& add_out);
+
+  bool isModified() const { return _is_modified; }
+  void setModified() { _is_modified = true; }
+  void resetModified() { _is_modified = false; }
 
   static DisassemblerCore& inst() {
     static DisassemblerCore _inst;
@@ -93,6 +87,12 @@ private:
 
   DisassemblerCore() {}
 
+  std::string disassembleInstructionInt(uint16_t addr, size_t& len);
+
+  size_t disassembleInstruction(uint16_t addr, CommandPtr& out_cmd);
+  LabelPtr makeJump(uint16_t from_addr, uint16_t jump_addr, memory::Reference::Type ref_type);
+  LabelPtr addCrossRef(CommandPtr cmd, uint16_t from_addr, uint16_t dst_addr, memory::Reference::Type ref_type);
+
   bool labelPresent(uint16_t addr) const;
 
   size_t postProcessCmd(CommandPtr cmd, size_t len);
@@ -107,6 +107,8 @@ private:
   Labels _labels;
 
   std::string _file_name;
+
+  bool _is_modified;
 
   uint16_t _entry_point;
   std::shared_ptr<postprocessors::AutoCommenter> _auto_commenter;

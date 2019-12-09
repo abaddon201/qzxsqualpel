@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QApplication>
+#include <QMessageBox>
 #include <QDesktopWidget>
 
 #include "navigation_stack.h"
@@ -101,6 +102,7 @@ void MainWindow::saveProject() {
   QString fileName = QFileDialog::getSaveFileName(this, tr("Save Project"), "", "Project files (*.qzx)");
   if (!fileName.isEmpty()) {
     _disassembler_widget->saveProjectFile(fileName);
+    core::DisassemblerCore::inst().resetModified();
   }
 }
 
@@ -108,8 +110,31 @@ void MainWindow::openProject() {
   QString fileName = QFileDialog::getOpenFileName(this, tr("Open Project"), "", "Project Files (*.qzx)");
   if (!fileName.isEmpty()) {
     _disassembler_widget->openProjectFile(fileName);
+    core::DisassemblerCore::inst().resetModified();
   }
 }
 
+void MainWindow::closeEvent(QCloseEvent* event) {
+  if (!core::DisassemblerCore::inst().isModified()) {
+    event->accept();
+    return;
+  }
+  QMessageBox::StandardButton resBtn = QMessageBox::question(this, "QZXSqualpel",
+                                                             tr("You have unsaved changes.\n"),
+                                                             QMessageBox::Cancel | QMessageBox::Save | QMessageBox::Close,
+                                                             QMessageBox::Cancel);
+  switch (resBtn) {
+    case QMessageBox::Close:
+      event->accept();
+      return;
+    case QMessageBox::Cancel:
+      event->ignore();
+      return;
+    case QMessageBox::Save:
+      event->ignore();
+      saveProject();
+      return;
+  }
+}
 }
 }

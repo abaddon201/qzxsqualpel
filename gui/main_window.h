@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QListWidget>
+#include <QCloseEvent>
 
 #include "disassembler_widget.h"
 #include "labels_widget.h"
@@ -23,6 +24,7 @@ public:
 
   void onAddressUpdated(uint16_t addr, uint16_t bytes) override;
 
+  void closeEvent(QCloseEvent* event);
 private:
   //Ui::CMainWindow ui;
   QListWidget* _navigation_stack;

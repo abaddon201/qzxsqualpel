@@ -15,6 +15,7 @@ namespace dasm {
 namespace core {
 
 void DisassemblerCore::init(IGUIUpdater* updater_) {
+  _is_modified = false;
   updater = updater_;
 
   //_memory = std::make_unique<memory::Memory>();
@@ -27,9 +28,8 @@ void DisassemblerCore::init(IGUIUpdater* updater_) {
 };
 
 void DisassemblerCore::loadGuessFile(const std::string& fname) {
-  if (_auto_commenter) {
-    _auto_commenter->loadGuessFile(fname);
-  }
+  _is_modified = true;
+  _auto_commenter->loadGuessFile(fname);
 }
 
 bool DisassemblerCore::labelPresent(uint16_t addr) const {
@@ -37,10 +37,12 @@ bool DisassemblerCore::labelPresent(uint16_t addr) const {
 }
 
 void DisassemblerCore::setRawMemory(unsigned char* buf, size_t size) {
+  _is_modified = true;
   _memory.segment(0)->fill(buf, size);
 }
 
 void DisassemblerCore::initialParse() {
+  _is_modified = true;
   _commands_map.clear();
   _commands_map.reset(_memory.wholeSize());
   for (unsigned long long i = 0; i < _memory.wholeSize(); ++i) {
@@ -58,6 +60,7 @@ void DisassemblerCore::initialParse() {
 
 void DisassemblerCore::setEntryPoint(CommandPtr cmd) {
   if (cmd->command_code != CmdCode::NONE && cmd->command_code != CmdCode::DB && cmd->command_code != CmdCode::DW) {
+    _is_modified = true;
     _entry_point = cmd->addr;
     bool modified = false;
     if (cmd->blockComment().empty()) {
@@ -136,6 +139,7 @@ size_t DisassemblerCore::disassembleInstruction(uint16_t addr, CommandPtr& out_c
 }
 
 void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
+  _is_modified = true;
   size_t res = 0;
   uint16_t addr = st_addr;
   uint16_t cmd_addr;
@@ -218,7 +222,6 @@ LabelPtr DisassemblerCore::addCrossRef(CommandPtr cmd, uint16_t from_addr, uint1
     lbl = cmd->label();
   }
   if (!labelPresent(dst_addr)) {
-    //CLabel label(jump_addr, lbl);
     _labels[dst_addr] = lbl;
   }
   updater->onAddressUpdated(dst_addr, cmd->len);
@@ -235,6 +238,7 @@ LabelPtr DisassemblerCore::makeData(uint16_t from_addr, uint16_t data_addr, memo
     //already data
     return nullptr;
   }
+  _is_modified = true;
   if ((ref_type == memory::Reference::Type::WRITE_BYTE) || (ref_type == memory::Reference::Type::READ_BYTE)) {
     if (data_cmd->command_code == CmdCode::NONE) {
       auto byte = _memory.byte(data_addr);
@@ -264,6 +268,8 @@ LabelPtr DisassemblerCore::makeData(uint16_t from_addr, uint16_t data_addr, memo
 }
 
 void DisassemblerCore::makeArray(uint16_t from_addr, int size, bool clearMem) {
+  //FIXME: need to check preconditions (all bytes must be unparsed)
+  _is_modified = true;
   if (clearMem) {
     auto addr = from_addr;
     int sz = size;
