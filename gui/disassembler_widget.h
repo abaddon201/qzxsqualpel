@@ -38,6 +38,7 @@ public:
   void setEntryPoint();
 
   void onAddressUpdated(uint16_t addr, uint16_t bytes);
+  void onPositionChanged(int pos);
   void refreshView();
 
   core::CommandPtr getCmdUnderCursor();

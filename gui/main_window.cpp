@@ -18,6 +18,10 @@ void MainWindow::updateWidgets() {
   _disassembler_widget->refreshView();
 }
 
+void MainWindow::onPositionChanged(int pos) {
+  _disassembler_widget->onPositionChanged(pos);
+}
+
 void MainWindow::onAddressUpdated(uint16_t addr, uint16_t bytes) {
   _disassembler_widget->onAddressUpdated(addr, bytes);
 }
@@ -48,6 +52,7 @@ MainWindow::MainWindow() {
   adjustSize();
   move(QApplication::desktop()->availableGeometry().center() - this->rect().center());
   setupMenu();
+  statusBar()->showMessage(tr("Ready"));
 }
 
 void MainWindow::setupMenu() {

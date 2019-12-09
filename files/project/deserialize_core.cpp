@@ -298,6 +298,7 @@ void Serializer::deserialize_file(const std::string& file_name, core::Disassembl
   deserializeMemory(doc, core);
   deserializeLabels(doc, core);
   deserializeCommands(doc, core);
+  core.setCurrentPosition(json::get_int(doc, "current_position"));
 }
 
 }

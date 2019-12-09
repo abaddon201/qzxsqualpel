@@ -4,7 +4,7 @@
 class GU : public IGUIUpdater {
 public:
   void updateWidgets() override {};
-
+  void onPositionChanged(int pos) override {};
   void onAddressUpdated(uint16_t addr, uint16_t bytes) override {};
 };
 

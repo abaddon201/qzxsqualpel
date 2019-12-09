@@ -74,6 +74,9 @@ public:
   void setModified() { _is_modified = true; }
   void resetModified() { _is_modified = false; }
 
+  void setCurrentPosition(int pos) { _current_position = pos; updater->onPositionChanged(pos); }
+  int currentPosition() const { return _current_position; }
+
   static DisassemblerCore& inst() {
     static DisassemblerCore _inst;
     return _inst;
@@ -110,6 +113,7 @@ private:
 
   std::string _file_name;
 
+  int _current_position;
   bool _is_modified;
 
   uint32_t _entry_point = std::numeric_limits<uint32_t>::max();

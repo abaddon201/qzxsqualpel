@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QListWidget>
 #include <QCloseEvent>
+#include <QStatusBar>
 
 #include "disassembler_widget.h"
 #include "labels_widget.h"
@@ -24,7 +25,18 @@ public:
 
   void onAddressUpdated(uint16_t addr, uint16_t bytes) override;
 
+  void onPositionChanged(int pos) override;
+
   void closeEvent(QCloseEvent* event);
+
+  void showMessage(const std::string& msg, int timeout = 0) {
+    statusBar()->showMessage(QString::fromStdString(msg), timeout);
+  }
+
+  void clearMessage() {
+    statusBar()->clearMessage();
+  }
+
 private:
   //Ui::CMainWindow ui;
   QListWidget* _navigation_stack;

@@ -123,9 +123,11 @@ void DisassemblerWidget::makeCodeUnderCursor() {
     return;
   }
   if (cmd->command_code == dasm::core::CmdCode::NONE) {
+    _main_window->showMessage("Disassembling...");
     const auto& ret_addr = cmd->addr;
     dasm::core::DisassemblerCore::inst().disassembleBlock(ret_addr);
     navigateToAddress(ret_addr);
+    _main_window->clearMessage();
   }
 }
 
@@ -147,9 +149,11 @@ void DisassemblerWidget::makeArray(int size, bool clearMem) {
     return;
   }
   if (cmd->command_code == CmdCode::NONE || cmd->command_code == CmdCode::DB || cmd->command_code == CmdCode::DW) {
+    _main_window->showMessage("Making array...");
     const auto& ret_addr = cmd->addr;
     dasm::core::DisassemblerCore::inst().makeArray(ret_addr, size, clearMem);
     navigateToAddress(ret_addr);
+    _main_window->clearMessage();
   }
 }
 
@@ -160,9 +164,7 @@ void DisassemblerWidget::navigateToAddress(uint16_t from_addr, uint16_t addr) {
 }
 
 void DisassemblerWidget::setCursorPosition(int position) {
-  QTextCursor cursor(textCursor());
-  cursor.setPosition(position);
-  setTextCursor(cursor);
+  core::DisassemblerCore::inst().setCurrentPosition(position);
 }
 
 void DisassemblerWidget::navigateToAddress(uint16_t addr) {
@@ -275,6 +277,7 @@ void DisassemblerWidget::paintEvent(QPaintEvent* event) {
 }
 
 void DisassemblerWidget::openRAWFile(const QString& fileName) {
+  _main_window->showMessage("Opening BIN file...");
   auto* buf = new unsigned char[65536];
   size_t loaded;
   FILE* f = fopen(fileName.toLocal8Bit(), "rb");
@@ -290,36 +293,48 @@ void DisassemblerWidget::openRAWFile(const QString& fileName) {
   dasm::core::DisassemblerCore::inst().initialParse();
   setCursorPosition(0);
   setFocus();
+  _main_window->clearMessage();
 }
 
 void DisassemblerWidget::saveProjectFile(const QString& fileName) {
+  _main_window->showMessage("Saving project...");
   std::ofstream file;
   file.open(fileName.toStdString());
   if (!file.is_open()) {
     QMessageBox::information(this, tr("Unable to open file"), fileName);
     return;
   }
+  
+  QTextCursor cursor(textCursor());
+  auto pos = cursor.position();
+  core::DisassemblerCore::inst().setCurrentPosition(pos);
   std::string res = dasm::files::project::Serializer::serialize(dasm::core::DisassemblerCore::inst());
   file << res;
   file.close();
+  _main_window->clearMessage();
 }
 
 void DisassemblerWidget::openProjectFile(const QString& fileName) {
+  _main_window->showMessage("Opening project...");
   _commands.clear();
   _commands.reset(65536);
   dasm::files::project::Serializer::deserialize_file(fileName.toStdString(), dasm::core::DisassemblerCore::inst());
   refreshView();
-  setCursorPosition(0);
   setFocus();
+  setCursorPosition(core::DisassemblerCore::inst().currentPosition());
+  _main_window->clearMessage();
 }
 
 void DisassemblerWidget::saveASMFile(const QString& fileName) {
+  _main_window->showMessage("Saving ASM file...");
   QTextDocumentWriter writer(fileName);
   writer.setFormat("plaintext");
   writer.write(document());
+  _main_window->clearMessage();
 }
 
 void DisassemblerWidget::refreshView() {
+  _main_window->showMessage("Refreshing view...");
   _commands.clear();
   _commands.reset(65536);
   clear();
@@ -339,6 +354,7 @@ void DisassemblerWidget::refreshView() {
   }
   cursor.endEditBlock();
   _main_window->labelsWidget()->refresh();
+  _main_window->clearMessage();
 }
 
 void DisassemblerWidget::onAddressUpdated(uint16_t addr, uint16_t bytes) {
@@ -376,5 +392,10 @@ void DisassemblerWidget::onAddressUpdated(uint16_t addr, uint16_t bytes) {
   }
 }
 
+void DisassemblerWidget::onPositionChanged(int pos) {
+  QTextCursor cursor(textCursor());
+  cursor.setPosition(pos);
+  setTextCursor(cursor);
+}
 }
 }
