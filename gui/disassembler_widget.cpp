@@ -200,22 +200,7 @@ void DisassemblerWidget::setEntryPoint() {
   if (nullptr == cmd) {
     return;
   }
-  if (cmd->command_code != CmdCode::NONE && cmd->command_code != CmdCode::DB && cmd->command_code != CmdCode::DW) {
-    core::DisassemblerCore::inst().setEntryPoint(cmd->addr);
-    bool modified = false;
-    if (cmd->blockComment().empty()) {
-      cmd->setBlockComment("Entry point");
-      modified = true;
-    }
-    if (cmd->label() == nullptr) {
-      auto lbl = std::make_shared<core::Label>(cmd->addr, "ENTRY_POINT");
-      cmd->setLabel(lbl);
-      modified = true;
-    }
-    if (modified) {
-      onAddressUpdated(cmd->addr, cmd->len);
-    }
-  }
+  core::DisassemblerCore::inst().setEntryPoint(cmd);
 }
 
 void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {

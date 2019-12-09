@@ -56,6 +56,25 @@ void DisassemblerCore::initialParse() {
   updater->updateWidgets();
 }
 
+void DisassemblerCore::setEntryPoint(CommandPtr cmd) {
+  if (cmd->command_code != CmdCode::NONE && cmd->command_code != CmdCode::DB && cmd->command_code != CmdCode::DW) {
+    _entry_point = cmd->addr;
+    bool modified = false;
+    if (cmd->blockComment().empty()) {
+      cmd->setBlockComment("Entry point");
+      modified = true;
+    }
+    if (cmd->label() == nullptr) {
+      auto lbl = std::make_shared<core::Label>(cmd->addr, "ENTRY_POINT");
+      cmd->setLabel(lbl);
+      modified = true;
+    }
+    if (modified) {
+      updater->onAddressUpdated(cmd->addr, cmd->len);
+    }
+  }
+}
+
 size_t DisassemblerCore::disassembleInstruction(uint16_t addr, CommandPtr& out_cmd) {
   size_t len = 0;
   if ((uint32_t)addr >= _memory.maxAddr()) {

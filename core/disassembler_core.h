@@ -62,7 +62,8 @@ public:
   void setFileName(const std::string& file_name) { _file_name = file_name; }
 
   const uint16_t entryPoint() const { return _entry_point; }
-  void setEntryPoint(uint16_t entry_point) { _entry_point = entry_point; }
+
+  void setEntryPoint(CommandPtr cmd);
 
   std::shared_ptr<postprocessors::AutoCommenter> autoCommenter() const { return _auto_commenter; }
   void setAutoCommenter(std::shared_ptr<postprocessors::AutoCommenter> ac) { _auto_commenter = ac; }
