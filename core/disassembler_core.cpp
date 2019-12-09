@@ -3,6 +3,8 @@
 #include "postprocessors/rst28.h"
 #include "postprocessors/register_reference_scan.h"
 
+#include "utils/plog/Log.h"
+
 #include <memory>
 #include <fstream>
 
@@ -81,26 +83,26 @@ void DisassemblerCore::setEntryPoint(CommandPtr cmd) {
 size_t DisassemblerCore::disassembleInstruction(uint16_t addr, CommandPtr& out_cmd) {
   size_t len = 0;
   if ((uint32_t)addr >= _memory.maxAddr()) {
-    std::cerr << "address out of range" << utils::toHex(addr);
+    PLOGE << "address out of range" << utils::toHex(addr);
     return 0;
   }
   std::string buff = disassembleInstructionInt(addr, len);
 
   if (len) {
     if ((uint32_t)(addr + len) >= _memory.maxAddr()) {
-      std::cout << "instruction out of mem block" << std::endl;
+      PLOGD << "instruction out of mem block" << std::endl;
       return -3;
     }
     //check address can be disassembled
     auto cmd_i = _commands_map.get(addr);
     if (cmd_i == nullptr) {
       // address is not loaded
-      std::cout << "no instruction here: " << utils::toHex(addr) << std::endl;
+      PLOGD << "no instruction here: " << utils::toHex(addr) << std::endl;
       return 0;
     }
     if ((cmd_i->command_code != CmdCode::NONE) || (cmd_i->addr != addr)) {
       // address allready disassembled
-      std::cout << "allready parsed: " << utils::toHex(addr) << std::endl;
+      PLOGD << "allready parsed: " << utils::toHex(addr) << std::endl;
       return 0;
     }
     if (len > 1) {
@@ -108,7 +110,7 @@ size_t DisassemblerCore::disassembleInstruction(uint16_t addr, CommandPtr& out_c
       for (size_t i = 1; i < len; i++) {
         auto ch = _commands_map.get(addr + i);
         if ((ch == nullptr) || (ch->command_code != CmdCode::NONE)) {
-          std::cout << "Instrunction longer than unparsed block" << std::endl;
+          PLOGD << "Instrunction longer than unparsed block" << std::endl;
           return -4;
         }
       }
@@ -118,7 +120,7 @@ size_t DisassemblerCore::disassembleInstruction(uint16_t addr, CommandPtr& out_c
     if (_auto_commenter) {
       klbl = _auto_commenter->getLabelForAddr(addr);
     }
-    std::cout << "addr=" << utils::toHex(addr) << "command=" << buff << "len=" << len << std::endl;
+    PLOGD << "addr=" << utils::toHex(addr) << "command=" << buff << "len=" << len << std::endl;
 
     CommandPtr cmd = std::make_shared<Command>();
     cmd->addr = addr;
@@ -131,7 +133,7 @@ size_t DisassemblerCore::disassembleInstruction(uint16_t addr, CommandPtr& out_c
       cmd->setLabel(klbl);
     }
     _commands_map.put(addr, len, cmd);
-    std::cout << "cmd appended" << std::endl;
+    PLOGD << "cmd appended" << std::endl;
     len = postProcessCmd(cmd, len);
     out_cmd = cmd;
   }
@@ -144,7 +146,7 @@ void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
   uint16_t addr = st_addr;
   uint16_t cmd_addr;
   CommandPtr last_cmd;
-  std::cout << "disassembleBlock(): addr" << utils::toHex(addr) << std::endl;
+  PLOGD << "disassembleBlock(): addr" << utils::toHex(addr) << std::endl;
   do {
     cmd_addr = addr;
     res = disassembleInstruction(addr, last_cmd);
@@ -160,8 +162,8 @@ void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
     switch (last_cmd->jumpType(jump_addr)) {
       case JumpType::JT_CALL: {
         //call
-        std::cout << "!!!! call: addr=" << utils::toHex(addr) << " to_addr " << utils::toHex(jump_addr) << std::endl;
-        std::cout << "st_addr=" << utils::toHex(st_addr) << std::endl;
+        PLOGD << "!!!! call: addr=" << utils::toHex(addr) << " to_addr " << utils::toHex(jump_addr) << std::endl;
+        PLOGD << "st_addr=" << utils::toHex(st_addr) << std::endl;
         auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::CALL);
         last_cmd->setJmpAddr(lbl);
         addr += res;
@@ -169,7 +171,7 @@ void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
       }
       case JumpType::JT_COND_JUMP: {
         //conditional jump
-        std::cout << "!!!! cond jump: addr=" << utils::toHex(addr) << " to_addr " << utils::toHex(jump_addr) << std::endl;
+        PLOGD << "!!!! cond jump: addr=" << utils::toHex(addr) << " to_addr " << utils::toHex(jump_addr) << std::endl;
         //auto& lastcmd = chunk->lastCommand();
         auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::JUMP);
         last_cmd->setJmpAddr(lbl);
@@ -177,7 +179,7 @@ void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
         break;
       }
       case JumpType::JT_JUMP: {
-        std::cout << "!!!! jump: addr=" << utils::toHex(addr) << " to_addr " << utils::toHex(jump_addr) << std::endl;
+        PLOGD << "!!!! jump: addr=" << utils::toHex(addr) << " to_addr " << utils::toHex(jump_addr) << std::endl;
         auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::JUMP);
         last_cmd->setJmpAddr(lbl);
         res = 0;
@@ -185,11 +187,11 @@ void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
       }
       case JumpType::JT_COND_RET:
         //conditional ret
-        std::cout << "!!!! cond_ret: addr=" << utils::toHex(addr) << std::endl;
+        PLOGD << "!!!! cond_ret: addr=" << utils::toHex(addr) << std::endl;
         addr += res;
         break;
       case JumpType::JT_RET:
-        std::cout << "!!!! ret: addr=" << utils::toHex(addr) << std::endl;
+        PLOGD << "!!!! ret: addr=" << utils::toHex(addr) << std::endl;
         res = 0;
         break;
       case JumpType::JT_NONE:
@@ -198,7 +200,7 @@ void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
     }
     updater->onAddressUpdated(cmd_addr, last_cmd->len);
   } while (res);
-  std::cout << "finished chunk:st_addr=" << utils::toHex(st_addr) << std::endl;
+  PLOGD << "finished chunk:st_addr=" << utils::toHex(st_addr) << std::endl;
 }
 
 LabelPtr DisassemblerCore::makeJump(uint16_t from_addr, uint16_t jump_addr, memory::Reference::Type ref_type) {
@@ -231,7 +233,7 @@ LabelPtr DisassemblerCore::addCrossRef(CommandPtr cmd, uint16_t from_addr, uint1
 LabelPtr DisassemblerCore::makeData(uint16_t from_addr, uint16_t data_addr, memory::Reference::Type ref_type) {
   auto data_cmd = _commands_map.get(data_addr);
   if (data_cmd == nullptr) {
-    std::cout << "[makeData] Can't find cmd at: " + utils::toHex(data_addr) << std::endl;
+    PLOGD << "[makeData] Can't find cmd at: " + utils::toHex(data_addr) << std::endl;
     return nullptr;
   }
   if ((data_cmd->command_code == CmdCode::DB) || (data_cmd->command_code == CmdCode::DW)) {
@@ -326,7 +328,7 @@ bool DisassemblerCore::extractAddrFromRef(const std::string& ref, uint16_t& add_
     refnc.erase(std::remove(refnc.begin(), refnc.end(), ','), refnc.end());
     auto splited = utils::split(refnc, '_');
     if (splited.size() != 2) {
-      std::cerr << "unable to process reference : " << ref << std::endl;
+      PLOGE << "unable to process reference : " << ref << std::endl;
       return false;
       //throw std::runtime_error("unable to process reference: " + ref);
     }
@@ -372,7 +374,7 @@ bool DisassemblerCore::extractAddrFromRef(const std::string& ref, uint16_t& add_
       add_out = utils::fromHex(ref);
       return true;
     } catch (...) {
-      std::cerr << "unable to process reference : " << ref << std::endl;
+      PLOGE << "unable to process reference : " << ref << std::endl;
       return false;
     }
   }

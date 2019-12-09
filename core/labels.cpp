@@ -15,8 +15,7 @@
 #include "command.h"
 #include "disassembler_core.h"
 
-#include "debug_printers.h"
-
+#include "utils/plog/Log.h"
 
 namespace dasm {
 namespace core {
@@ -33,19 +32,19 @@ namespace core {
  */
 std::string Labels::offsetInLabel(uint16_t addr) const {
   if (size() == 0) {
-    std::cout << "no labels" << std::endl;
+    PLOGD << "no labels" << std::endl;
     return utils::toHex(addr);
   }
   auto cmd = DisassemblerCore::inst().commands().get(addr);
   if (cmd == nullptr) {
-    std::cout << "no label for addr" << std::endl;
+    PLOGD << "no label for addr" << std::endl;
     return utils::toHex(addr);
   }
   auto ch_addr = cmd->addr;
-  std::cout << "addr:" << utils::toHex(ch_addr) << std::endl;
+  PLOGD << "addr:" << utils::toHex(ch_addr) << std::endl;
   auto lbl = cmd->label();
   if (lbl == nullptr) {
-    std::cout << "no label for chunk" << std::endl;
+    PLOGD << "no label for chunk" << std::endl;
     return utils::toHex(addr);
   }
   uint16_t delta = addr - ch_addr;

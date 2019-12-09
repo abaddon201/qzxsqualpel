@@ -11,6 +11,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_PREFIX_PATH "c:\\Qt\\5.12.6\\msvc2017_64\\lib\\cmake")
 
+include_directories(utils)
+
 file(GLOB TGT_SRC  main.cpp
         "core/*.cpp"
         "core/*.h"
@@ -24,6 +26,7 @@ file(GLOB TGT_SRC  main.cpp
         "postprocessors/*.h"
         "utils/*.cpp"
         "utils/*.h"
+        "utils/plog/*.h"
         "gui/*.cpp"
         "gui/*.ui"
         "gui/*.h")

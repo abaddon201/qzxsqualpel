@@ -13,6 +13,7 @@
 #include "command.h"
 #include "disassembler_core.h"
 #include "utils/utils.h"
+#include "utils/plog/Log.h"
 #include "flag.h"
 
 namespace dasm {
@@ -119,11 +120,11 @@ uint8_t Command::opcodes(unsigned long long offs) const {
 }
 
 void Command::parse(std::string& src) {
-  std::cout << utils::toHex(addr);
+  PLOGD << utils::toHex(addr);
   if (addr == 0x03c1) {
-    std::cout << "src: " << src << std::endl;
+    PLOGD << "src: " << src << std::endl;
   }
-  std::cout << "src: " << src << std::endl;
+  PLOGD << "src: " << src << std::endl;
   std::vector<std::string> strlist = utils::split(src, ' ');
   auto command = strlist[0];
   command_code = CmdCode{ command };
@@ -135,11 +136,11 @@ void Command::parse(std::string& src) {
     }
   }
   updateArgs();
-  std::cout << "dcd: " << command_code.toString();
+  PLOGD << "dcd: " << command_code.toString();
   for (const auto a : _args) {
-    std::cout << " " << a->toString();
+    PLOGD << " " << a->toString();
   }
-  std::cout << std::endl;
+  PLOGD << std::endl;
 }
 
 bool Command::isLDICmd() {

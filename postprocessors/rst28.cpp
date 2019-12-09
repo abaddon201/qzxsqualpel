@@ -3,6 +3,8 @@
 #include "core/command.h"
 #include "core/disassembler_core.h"
 
+#include "utils/plog/Log.h"
+
 namespace dasm {
 namespace postprocessors {
 
@@ -67,7 +69,7 @@ size_t Rst28::process(core::CommandPtr cmd, size_t len) {
     core::DisassemblerCore::inst().commands().put(a, 1, c);
     len++;
   } catch (std::out_of_range&) {
-    std::cout << "finished due address exceeds" << std::endl;
+    PLOGD << "finished due address exceeds" << std::endl;
   }
   return len;
 }

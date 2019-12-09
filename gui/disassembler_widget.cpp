@@ -1,6 +1,3 @@
-#include <QDebug>
-#include "utils/qt_debug_printers.h"
-
 #include "navigate_to_addr_dlg.h"
 #include "make_array_dlg.h"
 
@@ -27,6 +24,8 @@
 
 #include "text_view_printer.h"
 #include "utils/utils.h"
+
+#include "utils/plog/Log.h"
 
 namespace dasm {
 namespace gui {
@@ -57,8 +56,8 @@ void DisassemblerWidget::init() {
 
 dasm::core::CommandPtr DisassemblerWidget::getCmdUnderCursor() {
   QTextCursor cursor(textCursor());
-  qDebug() << "GUI: getCmdUnderCursor: " << cursor.block().text();
-  qDebug() << "GUI: getCmdUnderCursor: Cursor pos:" << cursor.position();
+  PLOGD << "GUI: getCmdUnderCursor: " << cursor.block().text();
+  PLOGD << "GUI: getCmdUnderCursor: Cursor pos:" << cursor.position();
   auto gcmd = _commands.find_position((size_t)cursor.position());
   if (gcmd != _commands.end()) {
     return DisassemblerCore::inst().commands().get(gcmd);
@@ -68,8 +67,8 @@ dasm::core::CommandPtr DisassemblerWidget::getCmdUnderCursor() {
 
 GUIBlockPtr DisassemblerWidget::getGuiCmdUnderCursor() {
   QTextCursor cursor(textCursor());
-  qDebug() << "GUI: getGuiCmdUnderCursor: " << cursor.block().text();
-  qDebug() << "GUI: getGuiCmdUnderCursor: Cursor pos:" << cursor.position();
+  PLOGD << "GUI: getGuiCmdUnderCursor: " << cursor.block().text();
+  PLOGD << "GUI: getGuiCmdUnderCursor: Cursor pos:" << cursor.position();
   auto gcmd = _commands.find_position(cursor.position());
   if (gcmd != _commands.end()) {
     return _commands.get(gcmd);
@@ -155,7 +154,7 @@ void DisassemblerWidget::makeArray(int size, bool clearMem) {
 }
 
 void DisassemblerWidget::navigateToAddress(uint16_t from_addr, uint16_t addr) {
-  qDebug() << "GUI: navigate to address:" << utils::toHex(addr) << " from: " << utils::toHex(from_addr);
+  PLOGD << "GUI: navigate to address:" << utils::toHex(addr) << " from: " << utils::toHex(from_addr);
   dasm::gui::NavigationStack::inst().push(from_addr);
   navigateToAddress(addr);
 }
@@ -167,7 +166,7 @@ void DisassemblerWidget::setCursorPosition(int position) {
 }
 
 void DisassemblerWidget::navigateToAddress(uint16_t addr) {
-  qDebug() << "GUI: navigate to address:" << utils::toHex(addr);
+  PLOGD << "GUI: navigate to address:" << utils::toHex(addr);
   auto cmd = _commands.get(addr);
   if (nullptr != cmd) {
     setCursorPosition(cmd->cursorStartPosition() + 1);
@@ -180,7 +179,7 @@ void DisassemblerWidget::navigateToReference() {
   uint16_t addr;
   if (dasm::core::DisassemblerCore::inst().extractAddrFromRef(txt, addr)) {
     //navigating to addr
-    qDebug() << "navigating to addr: " << utils::toHex(addr);
+    PLOGD << "navigating to addr: " << utils::toHex(addr);
     auto cmd = getCmdUnderCursor();
     if (cmd != nullptr) {
       navigateToAddress(cmd->addr, addr);
@@ -188,7 +187,7 @@ void DisassemblerWidget::navigateToReference() {
       std::cerr << "unable to navigate, source addr unknown" << std::endl;
     }
   } else {
-    qDebug() << "Unable to parse!!!";
+    PLOGD << "Unable to parse!!!";
   }
 }
 
@@ -204,7 +203,6 @@ void DisassemblerWidget::setEntryPoint() {
 }
 
 void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
-  //std::cout << "key: " << std::to_string(event->key()) << std::endl;
   switch (event->key()) {
     case Qt::Key_C:
       // must codefi under cursor
@@ -345,8 +343,8 @@ void DisassemblerWidget::refreshView() {
 
 void DisassemblerWidget::onAddressUpdated(uint16_t addr, uint16_t bytes) {
   auto block = _commands.get(addr);
-  //std::cout << "onUpdated addr: " << addr << ", bytes: " << bytes << std::endl;
-  //std::cout << "block start: " << block->cursorStartPosition() << ", end: " << block->cursorEndPosition() << std::endl;
+  //PLOGD << "onUpdated addr: " << addr << ", bytes: " << bytes << std::endl;
+  //PLOGD << "block start: " << block->cursorStartPosition() << ", end: " << block->cursorEndPosition() << std::endl;
   int block_size = 0;
   auto cmd = core::DisassemblerCore::inst().commands().get(addr);
   for (int i = 0; i < bytes; ++i) {
@@ -354,20 +352,19 @@ void DisassemblerWidget::onAddressUpdated(uint16_t addr, uint16_t bytes) {
     if (_commands.get_if(addr + i, rblck)) {
       block_size += rblck->cursorEndPosition() - rblck->cursorStartPosition() + 1;
     }
-    //std::cout << "block_sz: " << rblck->cursorStartPosition() << ", end: " << rblck->cursorEndPosition() << std::endl;
+    //PLOGD << "block_sz: " << rblck->cursorStartPosition() << ", end: " << rblck->cursorEndPosition() << std::endl;
   }
   --block_size;
-  //std::cout << "block_size: " << block_size << std::endl;
+  //PLOGD << "block_size: " << block_size << std::endl;
   QTextCursor cursor(textCursor());
   cursor.beginEditBlock();
   cursor.setPosition(block->cursorStartPosition());
   dasm::gui::TextViewPrinter::removeBlock(cursor, block_size);
-  //cursor.insertText("\n");
   dasm::gui::TextViewPrinter::printCommand(cursor, cmd);
   auto new_end = cursor.position();
-  //std::cout << "new_end: " << new_end << std::endl;
+  //PLOGD << "new_end: " << new_end << std::endl;
   auto new_block_size = new_end - block->cursorStartPosition();
-  //std::cout << "new_block_size: " << new_block_size << std::endl;
+  //PLOGD << "new_block_size: " << new_block_size << std::endl;
   cursor.endEditBlock();
   block->setCursorEndPosition(new_end);
   _commands.put(addr, bytes, block);

@@ -1,12 +1,10 @@
 #include "document_helper.h"
 
 #include "utils/utils.h"
+#include "utils/plog/Log.h"
 
 #include <QTextCursor>
 #include <QTextBlock>
-
-#include <QDebug>
-#include "utils/qt_debug_printers.h"
 
 namespace dasm {
 namespace gui {
@@ -38,9 +36,9 @@ std::string DocumentHelper::getWordUnderCursor() {
     txt += c;
     ++sel_end;
   }
-  qDebug() << "GUI: navigate to reference:" << cursor.block().text();
-  qDebug() << "GUI: text:" << txt.toStdString();
-  qDebug() << "GUI: Cursor pos:" << cursor.position();
+  PLOGD << "GUI: navigate to reference:" << cursor.block().text();
+  PLOGD << "GUI: text:" << txt.toStdString();
+  PLOGD << "GUI: Cursor pos:" << cursor.position();
   return txt.toStdString();
 }
 
