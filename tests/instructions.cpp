@@ -10,7 +10,7 @@ public:
 
 TEST_CASE("disassembler", "[core]") {
   dasm::utils::initHexes();
-  auto fileName = "test.raw";
+  auto fileName = "../../../../xeno2.raw";
   auto& core = dasm::core::DisassemblerCore::inst();
   core.init(new GU());
   auto* buf = new unsigned char[65536];
@@ -25,6 +25,8 @@ TEST_CASE("disassembler", "[core]") {
 
   dasm::core::DisassemblerCore::inst().initialParse();
   uint16_t ret_addr = 0;
+  dasm::core::DisassemblerCore::inst().disassembleBlock(ret_addr);
+  ret_addr = 0xcd78;
   dasm::core::DisassemblerCore::inst().disassembleBlock(ret_addr);
 
   SECTION("LD") {
@@ -213,12 +215,45 @@ TEST_CASE("disassembler", "[core]") {
     REQUIRE(cmd->getArgsCount() == 0);
   }
 
-  SECTION("data") {
+  /*SECTION("data") {
     //0x5c72 DW ffff
     auto cmd = core.commands().get(0x5c72);
     REQUIRE(cmd->command_code == dasm::core::CmdCode::DW);
     REQUIRE(cmd->getArg(0)->toString() == "ffff");
     REQUIRE(cmd->getArgsCount() == 1);
+  }*/
+
+  SECTION("decode") {
+    //d50f      20 ff              JR   NZ, jmp_d50f
+    auto cmd = core.commands().get(0xd50f);
+    REQUIRE(cmd->command_code == dasm::core::CmdCode::JR);
+    REQUIRE(cmd->getArg(0)->toString() == "NZ");
+    REQUIRE(cmd->getArg(1)->toString() == "jmp_d50f");
+
+    //d511      21 23 48           LD   HL, 4823
+    cmd = core.commands().get(0xd511);
+    REQUIRE(cmd->command_code == dasm::core::CmdCode::LD);
+    REQUIRE(cmd->getArg(0)->toString() == "HL");
+    REQUIRE(cmd->getArg(1)->toString() == "4823");
+
+    //d514      16 59              LD   D, 59
+    cmd = core.commands().get(0xd514);
+    REQUIRE(cmd->command_code == dasm::core::CmdCode::LD);
+    REQUIRE(cmd->getArg(0)->toString() == "D");
+    REQUIRE(cmd->getArg(1)->toString() == "59");
+
+    //d516      3a                 db   3a        ;:
+    cmd = core.commands().get(0xd516);
+    REQUIRE(cmd->command_code == dasm::core::CmdCode::NONE);
+    REQUIRE(cmd->getArg(0)->toString() == "3a");
+    REQUIRE(cmd->getArgsCount() == 1);
+
+    //d517      87                 ADD  A, A
+    cmd = core.commands().get(0xd517);
+    REQUIRE(cmd->command_code == dasm::core::CmdCode::ADD);
+    REQUIRE(cmd->getArg(0)->toString() == "A");
+    REQUIRE(cmd->getArg(1)->toString() == "A");
+
   }
 
   /*
