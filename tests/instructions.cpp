@@ -224,11 +224,11 @@ TEST_CASE("disassembler", "[core]") {
   }*/
 
   SECTION("decode") {
-    //d50f      20 ff              JR   NZ, jmp_d50f
+    //d50f      20 ff              JR   NZ, d510 (addr = d50f + 2 +(-1))
     auto cmd = core.commands().get(0xd50f);
     REQUIRE(cmd->command_code == dasm::core::CmdCode::JR);
     REQUIRE(cmd->getArg(0)->toString() == "NZ");
-    REQUIRE(cmd->getArg(1)->toString() == "jmp_d50f");
+    REQUIRE(cmd->getArg(1)->toString() == "d510");
 
     //d511      21 23 48           LD   HL, 4823
     cmd = core.commands().get(0xd511);

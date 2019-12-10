@@ -12,7 +12,7 @@ void TextViewPrinter::init() {
   _cell_format_args.setForeground(QColor("#000000"));
   _cell_format_cmd_comment.setForeground(QColor("#909090"));
   _cell_format_cmd_auto_comment.setForeground(QColor("#109090"));
-  _cell_format_chunk_comment.setForeground(QColor("#909090"));
+  _cell_format_block_comment.setForeground(QColor("#909090"));
   _cell_format_reference.setForeground(QColor("#9090ff"));
 
   _cell_length_addr = CELL_LENGTH_ADDR;
@@ -22,7 +22,7 @@ void TextViewPrinter::init() {
   _cell_length_args = CELL_LENGTH_ARGS;
   _cell_length_cmd_comment = CELL_LENGTH_CMD_COMMENT;
   _cell_length_reference = CELL_LENGTH_REFERENCE;
-  _cell_length_chunk_comment = CELL_LENGTH_CHUNK_COMMENT;
+  _cell_length_block_comment = CELL_LENGTH_BLOCK_COMMENT;
 }
 
 
@@ -71,7 +71,7 @@ void TextViewPrinter::printReferences(QTextCursor& cursor, dasm::core::CommandPt
 int TextViewPrinter::printCommand(QTextCursor& cursor, const core::CommandPtr cmd) {
   int start_pos = cursor.position();
   if (!cmd->blockComment().empty()) {
-    printCell(cursor, std::string(";") + cmd->blockComment(), _cell_length_chunk_comment, _cell_format_chunk_comment);
+    printCell(cursor, std::string(";") + cmd->blockComment(), _cell_length_block_comment, _cell_format_block_comment);
     cursor.insertText("\n");
   }
   if (cmd->label() != nullptr) {
@@ -104,7 +104,7 @@ QTextCharFormat TextViewPrinter::_cell_format_command;
 QTextCharFormat TextViewPrinter::_cell_format_args;
 QTextCharFormat TextViewPrinter::_cell_format_cmd_comment;
 QTextCharFormat TextViewPrinter::_cell_format_cmd_auto_comment;
-QTextCharFormat TextViewPrinter::_cell_format_chunk_comment;
+QTextCharFormat TextViewPrinter::_cell_format_block_comment;
 QTextCharFormat TextViewPrinter::_cell_format_reference;
 
 int TextViewPrinter::_cell_length_addr;
@@ -113,7 +113,7 @@ int TextViewPrinter::_cell_length_label;
 int TextViewPrinter::_cell_length_command;
 int TextViewPrinter::_cell_length_args;
 int TextViewPrinter::_cell_length_cmd_comment;
-int TextViewPrinter::_cell_length_chunk_comment;
+int TextViewPrinter::_cell_length_block_comment;
 int TextViewPrinter::_cell_length_reference;
 
 }
