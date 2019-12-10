@@ -386,20 +386,34 @@ void DisassemblerWidget::onAddressUpdated(uint16_t addr, uint16_t bytes) {
   //PLOGD << "block_size: " << block_size << std::endl;
   QTextCursor cursor(textCursor());
   cursor.beginEditBlock();
+  cursor.setPosition(block->cursorStartPosition());
+  TextViewPrinter::removeBlock(cursor, block_size);
+  cursor.setPosition(block->cursorStartPosition());
 
   //possibly added multipe commands (unparseblock, for ex, if multibyte instruction reversed, multiple cmds are created) we need to travers them and fill their structs
-  cursor.setPosition(block->cursorStartPosition());
-  dasm::gui::TextViewPrinter::removeBlock(cursor, block_size);
-  auto cmd = core::DisassemblerCore::inst().commands().get(addr);
-  dasm::gui::TextViewPrinter::printCommand(cursor, cmd);
-  auto new_end = cursor.position();
+  int cur_len = 0;
+  uint16_t naddr = addr;
+  int new_end;
+  while (cur_len < bytes) {
+    if (cur_len != 0) {
+      cursor.insertText("\n");
+    }
+    auto nblock = std::make_shared<GUIBlock>();
+    nblock->setCursorStartPosition(cursor.position());
+    auto cmd = core::DisassemblerCore::inst().commands().get(naddr);
+    TextViewPrinter::printCommand(cursor, cmd);
+    new_end = cursor.position();
+    //PLOGD << "new_end: " << new_end << std::endl;
+    nblock->setCursorEndPosition(new_end);
+    _commands.put(naddr, cmd->len, nblock);
+    naddr += cmd->len;
+    cur_len += cmd->len;
+  }
+  cursor.endEditBlock();
   //PLOGD << "new_end: " << new_end << std::endl;
   auto new_block_size = new_end - block->cursorStartPosition();
   //PLOGD << "new_block_size: " << new_block_size << std::endl;
-  cursor.endEditBlock();
-  block->setCursorEndPosition(new_end);
-  _commands.put(addr, bytes, block);
-  for (uint32_t nba = addr + cmd->len; nba < 65536; ++nba) {
+  for (uint32_t nba = addr + bytes; nba < 65536; ++nba) {
     GUIBlockPtr nb;
     if (_commands.get_if(nba, nb)) {
       nb->shiftPosition(new_block_size - block_size);

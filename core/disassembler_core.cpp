@@ -98,8 +98,8 @@ size_t DisassemblerCore::disassembleInstruction(uint16_t addr, CommandPtr& out_c
       return -3;
     }
     //check address can be disassembled
-    auto cmd_i = _commands_map.get(addr);
-    if (cmd_i == nullptr) {
+    CommandPtr cmd_i;
+    if (!_commands_map.get_if(addr, cmd_i)) {
       // address is not loaded
       PLOGD << "no instruction here: " << utils::toHex(addr) << std::endl;
       return 0;
@@ -112,8 +112,8 @@ size_t DisassemblerCore::disassembleInstruction(uint16_t addr, CommandPtr& out_c
     if (len > 1) {
       // check that all bytes for the command are not parsed, if so, remove their chunks, if not, don't do anything
       for (size_t i = 1; i < len; i++) {
-        auto ch = _commands_map.get(addr + i);
-        if ((ch == nullptr) || (ch->command_code != CmdCode::NONE)) {
+        CommandPtr ch;
+        if ((!_commands_map.get_if(addr + i, ch)) || (ch->command_code != CmdCode::NONE)) {
           PLOGD << "Instrunction longer than unparsed block" << std::endl;
           return -4;
         }
@@ -162,6 +162,7 @@ void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
       //parse error
       return;
     }
+    updater->onAddressUpdated(cmd_addr, last_cmd->len);
     uint16_t jump_addr;
     switch (last_cmd->jumpType(jump_addr)) {
       case JumpType::JT_CALL: {
@@ -170,6 +171,7 @@ void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
         PLOGD << "st_addr=" << utils::toHex(st_addr) << std::endl;
         auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::CALL);
         last_cmd->setJmpAddr(lbl);
+        updater->onAddressUpdated(cmd_addr, last_cmd->len);
         addr += res;
         break;
       }
@@ -179,6 +181,7 @@ void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
         //auto& lastcmd = chunk->lastCommand();
         auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::JUMP);
         last_cmd->setJmpAddr(lbl);
+        updater->onAddressUpdated(cmd_addr, last_cmd->len);
         addr += res;
         break;
       }
@@ -186,6 +189,7 @@ void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
         PLOGD << "!!!! jump: addr=" << utils::toHex(addr) << " to_addr " << utils::toHex(jump_addr) << std::endl;
         auto& lbl = makeJump(addr, jump_addr, memory::Reference::Type::JUMP);
         last_cmd->setJmpAddr(lbl);
+        updater->onAddressUpdated(cmd_addr, last_cmd->len);
         res = 0;
         break;
       }
@@ -202,16 +206,17 @@ void DisassemblerCore::disassembleBlock(uint16_t st_addr) {
         addr += res;
         break;
     }
-    updater->onAddressUpdated(cmd_addr, last_cmd->len);
   } while (res);
   PLOGD << "finished chunk:st_addr=" << utils::toHex(st_addr) << std::endl;
 }
 
 void DisassemblerCore::uncodeBlock(uint16_t addr) {
-  auto cmd = _commands_map.get(addr);
-  if (cmd->command_code == CmdCode::NONE) {
+  CommandPtr cmd;
+  if (!_commands_map.get_if(addr, cmd) || cmd->command_code == CmdCode::NONE) {
     return;
   }
+  _is_modified = true;
+
   addr = cmd->addr;
   for (int i = 0; i < cmd->len; ++i, ++addr) {
     auto nc = std::make_shared<Command>();
@@ -226,8 +231,8 @@ void DisassemblerCore::uncodeBlock(uint16_t addr) {
 
 LabelPtr DisassemblerCore::makeJump(uint16_t from_addr, uint16_t jump_addr, memory::Reference::Type ref_type) {
   disassembleBlock(jump_addr);
-  auto jmp_cmd = _commands_map.get(jump_addr);
-  if (jmp_cmd == nullptr) {
+  CommandPtr jmp_cmd;
+  if (!_commands_map.get_if(jump_addr, jmp_cmd)) {
     return nullptr;
   }
   return addCrossRef(jmp_cmd, from_addr, jump_addr, ref_type);
@@ -252,8 +257,8 @@ LabelPtr DisassemblerCore::addCrossRef(CommandPtr cmd, uint16_t from_addr, uint1
 }
 
 LabelPtr DisassemblerCore::makeData(uint16_t from_addr, uint16_t data_addr, memory::Reference::Type ref_type) {
-  auto data_cmd = _commands_map.get(data_addr);
-  if (data_cmd == nullptr) {
+  CommandPtr data_cmd;
+  if (!_commands_map.get_if(data_addr, data_cmd)) {
     PLOGD << "[makeData] Can't find cmd at: " + utils::toHex(data_addr) << std::endl;
     return nullptr;
   }
@@ -286,8 +291,11 @@ LabelPtr DisassemblerCore::makeData(uint16_t from_addr, uint16_t data_addr, memo
       updater->onAddressUpdated(data_addr, 2);
     }
   }
-  data_cmd = _commands_map.get(data_addr);
-  return addCrossRef(data_cmd, from_addr, data_addr, ref_type);
+  if (_commands_map.get_if(data_addr, data_cmd)) {
+    return addCrossRef(data_cmd, from_addr, data_addr, ref_type);
+  } else {
+    return nullptr;
+  }
 }
 
 void DisassemblerCore::makeArray(uint16_t from_addr, int size, bool clearMem) {
