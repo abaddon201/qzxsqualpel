@@ -264,7 +264,8 @@ LabelPtr DisassemblerCore::makeData(uint16_t from_addr, uint16_t data_addr, memo
   }
   if ((data_cmd->command_code == CmdCode::DB) || (data_cmd->command_code == CmdCode::DW)) {
     //already data
-    return nullptr;
+    addCrossRef(data_cmd, from_addr, data_addr, ref_type);
+    return data_cmd->label();
   }
   _is_modified = true;
   if ((ref_type == memory::Reference::Type::WRITE_BYTE) || (ref_type == memory::Reference::Type::READ_BYTE)) {
