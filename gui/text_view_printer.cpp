@@ -51,7 +51,7 @@ void TextViewPrinter::printCell(QTextCursor& cursor, const std::string& text, in
   cursor.insertText(QString::fromStdString(text + spcline));
 }
 
-void TextViewPrinter::printReferences(QTextCursor& cursor, dasm::core::CommandPtr cmd) {
+void TextViewPrinter::printReferences(QTextCursor& cursor, const dasm::core::CommandPtr& cmd) {
   if (cmd->references().size() == 0) {
     return;
   }
@@ -68,7 +68,7 @@ void TextViewPrinter::printReferences(QTextCursor& cursor, dasm::core::CommandPt
   }
 }
 
-int TextViewPrinter::printCommand(QTextCursor& cursor, const core::CommandPtr cmd) {
+int TextViewPrinter::printCommand(QTextCursor& cursor, const core::CommandPtr& cmd) {
   int start_pos = cursor.position();
   if (!cmd->blockComment().empty()) {
     printCell(cursor, std::string(";") + cmd->blockComment(), _cell_length_block_comment, _cell_format_block_comment);

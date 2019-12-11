@@ -112,6 +112,10 @@ void DisassemblerWidget::changeNameUnderCursor() {
     if (dlg.exec()) {
       dasm::core::DisassemblerCore::inst().labels().changeLabel(cmd->addr, dlg.text().toStdString());
       onAddressUpdated(cmd->addr, cmd->len);
+      for (auto& ref : cmd->references()) {
+        auto& refcmd = core::DisassemblerCore::inst().commands().get(ref->addr);
+        onAddressUpdated(refcmd->addr, refcmd->len);
+      }
       navigateToAddress(cmd->addr);
     }
   }
@@ -221,6 +225,9 @@ void DisassemblerWidget::keyPressEvent(QKeyEvent* event) {
     case Qt::Key_C:
       // must codefi under cursor
       makeCodeUnderCursor();
+      return;
+    case Qt::Key_A:
+      // change argument to address and back
       return;
     case Qt::Key_D:
       // must datefi under cursor

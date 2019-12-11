@@ -28,7 +28,7 @@ TEST_CASE("disassembler", "[core]") {
   dasm::core::DisassemblerCore::inst().disassembleBlock(ret_addr);
   ret_addr = 0xcd78;
   dasm::core::DisassemblerCore::inst().disassembleBlock(ret_addr);
-
+  
   SECTION("LD") {
     auto cmd = core.commands().get(0x03c1);
     REQUIRE(cmd->command_code == dasm::core::CmdCode::LD);
@@ -194,15 +194,14 @@ TEST_CASE("disassembler", "[core]") {
   }
 
   SECTION("jmp, calls ops") {
-    /* not disassembled from 0000
     //0x2e24 (rst 28)
     auto cmd = core.commands().get(0x2e24);
     REQUIRE(cmd->command_code == dasm::core::CmdCode::RST);
     REQUIRE(cmd->getArg(0)->toString() == "28");
     REQUIRE(cmd->getArgsCount() == 1);
-    */
+
     //0x0cf4 DJNZ 0x0cf0
-    auto cmd = core.commands().get(0x0cf4);
+    cmd = core.commands().get(0x0cf4);
     REQUIRE(cmd->command_code == dasm::core::CmdCode::DJNZ);
     REQUIRE(cmd->getArg(0)->toString() == "jmp_0cf0");
     REQUIRE(cmd->getArgsCount() == 1);
@@ -215,13 +214,13 @@ TEST_CASE("disassembler", "[core]") {
     REQUIRE(cmd->getArgsCount() == 0);
   }
 
-  /*SECTION("data") {
+  //SECTION("data") {
     //0x5c72 DW ffff
-    auto cmd = core.commands().get(0x5c72);
-    REQUIRE(cmd->command_code == dasm::core::CmdCode::DW);
-    REQUIRE(cmd->getArg(0)->toString() == "ffff");
-    REQUIRE(cmd->getArgsCount() == 1);
-  }*/
+    //auto cmd = core.commands().get(0x5c72);
+    //REQUIRE(cmd->command_code == dasm::core::CmdCode::DW);
+    //REQUIRE(cmd->getArg(0)->toString() == "ffff");
+    //REQUIRE(cmd->getArgsCount() == 1);
+  //}
 
   SECTION("decode") {
     //d50f      20 ff              JR   NZ, d510 (addr = d50f + 2 +(-1))

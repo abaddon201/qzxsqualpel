@@ -18,7 +18,7 @@ void RegisterReferenceScan::updateRegisterSource(uint16_t addr, ArgPtr arg, ArgS
 
 void RegisterReferenceScan::updateRegisterSource(uint16_t addr, Register16 reg, ArgSize size) {
   uint16_t tmp_addr = addr;
-  auto commands = core::DisassemblerCore::inst().commands();
+  auto& commands = core::DisassemblerCore::inst().commands();
   CommandPtr cmd;
   do {
     cmd = commands.get(tmp_addr);

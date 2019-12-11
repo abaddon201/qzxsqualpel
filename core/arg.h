@@ -51,7 +51,7 @@ public:
     return size;
   }
 
-  void setSize(ArgSize sz) { size = sz; tstr_cache = ""; }
+  void setSize(ArgSize sz) { size = sz; }
 
   int getBytesSize() const { return size == ArgSize::Byte ? 1 : 2; }
 
@@ -59,7 +59,6 @@ public:
 
   ArgSize size;
   ArgType arg_type;
-  mutable std::string tstr_cache;
 };
 
 using ArgPtr = std::shared_ptr<Argument>;
@@ -153,6 +152,7 @@ public:
   const std::vector<uint8_t>& bytes() const { return _bytes; }
 private:
   std::vector<uint8_t> _bytes;
+  mutable std::string tstr_cache;
 };
 
 using ArgByteArrayPtr = std::shared_ptr<ArgByteArray>;
@@ -235,7 +235,7 @@ public:
   explicit ArgRegisterReference(Register16 reg_id) : Argument(ArgType::ARG_REGISTER_REF, ArgSize::Byte), reg_id{ reg_id } { }
   virtual ~ArgRegisterReference() = default;
 
-  std::string toString() const override { if (tstr_cache.empty()) { tstr_cache = "(" + reg_id.toString() + ")"; } return tstr_cache; }
+  std::string toString() const override { return "(" + reg_id.toString() + ")"; }
 
   Register16 reg_id;
 };
@@ -251,30 +251,26 @@ public:
   virtual ~ArgMemoryReference() = default;
 
   std::string toString() const override {
-    if (tstr_cache.empty()) {
       if (isReference) {
         if (label != nullptr) {
-          tstr_cache = std::string("(") + label->name + ")";
+          return std::string("(") + label->name + ")";
         } else {
-          tstr_cache = std::string("(") + ((size == ArgSize::Byte) ? "byte_" : "word_") + utils::toHex(addr) + ")";
+          return std::string("(") + ((size == ArgSize::Byte) ? "byte_" : "word_") + utils::toHex(addr) + ")";
         }
       } else {
         if (label != nullptr) {
-          tstr_cache = label->name;
+          return label->name;
         } else {
-          tstr_cache = ((size == ArgSize::Byte) ? "byte_" : "word_") + utils::toHex(addr);
+          return ((size == ArgSize::Byte) ? "byte_" : "word_") + utils::toHex(addr);
         }
       }
-    }
-    return tstr_cache;
   }
 
-  void setLabel(LabelPtr label) { this->label = label; tstr_cache = ""; }
+  void setLabel(LabelPtr label) { this->label = label; }
 
   bool isReference;
   uint16_t addr;
   LabelPtr label;
-  mutable std::string tstr_cache;
 };
 
 }
