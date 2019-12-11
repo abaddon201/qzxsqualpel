@@ -20,6 +20,16 @@
 namespace dasm {
 namespace core {
 
+LabelPtr Labels::getByName(const std::string& name) {
+  auto res= std::find_if(begin(), end(), [&name](auto v) ->bool{
+    return v.second->name == name;
+  });
+  if (res != end()) {
+    return res->second;
+  }
+  return nullptr;
+}
+
 /**
  * @brief Вовращает сроку адреса относительно метки.
  * @param addr Искомый адрес
@@ -35,7 +45,7 @@ std::string Labels::offsetInLabel(uint16_t addr) const {
     PLOGD << "no labels" << std::endl;
     return utils::toHex(addr);
   }
-  auto cmd = DisassemblerCore::inst().commands().get(addr);
+  auto& cmd = DisassemblerCore::inst().commands().get(addr);
   if (cmd == nullptr) {
     PLOGD << "no label for addr" << std::endl;
     return utils::toHex(addr);

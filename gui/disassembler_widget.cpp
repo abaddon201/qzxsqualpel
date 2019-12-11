@@ -407,7 +407,7 @@ void DisassemblerWidget::onAddressUpdated(uint16_t addr, uint16_t bytes) {
     }
     auto nblock = std::make_shared<GUIBlock>();
     nblock->setCursorStartPosition(cursor.position());
-    auto cmd = core::DisassemblerCore::inst().commands().get(naddr);
+    auto& cmd = core::DisassemblerCore::inst().commands().get(naddr);
     TextViewPrinter::printCommand(cursor, cmd);
     new_end = cursor.position();
     //PLOGD << "new_end: " << new_end << std::endl;

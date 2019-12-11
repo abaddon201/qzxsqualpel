@@ -26,6 +26,8 @@ public:
   ///@brief Вовращает сроку адреса относительно метки.
   std::string offsetInLabel(uint16_t addr) const;
 
+  LabelPtr getByName(const std::string& name);
+
   /**
    * @brief Изменяет метку. Создаёт если не найдена соотв. метка
    * @param chunk Указатель на блок, для которого меняется метка

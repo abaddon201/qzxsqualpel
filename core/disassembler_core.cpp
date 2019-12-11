@@ -339,8 +339,10 @@ size_t DisassemblerCore::postProcessCmd(CommandPtr cmd, size_t len) {
   return len;
 }
 
-bool DisassemblerCore::extractAddrFromRef(const std::string& ref, uint16_t& add_out) {
+bool DisassemblerCore::extractAddrFromRef(const std::string& ref, uint16_t& addr_out) {
+  //label
   //sub_0008: //ignore
+  //(label)
   //(word_5c5d)
   //(word_5c5f),
   //jmp_1bd1+27/c
@@ -349,20 +351,28 @@ bool DisassemblerCore::extractAddrFromRef(const std::string& ref, uint16_t& add_
   //jmp_0c86/c
   //jmp_0053
   //ffff
-
-  if (ref.find('(') != ref.npos) {
+  auto lbl = _labels.getByName(ref);
+  if (lbl != nullptr) {
+    addr_out = lbl->addr;
+    return true;
+  } else if (ref.find('(') != ref.npos) {
     //data ref
     std::string refnc = ref;
     refnc.erase(std::remove(refnc.begin(), refnc.end(), '('), refnc.end());
     refnc.erase(std::remove(refnc.begin(), refnc.end(), ')'), refnc.end());
     refnc.erase(std::remove(refnc.begin(), refnc.end(), ','), refnc.end());
+    auto lbl = _labels.getByName(refnc);
+    if (lbl != nullptr) {
+      addr_out = lbl->addr;
+      return true;
+    }
     auto splited = utils::split(refnc, '_');
     if (splited.size() != 2) {
       PLOGE << "unable to process reference : " << ref << std::endl;
       return false;
       //throw std::runtime_error("unable to process reference: " + ref);
     }
-    add_out = utils::fromHex(splited[1]);
+    addr_out = utils::fromHex(splited[1]);
     return true;
   }
   if (ref.find('+') != ref.npos) {
@@ -373,7 +383,7 @@ bool DisassemblerCore::extractAddrFromRef(const std::string& ref, uint16_t& add_
     auto spl3 = utils::split(spl2[1], '+');
     uint16_t addr = utils::fromHex(spl3[0]);
     auto offs = std::atoi(spl3[1].c_str());
-    add_out = addr + offs;
+    addr_out = addr + offs;
     return true;
   }
   if (ref.find('/') != ref.npos) {
@@ -383,11 +393,11 @@ bool DisassemblerCore::extractAddrFromRef(const std::string& ref, uint16_t& add_
     auto spl2 = utils::split(spl1[0], '_');
     if (spl2.size() == 2) {
       //simple address
-      add_out = utils::fromHex(spl2[1]);
+      addr_out = utils::fromHex(spl2[1]);
       return true;
     } else {
       //simple address
-      add_out = utils::fromHex(spl2[0]);
+      addr_out = utils::fromHex(spl2[0]);
       return true;
     }
   }
@@ -395,13 +405,13 @@ bool DisassemblerCore::extractAddrFromRef(const std::string& ref, uint16_t& add_
     //ref with offset
     std::string refnc = ref;
     auto spl1 = utils::split(refnc, '_');
-    add_out = utils::fromHex(spl1[1]);
+    addr_out = utils::fromHex(spl1[1]);
     return true;
   }
   if (ref.size() == 4) {
     //value
     try {
-      add_out = utils::fromHex(ref);
+      addr_out = utils::fromHex(ref);
       return true;
     } catch (...) {
       PLOGE << "unable to process reference : " << ref << std::endl;
