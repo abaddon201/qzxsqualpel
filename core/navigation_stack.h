@@ -25,6 +25,8 @@ public:
 
   bool hasAddr() { return !_stack.empty(); }
 
+  void clear() { _stack.clear(); }
+
   void push(uint16_t addr) {
     _stack.push_back(addr);
     if (_listener != nullptr) {

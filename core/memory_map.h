@@ -24,7 +24,9 @@ public:
     size_t _offs;
   };
 
-  MemoryMap() {}
+  MemoryMap() = default;
+  MemoryMap(const MemoryMap&) = delete;
+  MemoryMap& operator=(const MemoryMap&) = delete;
 
   void clear() { _elems.clear(); }
   void reset(size_t size) { _elems.resize(size); }

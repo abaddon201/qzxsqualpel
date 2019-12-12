@@ -28,18 +28,9 @@ struct Label {
 
   Label(uint16_t addr, const std::string& name) : name(std::move(name)), addr(addr) {}
 
-  Label(const Label& s) {
-    addr = s.addr;
-    name = s.name;
-    _references = s._references;
-  }
+  Label(const Label& s) = delete;
 
-  Label& operator=(const Label& s) {
-    addr = s.addr;
-    name = s.name;
-    _references = s._references;
-    return *this;
-  }
+  Label& operator=(const Label& s) = delete;
 
   ~Label() = default;
 

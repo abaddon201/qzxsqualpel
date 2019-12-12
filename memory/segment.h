@@ -29,6 +29,9 @@ public:
 
   Segment(IdType id, size_type sz) : _size{ sz }, _dataSize{ 0 }, _id{ id }, _type{ Type::RAW } {}
 
+  Segment(const Segment&) = delete;
+  Segment& operator=(const Segment&) = delete;
+
   void fill(unsigned char buff[], size_type size);
 
   inline IdType id() const { return _id; }

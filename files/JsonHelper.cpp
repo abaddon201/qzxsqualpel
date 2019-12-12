@@ -9,6 +9,7 @@
 
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
+#include "rapidjson/prettywriter.h"
 #include "rapidjson/error/en.h"
 #include "rapidjson/error/error.h"
 
@@ -94,7 +95,8 @@ void add_string_field(rapidjson::Value &res, rapidjson::Value &key, const std::s
 
 std::string doc_to_string(const rapidjson::Value &document) {
   rapidjson::StringBuffer sb;
-  rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+  //rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+  rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
   document.Accept(writer);    // Accept() traverses the DOM and generates Handler events.
   return sb.GetString();
 }

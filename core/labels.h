@@ -34,6 +34,10 @@ public:
    * @param new_label Новое название метки
    */
   void changeLabel(uint16_t addr, const std::string& new_label);
+
+  Labels() = default;
+  Labels(const Labels&) = delete;
+  Labels& operator=(const Labels&) = delete;
 };
 
 }

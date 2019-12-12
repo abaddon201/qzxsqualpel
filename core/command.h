@@ -43,38 +43,9 @@ struct Command {
 
   Command() : command_code{ CmdCode::NONE }, len{ 0 } {}
 
-  void clone(const Command& c) {
-    addr = c.addr;
-    len = c.len;
-    command_code = c.command_code;
-    //command = c.command;
-    _args = c._args;
-    comment = c.comment;
-    auto_comment = c.auto_comment;
-    _label = c._label;
-    _blockComment = c._blockComment;
-  }
-  Command(const Command& c) {
-    clone(c);
-  }
-
-  Command& operator=(const Command& c) {
-    clone(c);
-    return *this;
-  }
-
-  Command& operator=(const Command&& c) {
-    addr = c.addr;
-    len = c.len;
-    command_code = c.command_code;
-    //command = c.command;
-    _args = c._args;
-    comment = c.comment;
-    auto_comment = c.auto_comment;
-    _label = c._label;
-    _blockComment = c._blockComment;
-    return *this;
-  }
+  Command(const Command& c) = delete;
+  Command& operator=(const Command& c) = delete;
+  Command& operator=(const Command&& c) = delete;
 
   void parse(std::string& src);
 

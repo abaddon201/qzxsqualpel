@@ -46,15 +46,15 @@ core::LabelPtr deserializeLabel(const rapidjson::Value& node) {
     res->name = name;
     res->addr = addr;
     lbls[addr] = res;
+    auto arr2 = json::get_optional_array<memory::ReferencePtr>(node, "refs", [](const rapidjson::Value& v)->memory::ReferencePtr {
+      return deserializeReference(v);
+    });
+
+    for (auto& a : arr2) {
+      res->references().emplace_back(a);
+    }
   } else {
     res = lbls[addr];
-  }
-  auto arr2 = json::get_optional_array<memory::ReferencePtr>(node, "refs", [](const rapidjson::Value& v)->memory::ReferencePtr {
-    return deserializeReference(v);
-  });
-
-  for (auto& a : arr2) {
-    res->references().emplace_back(a);
   }
   return res;
 }
@@ -268,6 +268,7 @@ void deserializeNavigationStack(const rapidjson::Value& node, core::Disassembler
     return v.GetUint();
   });
 
+  core::NavigationStack::inst().clear();
   for (auto& s : arr) {
     core::NavigationStack::inst().push(s);
   }

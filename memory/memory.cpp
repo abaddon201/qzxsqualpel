@@ -3,8 +3,6 @@
 namespace dasm {
 namespace memory {
 
-Memory::Memory() {}
-
 void Memory::createSegment(Segment::IdType id, size_type size) {
   //std::map<Segment::IdType, Segment>::iterator right;
   if (!_segments.empty()) {

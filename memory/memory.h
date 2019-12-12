@@ -16,7 +16,9 @@ class Memory {
 public:
   using size_type = size_t;
 
-  Memory();
+  Memory() = default;
+  Memory(const Memory&) = delete;
+  Memory operator=(const Memory&) = delete;
 
   void createSegment(Segment::IdType id, size_type size);
 
