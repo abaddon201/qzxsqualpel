@@ -112,9 +112,11 @@ void DisassemblerWidget::changeNameUnderCursor() {
     if (dlg.exec()) {
       dasm::core::DisassemblerCore::inst().labels().changeLabel(cmd->addr, dlg.text().toStdString());
       onAddressUpdated(cmd->addr, cmd->len);
-      for (auto& ref : cmd->references()) {
-        auto& refcmd = core::DisassemblerCore::inst().commands().get(ref->addr);
-        onAddressUpdated(refcmd->addr, refcmd->len);
+      if (cmd->label() != nullptr) {
+        for (auto& ref : cmd->label()->references()) {
+          auto& refcmd = core::DisassemblerCore::inst().commands().get(ref->addr);
+          onAddressUpdated(refcmd->addr, refcmd->len);
+        }
       }
       navigateToAddress(cmd->addr);
     }

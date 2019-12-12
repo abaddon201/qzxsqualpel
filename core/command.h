@@ -14,7 +14,6 @@
 #define CCOMMAND_H
 
 #include "core/cmd_code.h"
-#include "memory/reference.h"
 
 #include <vector>
 #include <memory>
@@ -27,7 +26,6 @@ namespace core {
 
 ///@brief Структура описывающая одну команду ассемблера
 struct Command {
-  using ReferencesList = std::vector<memory::ReferencePtr>;
 
   ///@brief символьное представление команды
   //std::string command;
@@ -54,7 +52,6 @@ struct Command {
     comment = c.comment;
     auto_comment = c.auto_comment;
     _label = c._label;
-    _references = c._references;
     _blockComment = c._blockComment;
   }
   Command(const Command& c) {
@@ -75,7 +72,6 @@ struct Command {
     comment = c.comment;
     auto_comment = c.auto_comment;
     _label = c._label;
-    _references = c._references;
     _blockComment = c._blockComment;
     return *this;
   }
@@ -118,9 +114,6 @@ struct Command {
   LabelPtr setLabel(LabelPtr label = nullptr, memory::Reference::Type = memory::Reference::Type::JUMP);
   //void setLabel(const std::string& label);
 
-  void addCrossRef(uint16_t addr, memory::Reference::Type type);
-  ReferencesList& references() { return _references; }
-
   const std::string& blockComment() const { return _blockComment; }
   void setBlockComment(const std::string& comm) { _blockComment = comm; }
 
@@ -135,7 +128,6 @@ private:
 
   std::vector<ArgPtr> _args;
   LabelPtr _label;
-  ReferencesList _references;
   std::string _blockComment;
 
 };

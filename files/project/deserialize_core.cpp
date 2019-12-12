@@ -10,19 +10,53 @@ namespace dasm {
 namespace files {
 namespace project {
 
+memory::Reference::Type referenceTypeFromString(const std::string& type) {
+  if (type == "UNKNOWN") {
+    return memory::Reference::Type::UNKNOWN;
+  } else if (type == "JUMP") {
+    return memory::Reference::Type::JUMP;
+  } else if (type == "CALL") {
+    return memory::Reference::Type::CALL;
+  } else if (type == "READ_BYTE") {
+    return memory::Reference::Type::READ_BYTE;
+  } else if (type == "WRITE_BYTE") {
+    return memory::Reference::Type::WRITE_BYTE;
+  } else if (type == "READ_WORD") {
+    return memory::Reference::Type::READ_WORD;
+  } else if (type == "WRITE_WORD") {
+    return memory::Reference::Type::WRITE_WORD;
+  }
+  throw std::runtime_error("unknown reference type: " + type);
+}
+
+memory::ReferencePtr deserializeReference(const rapidjson::Value& node) {
+  memory::ReferencePtr ref = std::make_shared<memory::Reference>();
+  ref->addr = json::get_uint(node, "addr");
+  ref->type = referenceTypeFromString(json::get_string(node, "type"));
+  return ref;
+}
+
 core::LabelPtr deserializeLabel(const rapidjson::Value& node) {
   auto name = json::get_string(node, "name");
   auto addr = json::get_uint(node, "addr");
   auto& lbls = core::DisassemblerCore::inst().labels();
+  core::LabelPtr res;
   if (lbls.find(addr) == lbls.end()) {
-    core::LabelPtr res = std::make_shared<core::Label>();
+    res = std::make_shared<core::Label>();
     res->name = name;
     res->addr = addr;
     lbls[addr] = res;
-    return res;
   } else {
-    return lbls[addr];
+    res = lbls[addr];
   }
+  auto arr2 = json::get_optional_array<memory::ReferencePtr>(node, "refs", [](const rapidjson::Value& v)->memory::ReferencePtr {
+    return deserializeReference(v);
+  });
+
+  for (auto& a : arr2) {
+    res->references().emplace_back(a);
+  }
+  return res;
 }
 
 std::shared_ptr<postprocessors::AutoCommenter> deserializeAutocommenter(const rapidjson::Value& node) {
@@ -80,32 +114,6 @@ void deserializeMemory(const rapidjson::Value& node, core::DisassemblerCore& cor
   for (auto& s : arr) {
     core.memory().placeSegment(s);
   }
-}
-
-memory::Reference::Type referenceTypeFromString(const std::string& type) {
-  if (type == "UNKNOWN") {
-    return memory::Reference::Type::UNKNOWN;
-  } else if (type == "JUMP") {
-    return memory::Reference::Type::JUMP;
-  } else if (type == "CALL") {
-    return memory::Reference::Type::CALL;
-  } else if (type == "READ_BYTE") {
-    return memory::Reference::Type::READ_BYTE;
-  } else if (type == "WRITE_BYTE") {
-    return memory::Reference::Type::WRITE_BYTE;
-  } else if (type == "READ_WORD") {
-    return memory::Reference::Type::READ_WORD;
-  } else if (type == "WRITE_WORD") {
-    return memory::Reference::Type::WRITE_WORD;
-  }
-  throw std::runtime_error("unknown reference type: " + type);
-}
-
-memory::ReferencePtr deserializeReference(const rapidjson::Value& node) {
-  memory::ReferencePtr ref = std::make_shared<memory::Reference>();
-  ref->addr = json::get_uint(node, "addr");
-  ref->type = referenceTypeFromString(json::get_string(node, "type"));
-  return ref;
 }
 
 core::ArgType argumentTypeFromString(const std::string& type) {
@@ -226,14 +234,6 @@ core::CommandPtr deserializeCommand(const rapidjson::Value& node) {
 
   for (auto& a : arr) {
     cmd->args().emplace_back(a);
-  }
-
-  auto arr2 = json::get_optional_array<memory::ReferencePtr>(node, "refs", [](const rapidjson::Value& v)->memory::ReferencePtr {
-    return deserializeReference(v);
-  });
-
-  for (auto& a : arr2) {
-    cmd->references().emplace_back(a);
   }
   return cmd;
 }

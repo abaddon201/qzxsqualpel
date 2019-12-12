@@ -51,7 +51,7 @@ void TextViewPrinter::printCell(QTextCursor& cursor, const std::string& text, in
   cursor.insertText(QString::fromStdString(text + spcline));
 }
 
-void TextViewPrinter::printReferences(QTextCursor& cursor, const dasm::core::CommandPtr& cmd) {
+void TextViewPrinter::printReferences(QTextCursor& cursor, const dasm::core::LabelPtr& cmd) {
   if (cmd->references().size() == 0) {
     return;
   }
@@ -77,7 +77,7 @@ int TextViewPrinter::printCommand(QTextCursor& cursor, const core::CommandPtr& c
   if (cmd->label() != nullptr) {
     printCell(cursor, utils::toHex(cmd->addr), _cell_length_addr, _cell_format_addr);
     printCell(cursor, cmd->label()->name + ":", _cell_length_label, _cell_format_label);
-    printReferences(cursor, cmd);
+    printReferences(cursor, cmd->label());
     cursor.insertText("\n");
   }
   if (cmd->addr < 16384) {

@@ -18,7 +18,7 @@ public:
   static void printCell(QTextCursor& cursor, const std::string& text, int length, const QTextCharFormat& fmt);
   static void printCell(QTextCursor& cursor, const std::string& text, int length);
 
-  static void printReferences(QTextCursor& cursor, const dasm::core::CommandPtr& cmd);
+  static void printReferences(QTextCursor& cursor, const dasm::core::LabelPtr& cmd);
   static int printCommand(QTextCursor& cursor, const dasm::core::CommandPtr& cmd);
 
   static QTextCharFormat _cell_format_addr;

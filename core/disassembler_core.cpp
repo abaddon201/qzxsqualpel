@@ -239,7 +239,6 @@ LabelPtr DisassemblerCore::makeJump(uint16_t from_addr, uint16_t jump_addr, memo
 }
 
 LabelPtr DisassemblerCore::addCrossRef(CommandPtr cmd, uint16_t from_addr, uint16_t dst_addr, memory::Reference::Type ref_type) {
-  cmd->addCrossRef(from_addr, ref_type);
   LabelPtr lbl{ nullptr };
   if (_auto_commenter) {
     lbl = _auto_commenter->getLabelForAddr(dst_addr);
@@ -249,6 +248,7 @@ LabelPtr DisassemblerCore::addCrossRef(CommandPtr cmd, uint16_t from_addr, uint1
   } else {
     lbl = cmd->label();
   }
+  lbl->addCrossRef(from_addr, ref_type);
   if (!labelPresent(dst_addr)) {
     _labels[dst_addr] = lbl;
   }

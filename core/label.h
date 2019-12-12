@@ -16,6 +16,9 @@
 #include <utility>
 #include <memory>
 #include <string>
+#include <vector>
+
+#include "memory/reference.h"
 
 namespace dasm {
 namespace core {
@@ -28,18 +31,27 @@ struct Label {
   Label(const Label& s) {
     addr = s.addr;
     name = s.name;
+    _references = s._references;
   }
 
   Label& operator=(const Label& s) {
     addr = s.addr;
     name = s.name;
+    _references = s._references;
     return *this;
   }
 
   ~Label() = default;
 
+  using ReferencesList = std::vector<memory::ReferencePtr>;
+
+  void addCrossRef(uint16_t addr, memory::Reference::Type type);
+  ReferencesList& references() { return _references; }
+
   std::string name;
   uint16_t addr;
+private:
+  ReferencesList _references;
 };
 
 using LabelPtr = std::shared_ptr<Label>;

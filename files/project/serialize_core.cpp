@@ -7,12 +7,43 @@ namespace dasm {
 namespace files {
 namespace project {
 
+std::string referenceTypeToString(const memory::Reference::Type type) {
+  switch (type) {
+    case memory::Reference::Type::UNKNOWN: return "UNKNOWN";
+    case memory::Reference::Type::JUMP: return "JUMP";
+    case memory::Reference::Type::CALL: return "CALL";
+    case memory::Reference::Type::READ_BYTE: return "READ_BYTE";
+    case memory::Reference::Type::WRITE_BYTE: return "WRITE_BYTE";
+    case memory::Reference::Type::READ_WORD:return "READ_WORD";
+    case memory::Reference::Type::WRITE_WORD: return "WRITE_WORD";
+  }
+  throw std::runtime_error("unknown reference type: " + std::to_string((int)type));
+}
+
+rapidjson::Value serializeReference(const memory::ReferencePtr ref, rapidjson::Document::AllocatorType& allocator) {
+  rapidjson::Value v{};
+  v.SetObject();
+
+  json::add_uint_field(v, "addr", ref->addr, allocator);
+  json::add_string_field(v, "type", referenceTypeToString(ref->type), allocator);
+  return v;
+}
+
 rapidjson::Value  serializeLabel(core::LabelPtr lbl, rapidjson::Document::AllocatorType& allocator) {
   rapidjson::Value v{};
   v.SetObject();
 
   json::add_uint_field(v, "addr", lbl->addr, allocator);
   json::add_string_field(v, "name", lbl->name, allocator);
+  if (!lbl->references().empty()) {
+    rapidjson::Value args{};
+    args.SetArray();
+    for (const auto& arg : lbl->references()) {
+      json::push_object(args, serializeReference(arg, allocator), allocator);
+    }
+    json::add_object(v, "refs", args, allocator);
+  }
+
   return v;
 }
 
@@ -87,28 +118,6 @@ void serializeMemory(const core::DisassemblerCore& core, rapidjson::Document& do
   mem.AddMember("segments", cont, allocator);
 
   doc.AddMember("memory", mem, allocator);
-}
-
-std::string referenceTypeToString(const memory::Reference::Type type) {
-  switch (type) {
-    case memory::Reference::Type::UNKNOWN: return "UNKNOWN";
-    case memory::Reference::Type::JUMP: return "JUMP";
-    case memory::Reference::Type::CALL: return "CALL";
-    case memory::Reference::Type::READ_BYTE: return "READ_BYTE";
-    case memory::Reference::Type::WRITE_BYTE: return "WRITE_BYTE";
-    case memory::Reference::Type::READ_WORD:return "READ_WORD";
-    case memory::Reference::Type::WRITE_WORD: return "WRITE_WORD";
-  }
-  throw std::runtime_error("unknown reference type: " + std::to_string((int)type));
-}
-
-rapidjson::Value serializeReference(const memory::ReferencePtr ref, rapidjson::Document::AllocatorType& allocator) {
-  rapidjson::Value v{};
-  v.SetObject();
-
-  json::add_uint_field(v, "addr", ref->addr, allocator);
-  json::add_string_field(v, "type", referenceTypeToString(ref->type), allocator);
-  return v;
 }
 
 std::string argumentTypeToString(core::ArgType type) {
@@ -205,15 +214,6 @@ rapidjson::Value serializeCommand(const core::CommandPtr cmd, rapidjson::Documen
   }
   if (cmd->label() != nullptr) {
     json::add_object(v, "label", serializeLabel(cmd->label(), allocator), allocator);
-  }
-  if (!cmd->references().empty()) {
-    rapidjson::Value args{};
-    args.SetArray();
-    for (const auto& arg : cmd->references()) {
-      json::push_object(args, serializeReference(arg, allocator), allocator);
-    }
-    json::add_object(v, "refs", args, allocator);
-
   }
   json::add_uint_field(v, "addr", cmd->addr, allocator);
   json::add_uint_field(v, "len", cmd->len, allocator);

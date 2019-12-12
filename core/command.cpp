@@ -50,11 +50,6 @@ void Command::setJmpAddr(const LabelPtr label) {
   }
 }
 
-void Command::addCrossRef(uint16_t addr, memory::Reference::Type type) {
-  memory::ReferencePtr ref = std::make_shared<memory::Reference>(addr, type);
-  _references.push_back(ref);
-}
-
 LabelPtr Command::setLabel(LabelPtr label, memory::Reference::Type ref_type) {
   if (label == nullptr) {
     //generate from name
