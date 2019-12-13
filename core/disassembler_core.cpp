@@ -309,11 +309,18 @@ void DisassemblerCore::makeArray(uint16_t from_addr, int size, bool clearMem) {
       _memory.setByte(addr, 0);
     }
   }
+  CommandPtr oldcmd = _commands_map.get(from_addr);
   auto addr = from_addr;
   CommandPtr cmd = std::make_shared<Command>();
   cmd->command_code = CmdCode::DB;
   cmd->addr = from_addr;
   cmd->len = size;
+  if (oldcmd->label() != nullptr) {
+    cmd->setLabel(oldcmd->label());
+  }
+  cmd->setAutoComment(oldcmd->auto_comment);
+  cmd->setBlockComment(oldcmd->blockComment());
+  cmd->setComment(oldcmd->comment);
   auto arg = std::make_shared<ArgByteArray>(size);
   for (; size != 0; size--, ++addr) {
     auto byte = _memory.byte(addr);
