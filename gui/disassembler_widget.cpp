@@ -104,20 +104,24 @@ void DisassemblerWidget::blockCommentUnderCursor() {
 
 void DisassemblerWidget::changeNameUnderCursor() {
   auto cmd = getCmdUnderCursor();
-  if (nullptr == cmd || cmd->label() == nullptr) {
+  if (nullptr == cmd) {
     return;
   }
   if (cmd->command_code != CmdCode::NONE) {
-    WidgetChangeLine dlg(this, tr("Change label name"), tr("Label:"), QString::fromStdString(cmd->label()->name));
+    WidgetChangeLine dlg(this, tr("Change label name"), tr("Label:"), (cmd->label() == nullptr) ? "" : QString::fromStdString(cmd->label()->name));
     if (dlg.exec()) {
-      dasm::core::DisassemblerCore::inst().labels().changeLabel(cmd->addr, dlg.text().toStdString());
-      onAddressUpdated(cmd->addr, cmd->len);
       if (cmd->label() != nullptr) {
         for (auto& ref : cmd->label()->references()) {
           auto& refcmd = core::DisassemblerCore::inst().commands().get(ref->addr);
           onAddressUpdated(refcmd->addr, refcmd->len);
         }
+        dasm::core::DisassemblerCore::inst().labels().changeLabel(cmd->addr, dlg.text().toStdString());
+      } else {
+        auto lbl = std::make_shared<Label>(cmd->addr, dlg.text().toStdString());
+        cmd->setLabel(lbl, memory::Reference::Type::UNKNOWN);
+        dasm::core::DisassemblerCore::inst().labels()[lbl->addr] = lbl;
       }
+      onAddressUpdated(cmd->addr, cmd->len);
       navigateToAddress(cmd->addr);
     }
   }
@@ -326,7 +330,7 @@ void DisassemblerWidget::saveProjectFile(const QString& fileName) {
     QMessageBox::information(this, tr("Unable to open file"), fileName);
     return;
   }
-  
+
   QTextCursor cursor(textCursor());
   auto pos = cursor.position();
   core::DisassemblerCore::inst().setCurrentPosition(pos);

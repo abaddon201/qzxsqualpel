@@ -1,0 +1,84 @@
+d690:
+
+(ce9b) =0
+(ce9c) = ce73
+IX = ce73 - player one, ce7d - player two
+for(i=0;i<10;i++) (ce73)[i]
+HL = ce73+10
+B1=0
+for(int B1=0;B1<5;B1++) {
+	A=B1*2+9
+	(cdd7) = A
+	A = 14
+	(cdd6) = 14
+	D = 0xfe
+	do {
+d6b3:
+	   C = 0
+		do {
+d6b5:
+			E=0xfe
+			do {
+				A = C
+				if ((A != 0) && (A!=0x23)) {
+					A = IN(0xfe) | 0xe0
+					A++
+					if (A == 0) {
+						//no key pressed
+						(ce9b) = 1
+					}
+					A = (ce9b)
+					if (A!=0) {
+						A=IN(D+0xfe) | E
+						A++
+						if (A!=0) {
+							//some key pressed
+							HL=(ce9c)
+							for(int i=0;i<5;i++) {
+								A = (HL)
+								HL++
+								if (A == D) {
+									A = (HL)
+									if (A == E) {
+										goto cont;
+									}
+								}
+								HL++
+							}
+							IX[0] = D 	; store port
+							IX[1] = E   ; stor mask
+							IX+=2
+							HL = d98b ; key names
+							D = 0
+							E = C
+							HL += DE
+							A=d98b[DE]
+							call d932
+							if (C==0x1e) {
+								print "nter"
+								goto d735
+							} else if(C==0x24) {
+								print "ymbol shift"
+							}
+							call d773
+							call d745
+						}
+					}
+				}
+cont:
+				C++
+				RLC(E)
+				if (E&010000b == 0) {
+					RLC(D)
+					if (CF) {
+						goto d6b5
+					}
+					HALT
+					call d745
+					goto d6b3
+				}
+
+			} while(true)
+		}	
+	}
+}
